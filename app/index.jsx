@@ -1,5 +1,5 @@
 import {SafeAreaView} from "react-native-safe-area-context";
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useEffectEvent, useState} from 'react';
 import {
     View,
     Text,
@@ -8,7 +8,7 @@ import {
     TextInput,
     StyleSheet,
     ScrollView,
-    ActivityIndicator,
+    ActivityIndicator, Modal,
 } from 'react-native';
 import {router} from "expo-router";
 import ProductCard from "../components/ProductCard";
@@ -21,6 +21,24 @@ export default function Index() {
     const [isSearching, setIsSearching] = useState(false);
     const [displayProducts, setDisplayProducts] = useState([]);
     const [error, setError] = useState(false);
+    const [address, setAddress] = useState({
+        type: 'Home',
+        pinCode: '',
+        address: '',
+
+    });
+    const [pinCode, setPinCode] = useState('201007');
+    const [addressType, setAddressType] = useState('');
+    const [showModal, setShowModal] = useState({
+        addressModalVisible: false,
+    })
+
+    useEffect(() => {
+        setAddress('1st Floor, A-1908, DDA Park, Jahangir Colony, Rajgir Maidan, Solapur');
+        setPinCode('201007');
+        setAddressType('Home');
+    }, []);
+
     useEffect(() => {
         const loadProducts = async () => {
             setIsLoading(true);
@@ -35,7 +53,9 @@ export default function Index() {
             }
         }
         loadProducts();
-    }, [category])
+    }, [category]);
+
+
     const categories = [
         {id: 'all', label: 'All', icon: ShoppingBag},
         {id: 'vegetables', label: 'Vegetables', icon: Carrot},
@@ -128,16 +148,41 @@ export default function Index() {
             : products;
     }
     const itemCount = categories.length; //replace later with item count from Cart.
+
     return (
         <SafeAreaView style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
                 <View>
-                    <TouchableOpacity
-                        onPress={() => router.push('/(pages)/home')}>
+                    <TouchableOpacity>
                         <Text style={styles.headerGreeting}>Hello Ji! 👋</Text>
                     </TouchableOpacity>
                     <Text style={styles.headerTitle}>FreshCart</Text>
+                    <TouchableOpacity
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            marginTop: 5,
+                        }}
+                        onPress={() => setShowModal(prev => ({...prev, addressModalVisible: true}))}
+                    >
+                        <Text
+                            style={{
+                                color: '#f4f4f4',
+                                fontSize: 16,
+                                fontWeight: '700',
+                                lineHeight: 20,
+                            }}
+                        >{addressType.toUpperCase()} - </Text>
+                        <Text
+                            style={{
+                                color: '#f4f4f4',
+                                fontSize: 16,
+                                fontWeight: '300'
+                            }}
+                        >{address.split(',').slice(0, 3).join(',')}</Text>
+                    </TouchableOpacity>
                 </View>
                 <TouchableOpacity
                     style={styles.cartIconButton}
@@ -245,6 +290,16 @@ export default function Index() {
                     />
                 )}
             </View>
+            {/*Address Modal Visible: */}
+            <Modal visible={showModal.addressModalVisible} allowSwipeDismissal={true}>
+                <View>
+                    <Text style={{color: '#fff'}}>Address 1</Text>
+                </View>
+                <TouchableOpacity onPress={() => setShowModal(prev => ({...prev, addressModalVisible: false}))}>
+                    <Text style={{color: '#1e1e1e'}}> Close </Text>
+                </TouchableOpacity>
+            </Modal>
+
         </SafeAreaView>
     );
 }
@@ -365,8 +420,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 4,
     },
     categoryChipActive: {
-        backgroundColor: '#0c831f',
-        borderColor: '#0c831f',
+        backgroundColor: '#000000',
     },
     categoryText: {
         fontSize: 14,
