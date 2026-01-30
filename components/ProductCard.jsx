@@ -41,7 +41,7 @@ const ProductCard = ({product}) => {
                 {/* Discount Badge */}
                 {product.discount && (
                     <View style={styles.discountBadge}>
-                        <Text style={styles.discountText}>{product.discount}</Text>
+                        <Text style={styles.discountText}>{product.discount}% OFF</Text>
                     </View>
                 )}
             </View>
@@ -57,7 +57,7 @@ const ProductCard = ({product}) => {
                 <Text style={styles.productWeight}>{product.unit}</Text>
 
                 <View style={styles.priceRow}>
-                    <Text style={styles.productPrice}>₹{product.price}</Text>
+                    <Text style={styles.productPrice}>₹{product.originalPrice - product.discount * product.originalPrice/100}</Text>
                     {product.originalPrice && (
                         <Text style={styles.originalPrice}>₹{product.originalPrice}</Text>
                     )}

@@ -6,7 +6,7 @@ export default function RootLayout() {
         screenOptions={{
             headerShown: false,
             tabBarActiveBackgroundColor: '#f5f5f5',
-            tabBarActiveTintColor: '#ff03c1',
+            tabBarActiveTintColor: '#0c831f',
             tabBarLabelStyle: {
                 fontSize: 12,
                 fontFamily: 'Georgia',
