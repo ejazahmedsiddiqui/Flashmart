@@ -1,10 +1,11 @@
 import {Text, TouchableOpacity, View, StyleSheet, Dimensions, Image} from "react-native";
 import React, {useState} from "react";
+import {router} from "expo-router";
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - 48) / 2;
 
-const ProductCard = ({product}) => {
+const ProductCard = ({product, path=''}) => {
     const [cart, setCart] = useState({});
 
     const addToCart = (productId) => {
@@ -26,10 +27,21 @@ const ProductCard = ({product}) => {
         });
     };
 
+    const handleCardPush = () => {
+        console.log("=== ProductCard Click ===");
+        console.log("Product ID:", product.id);
+        console.log("Product Name:", product.name);
+        console.log("Navigating to product");
+        router.push(`/(home)/${product.id}`);
+    }
+
     const quantity = cart[product.id] || 0;
 
     return (
-        <View style={styles.productCard}>
+        <TouchableOpacity
+            style={styles.productCard}
+            onPress={handleCardPush}
+        >
             {/* Product Image */}
             <View style={styles.imageContainer}>
                 {product.image?.startsWith('http') ? (
@@ -66,7 +78,11 @@ const ProductCard = ({product}) => {
                 {quantity === 0 ? (
                     <TouchableOpacity
                         style={styles.addButton}
-                        onPress={() => addToCart(product.id)}
+                        onPress={(e) => {
+                            // Stop propagation to prevent navigation when adding to cart
+                            e.stopPropagation();
+                            addToCart(product.id);
+                        }}
                         activeOpacity={0.8}
                     >
                         <Text style={styles.addButtonText}>ADD</Text>
@@ -75,7 +91,10 @@ const ProductCard = ({product}) => {
                     <View style={styles.quantityControl}>
                         <TouchableOpacity
                             style={styles.quantityButton}
-                            onPress={() => removeFromCart(product.id)}
+                            onPress={(e) => {
+                                e.stopPropagation();
+                                removeFromCart(product.id);
+                            }}
                             activeOpacity={0.7}
                         >
                             <Text style={styles.quantityButtonText}>−</Text>
@@ -83,7 +102,10 @@ const ProductCard = ({product}) => {
                         <Text style={styles.quantityText}>{quantity}</Text>
                         <TouchableOpacity
                             style={styles.quantityButton}
-                            onPress={() => addToCart(product.id)}
+                            onPress={(e) => {
+                                e.stopPropagation();
+                                addToCart(product.id);
+                            }}
                             activeOpacity={0.7}
                         >
                             <Text style={styles.quantityButtonText}>+</Text>
@@ -91,7 +113,7 @@ const ProductCard = ({product}) => {
                     </View>
                 )}
             </View>
-        </View>
+        </TouchableOpacity>
     );
 };
 

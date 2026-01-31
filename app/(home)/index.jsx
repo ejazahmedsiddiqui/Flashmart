@@ -1,19 +1,18 @@
 import {SafeAreaView} from "react-native-safe-area-context";
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     View,
     Text,
     FlatList,
     TouchableOpacity,
-    TextInput,
     StyleSheet,
     ScrollView,
-    ActivityIndicator, Modal, Animated
+    ActivityIndicator, Modal
 } from 'react-native';
 import {router} from "expo-router";
-import ProductCard from "../components/ProductCard";
-import {SearchIcon, ShoppingCart, ShoppingBag, Carrot, Apple, Milk, Beef, Croissant, MapPin, Navigation} from "lucide-react-native";
-import AnimatedSearchBar from "../components/AnimatedSearchBar";
+import ProductCard from "../../components/ProductCard";
+import {ShoppingCart, ShoppingBag, Carrot, Apple, Milk, Beef, Croissant, MapPin, Navigation} from "lucide-react-native";
+import AnimatedSearchBar from "../../components/AnimatedSearchBar";
 
 export default function Index() {
     const [category, setCategory] = useState('');
@@ -126,6 +125,10 @@ export default function Index() {
                 weight: '4 pcs',
                 category: 'fruits',
                 image: 'https://images.unsplash.com/photo-1619546813926-a78fa6372cd2?w=200&h=200&fit=crop',
+                rating: 4.5,
+                reviews: 234,
+                delivery: '10 mins',
+                description: 'Crisp and refreshing green apples, handpicked from premium orchards. Perfect for snacking, baking, or adding a tangy crunch to your salads. Rich in fiber and antioxidants.',
             },
             {
                 id: 3,
@@ -137,6 +140,10 @@ export default function Index() {
                 weight: '6 pcs',
                 category: 'fruits',
                 image: 'https://images.unsplash.com/photo-1582979512210-99b6a53386f9?w=200&h=200&fit=crop',
+                rating: 4.7,
+                reviews: 189,
+                delivery: '8 mins',
+                description: 'Juicy and sweet oranges bursting with vitamin C. Sourced from sun-kissed groves to bring you the freshest citrus experience. Great for fresh juice or healthy snacking.',
             },
             {
                 id: 4,
@@ -148,6 +155,10 @@ export default function Index() {
                 weight: '500g',
                 category: 'fruits',
                 image: 'https://images.unsplash.com/photo-1571663716920-9fd87840c9ef?w=200&h=200&fit=crop',
+                rating: 4.4,
+                reviews: 156,
+                delivery: '12 mins',
+                description: 'Sweet and seedless red grapes, perfect for a healthy snack or dessert. Packed with natural sugars and antioxidants to boost your energy and health.',
             },
             {
                 id: 5,
@@ -157,8 +168,12 @@ export default function Index() {
                 originalPrice: 180,
                 discount: 17,
                 weight: '250g',
-                category: 'vegetables',
+                category: 'fruits',
                 image: 'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=200&h=200&fit=crop',
+                rating: 4.8,
+                reviews: 312,
+                delivery: '15 mins',
+                description: 'Premium fresh strawberries with vibrant color and sweet flavor. Handpicked at peak ripeness to ensure maximum taste and nutrition. Perfect for desserts, smoothies, or eating fresh.',
             },
             {
                 id: 6,
@@ -166,30 +181,44 @@ export default function Index() {
                 brand: 'Ignyter Farm',
                 price: 400,
                 originalPrice: 789,
-                discount: 20,
+                discount: 49,
                 weight: '250g',
-                category: 'vegetables',
+                category: 'fruits',
                 image: 'https://img.lb.wbmdstatic.com/vim/live/webmd/consumer_assets/site_images/articles/health_tools/11_exotic_fruits_you_should_try_slideshow/1800ss_getty_rf_star_fruit_carambola.jpg?resize=750px:*&output-quality=75',
-            }, {
+                rating: 4.2,
+                reviews: 87,
+                delivery: '20 mins',
+                description: 'Exotic starfruit with a unique sweet-tart flavor and distinctive star shape. Rich in vitamin C and fiber, this tropical treat adds a special touch to fruit salads and garnishes.',
+            },
+            {
                 id: 7,
                 name: 'Watermelon',
                 brand: 'Berry Farm',
                 price: 150,
                 originalPrice: 180,
                 discount: 17,
-                weight: '250g',
-                category: 'dairy',
+                weight: '2 kg',
+                category: 'fruits',
                 image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=200&h=200&fit=crop',
-            }, {
+                rating: 4.6,
+                reviews: 278,
+                delivery: '10 mins',
+                description: 'Fresh and juicy watermelon, perfect for hot summer days. Sweet, hydrating, and packed with vitamins A and C. Great for refreshing snacks or making fresh juice.',
+            },
+            {
                 id: 8,
                 name: 'Banana',
                 brand: 'Unsplash Farm',
                 price: 150,
                 originalPrice: 180,
                 discount: 17,
-                weight: '250g',
-                category: 'dairy',
+                weight: '6 pcs',
+                category: 'fruits',
                 image: 'https://images.unsplash.com/photo-1587132137056-bfbf0166836e?w=200&h=200&fit=crop',
+                rating: 4.5,
+                reviews: 445,
+                delivery: '8 mins',
+                description: 'Fresh yellow bananas, nature\'s perfect snack. Rich in potassium, fiber, and natural energy. Ideal for breakfast, smoothies, or a quick energy boost throughout the day.',
             },
         ];
         return category
