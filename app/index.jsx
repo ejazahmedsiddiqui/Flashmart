@@ -1,5 +1,5 @@
 import {SafeAreaView} from "react-native-safe-area-context";
-import React, {useEffect, useEffectEvent, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {
     View,
     Text,
@@ -8,11 +8,12 @@ import {
     TextInput,
     StyleSheet,
     ScrollView,
-    ActivityIndicator, Modal,
+    ActivityIndicator, Modal, Animated
 } from 'react-native';
 import {router} from "expo-router";
 import ProductCard from "../components/ProductCard";
-import {SearchIcon, ShoppingCart, ShoppingBag, Carrot, Apple, Milk, Beef, Croissant} from "lucide-react-native";
+import {SearchIcon, ShoppingCart, ShoppingBag, Carrot, Apple, Milk, Beef, Croissant, MapPin, Navigation} from "lucide-react-native";
+import AnimatedSearchBar from "../components/AnimatedSearchBar";
 
 export default function Index() {
     const [category, setCategory] = useState('');
@@ -24,20 +25,69 @@ export default function Index() {
     const [address, setAddress] = useState({
         type: 'Home',
         pinCode: '',
-        address: '',
-
+        houseNumber: '',
+        buildingAddress: '',
+        streetAddress: '',
+        city: '',
+        state: '',
     });
-    const [pinCode, setPinCode] = useState('201007');
-    const [addressType, setAddressType] = useState('');
+    const [fullAddress, setFullAddress] = useState('')
     const [showModal, setShowModal] = useState({
         addressModalVisible: false,
     })
 
+
+    const [savedAddresses, setSavedAddresses] = useState([
+        {
+            id: 1,
+            type: 'Home',
+            pinCode: '201007',
+            houseNumber: 'A-1909',
+            buildingAddress: `Manager's Tropics`,
+            streetAddress: 'Rajnagar Extension',
+            city: 'Solapur',
+            state: 'Uttar Pradesh'
+        },
+        {
+            id: 2,
+            type: 'Work',
+            pinCode: '110001',
+            houseNumber: 'B-305',
+            buildingAddress: 'Tech Tower',
+            streetAddress: 'Connaught Place',
+            city: 'New Delhi',
+            state: 'Delhi'
+        },
+        {
+            id: 3,
+            type: 'Other',
+            pinCode: '400001',
+            houseNumber: 'C-12',
+            buildingAddress: 'Sea View Apartments',
+            streetAddress: 'Marine Drive',
+            city: 'Mumbai',
+            state: 'Maharashtra'
+        },
+        {
+            id: 4,
+            type: 'Home',
+            pinCode: '560001',
+            houseNumber: 'D-45',
+            buildingAddress: 'Garden Residency',
+            streetAddress: 'MG Road',
+            city: 'Bangalore',
+            state: 'Karnataka'
+        }
+    ])
+
     useEffect(() => {
-        setAddress('1st Floor, A-1908, DDA Park, Jahangir Colony, Rajgir Maidan, Solapur');
-        setPinCode('201007');
-        setAddressType('Home');
+        if (savedAddresses.length > 0) {
+            setAddress(savedAddresses[0]);
+        }
     }, []);
+    useEffect(() => {
+        setFullAddress(address.houseNumber + ', ' + address.buildingAddress + ', ' + address.streetAddress + ', ' + address.city);
+    }, [address])
 
     useEffect(() => {
         const loadProducts = async () => {
@@ -54,7 +104,6 @@ export default function Index() {
         }
         loadProducts();
     }, [category]);
-
 
     const categories = [
         {id: 'all', label: 'All', icon: ShoppingBag},
@@ -153,7 +202,7 @@ export default function Index() {
         <SafeAreaView style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
-                <View>
+                <View style={{flex: 1, marginRight: 12}}>
                     <TouchableOpacity>
                         <Text style={styles.headerGreeting}>Hello Ji! 👋</Text>
                     </TouchableOpacity>
@@ -161,7 +210,6 @@ export default function Index() {
                     <TouchableOpacity
                         style={{
                             flexDirection: 'row',
-                            justifyContent: 'center',
                             alignItems: 'center',
                             marginTop: 5,
                         }}
@@ -174,18 +222,20 @@ export default function Index() {
                                 fontWeight: '700',
                                 lineHeight: 20,
                             }}
-                        >{addressType.toUpperCase()} - </Text>
+                        >{address?.type?.toUpperCase()} - </Text>
                         <Text
+                            numberOfLines={1}
                             style={{
                                 color: '#f4f4f4',
                                 fontSize: 16,
-                                fontWeight: '300'
+                                fontWeight: '300',
+                                flexShrink: 1,
                             }}
-                        >{address.split(',').slice(0, 3).join(',')}</Text>
+                        >{fullAddress.split(',').slice(0, 3).join(',')}</Text>
                     </TouchableOpacity>
                 </View>
                 <TouchableOpacity
-                    style={styles.cartIconButton}
+                    style={[styles.cartIconButton, {flexShrink: 0}]}
                     onPress={() => router.push('/Cart')}
                     activeOpacity={0.7}
                 >
@@ -203,103 +253,182 @@ export default function Index() {
             {/* Search Bar */}
             <View style={styles.searchSection}>
                 <View style={styles.searchContainer}>
-                    <Text style={styles.searchIcon}><SearchIcon size={16} color={'#1e1e1e'}/></Text>
-                    <TextInput
-                        style={styles.searchInput}
-                        placeholder="Search for products..."
-                        placeholderTextColor="#94a3b8"
-                        value={searchTerm}
-                        onChangeText={setSearchTerm}
-                    />
+                    <AnimatedSearchBar value={searchTerm} onChange={setSearchTerm} />
                     {searchTerm.length > 0 && (
-                        <TouchableOpacity onPress={() => setSearchTerm('')}>
+                        <TouchableOpacity
+                            onPress={() => setSearchTerm('')}
+                            style={styles.clearButton}
+                        >
                             <Text style={styles.clearIcon}>✕</Text>
                         </TouchableOpacity>
                     )}
                 </View>
+
             </View>
 
             {/* Categories */}
             <View style={styles.categoriesSection}>
                 <TouchableOpacity
-                    onPress={() => router.push('/(pages)/product')}><Text style={styles.sectionTitle}>Categories</Text></TouchableOpacity>
+                    key={'all'}
+                    style={[
+                        styles.categoryChip,
+                        category === '' && styles.categoryChipActive
+                    ]}
+                    onPress={() => setCategory('')}
+                    activeOpacity={0.7}
+                >
+                    <Text style={[
+                        styles.categoryText,
+                        category === '' && styles.categoryTextActive
+                    ]}>
+                        All
+                    </Text>
+                </TouchableOpacity>
                 <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.categoriesContent}
                 >
-                    {categories.map(cat => {
-                        const IconComponent = cat.icon;
+                    {categories.map((cat) => {
+                        const Icon = cat.icon;
                         return (
                             <TouchableOpacity
                                 key={cat.id}
                                 style={[
                                     styles.categoryChip,
-                                    category === (cat.id === 'All' ? '' : cat.id) && styles.categoryChipActive
+                                    category === cat.id && styles.categoryChipActive
                                 ]}
-                                onPress={() => {
-                                    setCategory(cat.id === 'all' ? '' : cat.id);
-                                    setSearchTerm('');
-                                }}
+                                onPress={() => setCategory(cat.id === category ? '' : cat.id)}
                                 activeOpacity={0.7}
                             >
-                                <IconComponent
+                                <Icon
                                     size={18}
-                                    color={category === (cat.id === 'all' ? '' : cat.id) ? '#ffffff' : '#339a38'}
-                                    style={styles.categoryIcon}
+                                    color={category === cat.id ? '#ffffff' : '#339a38'}
+                                    style={{marginRight: 6}}
                                 />
                                 <Text style={[
                                     styles.categoryText,
-                                    category === (cat.id === 'all' ? '' : cat.id) && styles.categoryTextActive
-                                ]}>{cat.label}</Text>
+                                    category === cat.id && styles.categoryTextActive
+                                ]}>
+                                    {cat.label}
+                                </Text>
                             </TouchableOpacity>
                         );
                     })}
                 </ScrollView>
             </View>
 
-            {/* Products Section */}
+            {/* Products List */}
             <View style={styles.productsSection}>
-                <Text style={styles.sectionTitle}>
-                    {searchTerm.length > 2 ? 'Search Results' : 'Fresh Products'}
-                </Text>
-
-                {(isLoading || isSearching) && (
+                {isLoading ? (
                     <View style={styles.loadingContainer}>
-                        <ActivityIndicator size="large" color="#0c831f"/>
-                        <Text style={styles.loadingText}>Loading delicious items...</Text>
+                        <ActivityIndicator size="large" color="#339a38"/>
+                        <Text style={styles.loadingText}>Loading fresh products...</Text>
                     </View>
-                )}
-
-                {error && (
+                ) : error ? (
                     <View style={styles.errorContainer}>
-                        <Text style={styles.errorEmoji}>😔</Text>
-                        <Text style={styles.errorText}>Oops! Couldn&#39;t load products</Text>
+                        <Text style={styles.errorEmoji}>🥺</Text>
+                        <Text style={styles.errorText}>Oops! Something went wrong</Text>
                         <Text style={styles.errorSubtext}>Please try again later</Text>
                     </View>
-                )}
-
-                {displayProducts && !isLoading && !isSearching && (
+                ) : (
                     <FlatList
                         data={displayProducts}
                         renderItem={({item}) => <ProductCard product={item}/>}
-                        keyExtractor={item => item.id.toString()}
+                        keyExtractor={(item) => item.id.toString()}
                         numColumns={2}
                         contentContainerStyle={styles.productsList}
                         showsVerticalScrollIndicator={false}
                     />
                 )}
             </View>
-            {/*Address Modal Visible: */}
-            <Modal visible={showModal.addressModalVisible} allowSwipeDismissal={true}>
-                <View>
-                    <Text style={{color: '#fff'}}>Address 1</Text>
-                </View>
-                <TouchableOpacity onPress={() => setShowModal(prev => ({...prev, addressModalVisible: false}))}>
-                    <Text style={{color: '#1e1e1e'}}> Close </Text>
-                </TouchableOpacity>
-            </Modal>
 
+            {/* Address Selection Modal */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={showModal.addressModalVisible}
+                onRequestClose={() => setShowModal(prev => ({...prev, addressModalVisible: false}))}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Select Delivery Address</Text>
+                            <TouchableOpacity
+                                style={styles.closeButton}
+                                onPress={() => setShowModal(prev => ({...prev, addressModalVisible: false}))}
+                            >
+                                <Text style={styles.closeButtonText}>✕</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <ScrollView style={styles.addressList}>
+                            {/* Current Location Option */}
+                            <TouchableOpacity style={styles.currentLocationButton}>
+                                <View style={styles.currentLocationIcon}>
+                                    <Navigation size={24} color="#339a38"/>
+                                </View>
+                                <View style={styles.currentLocationTextContainer}>
+                                    <Text style={styles.currentLocationTitle}>Use Current Location</Text>
+                                    <Text style={styles.currentLocationSubtitle}>
+                                        Enable location to find stores near you
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+
+                            {/* Divider */}
+                            <View style={styles.divider}>
+                                <View style={styles.dividerLine}/>
+                                <Text style={styles.dividerText}>SAVED ADDRESSES</Text>
+                                <View style={styles.dividerLine}/>
+                            </View>
+
+                            {/* Saved Addresses */}
+                            {savedAddresses.map((addr) => (
+                                <TouchableOpacity
+                                    key={addr.id}
+                                    style={[
+                                        styles.addressCard,
+                                        address.id === addr.id && styles.addressCardSelected
+                                    ]}
+                                    onPress={() => {
+                                        setAddress(addr);
+                                        setShowModal(prev => ({...prev, addressModalVisible: false}));
+                                    }}
+                                >
+                                    <View style={styles.addressIconContainer}>
+                                        <MapPin size={20} color="#339a38"/>
+                                    </View>
+                                    <View style={styles.addressInfo}>
+                                        <View style={styles.addressTypeRow}>
+                                            <Text
+                                                style={[
+                                                    styles.addressType,
+                                                    address.id === addr.id && styles.addressTypeSelected
+                                                ]}
+                                            >
+                                                {addr.type}
+                                            </Text>
+                                            {address.id === addr.id && (
+                                                <View style={styles.selectedBadge}>
+                                                    <Text style={styles.selectedBadgeText}>SELECTED</Text>
+                                                </View>
+                                            )}
+                                        </View>
+                                        <Text style={styles.addressText}>
+                                            {addr.houseNumber}, {addr.buildingAddress}
+                                        </Text>
+                                        <Text style={styles.addressText}>
+                                            {addr.streetAddress}, {addr.city}
+                                        </Text>
+                                        <Text style={styles.addressPinCode}>PIN: {addr.pinCode}</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -309,26 +438,30 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#191919',
     },
+
+    // Header Styles
     header: {
+        backgroundColor: '#191919',
+        paddingHorizontal: 20,
+        paddingTop: 8,
+        paddingBottom: 16,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingVertical: 16,
-        backgroundColor: '#171717',
     },
     headerGreeting: {
         fontSize: 14,
-        color: '#26702A',
-        marginBottom: 2,
+        fontWeight: '400',
+        color: '#c9c9c9',
+        marginBottom: 4,
     },
     headerTitle: {
-        fontSize: 24,
-        fontWeight: '700',
+        fontSize: 32,
+        fontWeight: '900',
         color: '#339a38',
+        marginBottom: 2,
     },
     cartIconButton: {
-        position: 'relative',
         width: 48,
         height: 48,
         backgroundColor: '#0c831f',
@@ -366,40 +499,36 @@ const styles = StyleSheet.create({
 
     // Search Styles
     searchSection: {
+        backgroundColor: '#191919',
         paddingHorizontal: 20,
-        paddingVertical: 16,
-        backgroundColor: '#151515',
+        paddingBottom: 16,
     },
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#f8fafc',
-        borderRadius: 12,
+        borderRadius: 16,
         paddingHorizontal: 16,
-        height: 50,
-        borderWidth: 1,
-        borderColor: '#e2e8f0',
+        paddingVertical: 12,
     },
     searchIcon: {
-        fontSize: 18,
-        marginRight: 8,
+        marginRight: 12,
     },
-    searchInput: {
-        flex: 1,
-        fontSize: 15,
-        color: '#339a38',
-        fontWeight: '500',
+    clearButton: {
+        padding: 4,
+        marginLeft: 8,
     },
     clearIcon: {
         fontSize: 18,
-        color: '#94a3b8',
-        paddingLeft: 8,
+        color: '#64748b',
+        fontWeight: '600',
     },
 
     // Categories Styles
     categoriesSection: {
         backgroundColor: '#191919',
         paddingVertical: 16,
+        flexDirection: 'row',
+        paddingHorizontal: 20,
     },
     sectionTitle: {
         fontSize: 18,
@@ -409,23 +538,28 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
     },
     categoriesContent: {
-        paddingHorizontal: 16,
+        paddingHorizontal: 0,
     },
     categoryChip: {
+        flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 16,
         paddingVertical: 10,
         borderRadius: 20,
         marginHorizontal: 4,
+        backgroundColor: '#252525',
+        borderWidth: 1,
+        borderColor: '#2a2a2a',
     },
     categoryChipActive: {
-        backgroundColor: '#000000',
+        backgroundColor: '#339a38',
+        borderColor: '#339a38',
     },
     categoryText: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#339a38',
+        color: '#64748b',
     },
     categoryTextActive: {
         color: '#ffffff',
@@ -472,5 +606,159 @@ const styles = StyleSheet.create({
     errorSubtext: {
         fontSize: 14,
         color: '#94a3b8',
+    },
+
+    // Modal Styles
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'flex-end',
+    },
+    modalContent: {
+        backgroundColor: '#1e1e1e',
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        maxHeight: '85%',
+        paddingBottom: 20,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingVertical: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: '#2a2a2a',
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#ffffff',
+    },
+    closeButton: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: '#2a2a2a',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    closeButtonText: {
+        fontSize: 18,
+        color: '#94a3b8',
+        fontWeight: '600',
+    },
+    addressList: {
+        paddingHorizontal: 20,
+    },
+    currentLocationButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#252525',
+        borderRadius: 16,
+        padding: 16,
+        marginTop: 20,
+        borderWidth: 2,
+        borderColor: '#339a38',
+    },
+    currentLocationIcon: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        backgroundColor: '#e8f5e9',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 12,
+    },
+    currentLocationTextContainer: {
+        flex: 1,
+    },
+    currentLocationTitle: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#339a38',
+        marginBottom: 4,
+    },
+    currentLocationSubtitle: {
+        fontSize: 13,
+        color: '#94a3b8',
+    },
+    divider: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginVertical: 24,
+    },
+    dividerLine: {
+        flex: 1,
+        height: 1,
+        backgroundColor: '#2a2a2a',
+    },
+    dividerText: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: '#64748b',
+        paddingHorizontal: 12,
+        letterSpacing: 0.5,
+    },
+    addressCard: {
+        flexDirection: 'row',
+        backgroundColor: '#252525',
+        borderRadius: 16,
+        padding: 16,
+        marginBottom: 12,
+        borderWidth: 2,
+        borderColor: 'transparent',
+    },
+    addressCardSelected: {
+        backgroundColor: '#1a2e1b',
+        borderColor: '#339a38',
+    },
+    addressIconContainer: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#2a2a2a',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 12,
+    },
+    addressInfo: {
+        flex: 1,
+    },
+    addressTypeRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 6,
+    },
+    addressType: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#ffffff',
+    },
+    addressTypeSelected: {
+        color: '#339a38',
+    },
+    selectedBadge: {
+        backgroundColor: '#339a38',
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 12,
+    },
+    selectedBadgeText: {
+        fontSize: 11,
+        fontWeight: '700',
+        color: '#ffffff',
+    },
+    addressText: {
+        fontSize: 14,
+        color: '#cbd5e1',
+        lineHeight: 20,
+        marginBottom: 4,
+    },
+    addressPinCode: {
+        fontSize: 13,
+        color: '#64748b',
+        fontWeight: '500',
     },
 })
