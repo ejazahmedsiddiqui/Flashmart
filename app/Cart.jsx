@@ -76,7 +76,7 @@ export default function Cart() {
     const total = subtotal + deliveryFee;
 
     const renderCartItem = ({ item }) => (
-        <View style={styles.cartItem}>
+        <TouchableOpacity style={styles.cartItem} onPress={() => router.push(`/${item.id}?from=cart`)}>
             <Image source={{ uri: item.image }} style={styles.itemImage} />
 
             <View style={styles.itemDetails}>
@@ -121,7 +121,7 @@ export default function Cart() {
                     </TouchableOpacity>
                 </View>
             </View>
-        </View>
+        </TouchableOpacity>
     );
 
     if (cartItems.length === 0) {
@@ -237,7 +237,7 @@ export default function Cart() {
                     {savings > 0 && (
                         <View style={styles.savingsTag}>
                             <Text style={styles.savingsTagText}>
-                                You're saving ₹{savings} on this order 🎉
+                                You&#39;re saving ₹{savings} on this order 🎉
                             </Text>
                         </View>
                     )}

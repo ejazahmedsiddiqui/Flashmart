@@ -1,4 +1,4 @@
-import {Stack, Tabs} from "expo-router";
+import {Tabs} from "expo-router";
 import {HomeIcon, ShoppingCart} from "lucide-react-native";
 
 export default function RootLayout() {
@@ -12,10 +12,9 @@ export default function RootLayout() {
                 fontFamily: 'Georgia',
                 fontWeight: 300,
             },
-
         }}>
         <Tabs.Screen
-            name='index'
+            name='(home)'
             options={{
                 title: 'Home',
                 tabBarLabel: 'Home',
