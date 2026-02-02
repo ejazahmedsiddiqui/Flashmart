@@ -1,5 +1,5 @@
 import {SafeAreaView} from "react-native-safe-area-context";
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {
     View,
     Text,
@@ -7,7 +7,10 @@ import {
     TouchableOpacity,
     StyleSheet,
     ScrollView,
-    ActivityIndicator, Modal
+    ActivityIndicator,
+    Modal,
+    Animated,
+    Dimensions
 } from 'react-native';
 import {router} from "expo-router";
 import ProductCard from "../../components/ProductCard";
@@ -21,7 +24,18 @@ import {
     Croissant,
     MapPin,
     Navigation,
-    ChevronDown, HomeIcon
+    ChevronDown,
+    HomeIcon,
+    Pizza,
+    Coffee,
+    Fish,
+    Candy,
+    Wheat,
+    SprayCan,
+    Baby,
+    HeartPulse,
+    Shirt,
+    PawPrint
 } from "lucide-react-native";
 import AnimatedSearchBar from "../../components/AnimatedSearchBar";
 import {products} from "../../utilities/products";
@@ -33,6 +47,9 @@ export default function Index() {
     const [isSearching, setIsSearching] = useState(false);
     const [displayProducts, setDisplayProducts] = useState([]);
     const [error, setError] = useState(false);
+    const scrollViewRef = useRef(null);
+    const categoryRefs = useRef({});
+    const [categoryLayouts, setCategoryLayouts] = useState({});
     const [address, setAddress] = useState({
         type: 'Home',
         pinCode: '',
@@ -117,12 +134,23 @@ export default function Index() {
     }, [category]);
 
     const categories = [
-        {id: 'vegetables', label: 'Vegetables', icon: Carrot},
-        {id: 'fruits', label: 'Fruits', icon: Apple},
-        {id: 'dairy', label: 'Dairy', icon: Milk},
-        {id: 'meat', label: 'Meat', icon: Beef},
-        {id: 'bakery', label: 'Bakery', icon: Croissant},
-        {id: 'electronics', label: 'Electronics', icon: Headphones},
+        { id: '', label: 'Home', icon: HomeIcon },
+        { id: 'vegetables', label: 'Vegetables', icon: Carrot },
+        { id: 'fruits', label: 'Fruits', icon: Apple },
+        { id: 'dairy', label: 'Dairy', icon: Milk },
+        { id: 'meat', label: 'Meat', icon: Beef },
+        { id: 'bakery', label: 'Bakery', icon: Croissant },
+        { id: 'electronics', label: 'Electronics', icon: Headphones },
+        { id: 'snacks', label: 'Snacks', icon: Candy },
+        { id: 'beverages', label: 'Beverages', icon: Coffee },
+        { id: 'seafood', label: 'Seafood', icon: Fish },
+        { id: 'frozen', label: 'Frozen Food', icon: Pizza },
+        { id: 'grains', label: 'Grains & Rice', icon: Wheat },
+        { id: 'household', label: 'Household', icon: SprayCan },
+        { id: 'baby', label: 'Baby Care', icon: Baby },
+        { id: 'health', label: 'Health', icon: HeartPulse },
+        { id: 'fashion', label: 'Fashion', icon: Shirt },
+        { id: 'pets', label: 'Pet Supplies', icon: PawPrint },
     ];
     const fetchProducts = async (category = '') => {
         await new Promise(resolve => setTimeout(resolve, 800));
@@ -132,6 +160,31 @@ export default function Index() {
             ? allProducts.filter(p => p.category === category)
             : allProducts;
     }
+
+    const handleCategoryPress = (catId, index) => {
+        setCategory(catId);
+
+        // Calculate scroll position to center the selected category
+        if (scrollViewRef.current && categoryLayouts[catId]) {
+            const screenWidth = Dimensions.get('window').width;
+            const layout = categoryLayouts[catId];
+            const scrollX = layout.x - (screenWidth / 2) + (layout.width / 2);
+
+            scrollViewRef.current.scrollTo({
+                x: Math.max(0, scrollX),
+                animated: true
+            });
+        }
+    };
+
+    const handleCategoryLayout = (catId, event) => {
+        const { x, width } = event.nativeEvent.layout;
+        setCategoryLayouts(prev => ({
+            ...prev,
+            [catId]: { x, width }
+        }));
+    };
+
     const itemCount = categories.length; //replace later with item count from Cart.
 
     return (
@@ -201,53 +254,37 @@ export default function Index() {
 
             {/* Categories */}
             <View style={styles.categoriesSection}>
-                <TouchableOpacity
-                    key={'all'}
-                    style={[
-                        styles.categoryChip,
-                        category === '' && styles.categoryChipActive
-                    ]}
-                    onPress={() => setCategory('')}
-                    activeOpacity={0.7}
-                >
-                    <HomeIcon
-                        size={16}
-                        color={category === '' ? '#fff' : 'rgba(241,241,241,0.6)'}
-                        fill={category === '' ? 'rgba(51,154,56,0.98)' : 'rgba(0,0,0,0)'}
-                    />
-                    <Text style={[
-                        styles.categoryText,
-                        category === '' && styles.categoryTextActive
-                    ]}>
-                        Home
-                    </Text>
-                </TouchableOpacity>
                 <ScrollView
+                    ref={scrollViewRef}
                     horizontal
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.categoriesContent}
+                    decelerationRate="fast"
                 >
-                    {categories.map((cat) => {
+                    {categories.map((cat, index) => {
                         const Icon = cat.icon;
+                        const isActive = category === cat.id;
+
                         return (
                             <TouchableOpacity
                                 key={cat.id}
                                 style={[
                                     styles.categoryChip,
-                                    category === cat.id && styles.categoryChipActive
+                                    isActive && styles.categoryChipActive
                                 ]}
-                                onPress={() => setCategory(cat.id === category ? '' : cat.id)}
+                                onPress={() => handleCategoryPress(cat.id, index)}
+                                onLayout={(event) => handleCategoryLayout(cat.id, event)}
                                 activeOpacity={0.7}
                             >
                                 <Icon
                                     size={18}
-                                    color={category === cat.id ? '#ffffff' : 'rgba(241,241,241,0.6)'}
-                                    fill={category === cat.id ? 'rgba(51,154,56,0.98)' : 'rgba(0,0,0,0)'}
+                                    color={isActive ? '#ffffff' : 'rgba(241,241,241,0.6)'}
+                                    fill={isActive ? 'rgba(51,154,56,0.98)' : 'rgba(0,0,0,0)'}
                                 />
 
                                 <Text style={[
                                     styles.categoryText,
-                                    category === cat.id && styles.categoryTextActive
+                                    isActive && styles.categoryTextActive
                                 ]}>
                                     {cat.label}
                                 </Text>
@@ -463,7 +500,7 @@ const styles = StyleSheet.create({
 
     // Categories Styles
     categoriesSection: {
-        flexDirection: 'row',
+        paddingVertical: 8,
     },
     sectionTitle: {
         fontSize: 18,
