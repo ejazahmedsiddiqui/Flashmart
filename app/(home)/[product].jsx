@@ -1,177 +1,60 @@
-import React, {useState} from 'react';
-import {View, Text, ScrollView, Image, TouchableOpacity, StyleSheet} from 'react-native';
-import {ShoppingCart, Heart, ArrowLeft, Minus, Plus} from 'lucide-react-native';
-import {router, useLocalSearchParams} from "expo-router";
+import React, { useState, useMemo } from 'react';
+import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { ShoppingCart, Heart, ArrowLeft, Minus, Plus } from 'lucide-react-native';
+import { router, useLocalSearchParams } from "expo-router";
 import ProductCard from "../../components/ProductCard";
+import { products } from "../../utilities/products";
 
 const ProductDetailsPage = () => {
     const params = useLocalSearchParams();
+
+    const product = products.find(
+        p => p.id === Number(params.product)
+    ) || products[0];
+
+    /* ---------------- Variant State ---------------- */
+    const [selectedVariant, setSelectedVariant] = useState(product.variants[0]);
     const [quantity, setQuantity] = useState(0);
     const [isFavorite, setIsFavorite] = useState(false);
 
-    // Debug logging
-    console.log("=== Product Details Page ===");
-    console.log("Current product ID:", params.product);
-    console.log("From parameter:", params.from);
-    console.log("All params:", params);
+    /* ---------------- Derived Values ---------------- */
+    const discount = useMemo(() => {
+        if (!selectedVariant.originalPrice) return null;
+        return Math.round(
+            ((selectedVariant.originalPrice - selectedVariant.price) /
+                selectedVariant.originalPrice) * 100
+        );
+    }, [selectedVariant]);
 
-    // All available products with descriptions
-    const allProducts = [
-        {
-            id: 2,
-            name: 'Green Apples',
-            brand: 'Fresh Farm',
-            price: 120,
-            originalPrice: 150,
-            discount: 20,
-            weight: '4 pcs',
-            category: 'fruits',
-            image: 'https://images.unsplash.com/photo-1619546813926-a78fa6372cd2?w=200&h=200&fit=crop',
-            rating: 4.5,
-            reviews: 234,
-            delivery: '10 mins',
-            description: 'Crisp and refreshing green apples, handpicked from premium orchards. Perfect for snacking, baking, or adding a tangy crunch to your salads. Rich in fiber and antioxidants.',
-        },
-        {
-            id: 3,
-            name: 'Fresh Oranges',
-            brand: 'Citrus Co',
-            price: 80,
-            originalPrice: 100,
-            discount: 20,
-            weight: '6 pcs',
-            category: 'fruits',
-            image: 'https://images.unsplash.com/photo-1582979512210-99b6a53386f9?w=200&h=200&fit=crop',
-            rating: 4.7,
-            reviews: 189,
-            delivery: '8 mins',
-            description: 'Juicy and sweet oranges bursting with vitamin C. Sourced from sun-kissed groves to bring you the freshest citrus experience. Great for fresh juice or healthy snacking.',
-        },
-        {
-            id: 4,
-            name: 'Red Grapes',
-            brand: 'Valley Fresh',
-            price: 95,
-            originalPrice: 120,
-            discount: 21,
-            weight: '500g',
-            category: 'fruits',
-            image: 'https://images.unsplash.com/photo-1571663716920-9fd87840c9ef?w=200&h=200&fit=crop',
-            rating: 4.4,
-            reviews: 156,
-            delivery: '12 mins',
-            description: 'Sweet and seedless red grapes, perfect for a healthy snack or dessert. Packed with natural sugars and antioxidants to boost your energy and health.',
-        },
-        {
-            id: 5,
-            name: 'Strawberries',
-            brand: 'Berry Farm',
-            price: 150,
-            originalPrice: 180,
-            discount: 17,
-            weight: '250g',
-            category: 'fruits',
-            image: 'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=200&h=200&fit=crop',
-            rating: 4.8,
-            reviews: 312,
-            delivery: '15 mins',
-            description: 'Premium fresh strawberries with vibrant color and sweet flavor. Handpicked at peak ripeness to ensure maximum taste and nutrition. Perfect for desserts, smoothies, or eating fresh.',
-        },
-        {
-            id: 6,
-            name: 'Starfruit',
-            brand: 'Ignyter Farm',
-            price: 400,
-            originalPrice: 789,
-            discount: 49,
-            weight: '250g',
-            category: 'fruits',
-            image: 'https://img.lb.wbmdstatic.com/vim/live/webmd/consumer_assets/site_images/articles/health_tools/11_exotic_fruits_you_should_try_slideshow/1800ss_getty_rf_star_fruit_carambola.jpg?resize=750px:*&output-quality=75',
-            rating: 4.2,
-            reviews: 87,
-            delivery: '20 mins',
-            description: 'Exotic starfruit with a unique sweet-tart flavor and distinctive star shape. Rich in vitamin C and fiber, this tropical treat adds a special touch to fruit salads and garnishes.',
-        },
-        {
-            id: 7,
-            name: 'Watermelon',
-            brand: 'Berry Farm',
-            price: 150,
-            originalPrice: 180,
-            discount: 17,
-            weight: '2 kg',
-            category: 'fruits',
-            image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=200&h=200&fit=crop',
-            rating: 4.6,
-            reviews: 278,
-            delivery: '10 mins',
-            description: 'Fresh and juicy watermelon, perfect for hot summer days. Sweet, hydrating, and packed with vitamins A and C. Great for refreshing snacks or making fresh juice.',
-        },
-        {
-            id: 8,
-            name: 'Banana',
-            brand: 'Unsplash Farm',
-            price: 150,
-            originalPrice: 180,
-            discount: 17,
-            weight: '6 pcs',
-            category: 'fruits',
-            image: 'https://images.unsplash.com/photo-1587132137056-bfbf0166836e?w=200&h=200&fit=crop',
-            rating: 4.5,
-            reviews: 445,
-            delivery: '8 mins',
-            description: 'Fresh yellow bananas, nature\'s perfect snack. Rich in potassium, fiber, and natural energy. Ideal for breakfast, smoothies, or a quick energy boost throughout the day.',
-        },
-    ];
-
-    // Find the current product based on the ID from params
-    const product = allProducts.find(p => p.id === parseInt(params.product)) || allProducts[0];
-
-    // Get similar products (same category, excluding current product)
-    const similarProducts = allProducts
+    const similarProducts = products
         .filter(p => p.category === product.category && p.id !== product.id)
-        .slice(0, 4);
+        .slice(0, 6);
 
-    // Handle back navigation
-    const handleBack = () => {
-        console.log("=== Back Button Pressed ===");
-        console.log("Using router.back() in Stack navigation");
-        router.back();
-    };
-
-    const addToCart = () => {
-        setQuantity(1);
-    };
-
-    const increment = () => {
-        setQuantity(quantity + 1);
-    };
-
-    const decrement = () => {
-        if (quantity > 0) {
-            setQuantity(quantity - 1);
-        }
-    };
+    /* ---------------- Cart Logic ---------------- */
+    const addToCart = () => setQuantity(1);
+    const increment = () => quantity < selectedVariant.stock && setQuantity(q => q + 1);
+    const decrement = () => quantity > 0 && setQuantity(q => q - 1);
 
     return (
         <View style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
-                <TouchableOpacity style={styles.iconButton} onPress={handleBack}>
-                    <ArrowLeft size={24} color="#000"/>
+                <TouchableOpacity onPress={() => router.back()}>
+                    <ArrowLeft size={24} />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.iconButton}>
-                    <ShoppingCart size={24} color="#000"/>
+                <TouchableOpacity onPress={() => router.push('/Cart')}>
+                    <ShoppingCart size={24} />
                 </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-                {/* Product Image */}
+            <ScrollView showsVerticalScrollIndicator={false}>
+                {/* Image */}
                 <View style={styles.imageContainer}>
-                    <Image source={{uri: product.image}} style={styles.productImage}/>
+                    <Image source={{ uri: product.image }} style={styles.productImage} />
+
                     <TouchableOpacity
                         style={styles.favoriteButton}
-                        onPress={() => setIsFavorite(!isFavorite)}
+                        onPress={() => setIsFavorite(v => !v)}
                     >
                         <Heart
                             size={20}
@@ -179,58 +62,79 @@ const ProductDetailsPage = () => {
                             fill={isFavorite ? '#e74c3c' : 'none'}
                         />
                     </TouchableOpacity>
-                    {product.discount && (
+
+                    {discount && (
                         <View style={styles.discountBadge}>
-                            <Text style={styles.discountText}>{product.discount}% OFF</Text>
+                            <Text style={styles.discountText}>{discount}% OFF</Text>
                         </View>
                     )}
                 </View>
 
-                {/* Product Info */}
+                {/* Info */}
                 <View style={styles.productInfo}>
                     <Text style={styles.brandText}>{product.brand}</Text>
                     <Text style={styles.productName}>{product.name}</Text>
-                    <Text style={styles.weightText}>{product.weight}</Text>
+                    <Text style={styles.weightText}>{selectedVariant.weight}</Text>
 
                     <View style={styles.ratingContainer}>
-                        <Text style={styles.ratingText}>⭐ {product.rating}</Text>
+                        <Text>⭐ {product.rating}</Text>
                         <Text style={styles.reviewsText}>({product.reviews} reviews)</Text>
                     </View>
 
                     <View style={styles.priceContainer}>
-                        <Text style={styles.price}>₹{product.price}</Text>
-                        <Text style={styles.originalPrice}>₹{product.originalPrice}</Text>
+                        <Text style={styles.price}>₹{selectedVariant.price}</Text>
+                        <Text style={styles.originalPrice}>
+                            ₹{selectedVariant.originalPrice}
+                        </Text>
                     </View>
 
-                    <View style={styles.deliveryContainer}>
-                        <Text style={styles.deliveryText}>🚀 Delivery in {product.delivery}</Text>
+                    {/* Variant Selector */}
+                    <View style={styles.variantRow}>
+                        {product.variants.map(v => (
+                            <TouchableOpacity
+                                key={v.sku}
+                                style={[
+                                    styles.variantChip,
+                                    v.sku === selectedVariant.sku && styles.variantActive
+                                ]}
+                                onPress={() => {
+                                    setSelectedVariant(v);
+                                    setQuantity(0);
+                                }}
+                            >
+                                <Text
+                                    style={[
+                                        styles.variantText,
+                                        v.sku === selectedVariant.sku && styles.variantTextActive
+                                    ]}
+                                >
+                                    {v.label}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
                     </View>
 
-                    {/* Product Description */}
-                    <View style={styles.descriptionContainer}>
-                        <Text style={styles.sectionTitle}>Product Details</Text>
-                        <Text style={styles.descriptionText}>{product.description}</Text>
-                    </View>
+                    {/* Description */}
+                    <Text style={styles.sectionTitle}>Product Details</Text>
+                    <Text style={styles.descriptionText}>{product.description}</Text>
                 </View>
 
-                {/* Similar Products */}
+                {/* Similar */}
                 {similarProducts.length > 0 && (
                     <View style={styles.similarSection}>
                         <Text style={styles.similarTitle}>Similar Products</Text>
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.similarScroll}>
-                            {similarProducts.map((item) => (
-                                <View key={item.id}>
-                                    <ProductCard product={item}/>
-                                </View>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                            {similarProducts.map(item => (
+                                <ProductCard key={item.id} product={item} />
                             ))}
                         </ScrollView>
                     </View>
                 )}
 
-                <View style={styles.bottomPadding}/>
+                <View style={{ height: 120 }} />
             </ScrollView>
 
-            {/* Bottom Add to Cart */}
+            {/* Bottom Bar */}
             <View style={styles.bottomBar}>
                 {quantity === 0 ? (
                     <TouchableOpacity style={styles.addButton} onPress={addToCart}>
@@ -238,12 +142,12 @@ const ProductDetailsPage = () => {
                     </TouchableOpacity>
                 ) : (
                     <View style={styles.quantityContainer}>
-                        <TouchableOpacity style={styles.quantityButton} onPress={decrement}>
-                            <Minus size={20} color="#fff"/>
+                        <TouchableOpacity onPress={decrement}>
+                            <Minus size={20} color="#fff" />
                         </TouchableOpacity>
                         <Text style={styles.quantityText}>{quantity}</Text>
-                        <TouchableOpacity style={styles.quantityButton} onPress={increment}>
-                            <Plus size={20} color="#fff"/>
+                        <TouchableOpacity onPress={increment}>
+                            <Plus size={20} color="#fff" />
                         </TouchableOpacity>
                     </View>
                 )}
@@ -251,6 +155,7 @@ const ProductDetailsPage = () => {
         </View>
     );
 };
+
 
 const styles = StyleSheet.create({
     container: {
@@ -528,6 +433,33 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         marginHorizontal: 30,
     },
+    variantRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginVertical: 16,
+    },
+    variantChip: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 20,
+        paddingHorizontal: 14,
+        paddingVertical: 8,
+        marginRight: 8,
+        marginBottom: 8,
+    },
+    variantActive: {
+        backgroundColor: '#26702A',
+        borderColor: '#26702A',
+    },
+    variantText: {
+        fontSize: 14,
+        color: '#333',
+        fontWeight: '600',
+    },
+    variantTextActive: {
+        color: '#fff',
+    },
+
 })
 
 export default ProductDetailsPage;

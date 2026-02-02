@@ -11,8 +11,20 @@ import {
 } from 'react-native';
 import {router} from "expo-router";
 import ProductCard from "../../components/ProductCard";
-import {ShoppingCart, ShoppingBag, Carrot, Apple, Milk, Beef, Croissant, MapPin, Navigation} from "lucide-react-native";
+import {
+    ShoppingCart,
+    Headphones,
+    Carrot,
+    Apple,
+    Milk,
+    Beef,
+    Croissant,
+    MapPin,
+    Navigation,
+    ChevronDown, HomeIcon
+} from "lucide-react-native";
 import AnimatedSearchBar from "../../components/AnimatedSearchBar";
+import {products} from "../../utilities/products";
 
 export default function Index() {
     const [category, setCategory] = useState('');
@@ -105,125 +117,20 @@ export default function Index() {
     }, [category]);
 
     const categories = [
-        {id: 'all', label: 'All', icon: ShoppingBag},
         {id: 'vegetables', label: 'Vegetables', icon: Carrot},
         {id: 'fruits', label: 'Fruits', icon: Apple},
         {id: 'dairy', label: 'Dairy', icon: Milk},
         {id: 'meat', label: 'Meat', icon: Beef},
         {id: 'bakery', label: 'Bakery', icon: Croissant},
+        {id: 'electronics', label: 'Electronics', icon: Headphones},
     ];
     const fetchProducts = async (category = '') => {
         await new Promise(resolve => setTimeout(resolve, 800));
-        const products = [
-            {
-                id: 2,
-                name: 'Green Apples',
-                brand: 'Fresh Farm',
-                price: 120,
-                originalPrice: 150,
-                discount: 20,
-                weight: '4 pcs',
-                category: 'fruits',
-                image: 'https://images.unsplash.com/photo-1619546813926-a78fa6372cd2?w=200&h=200&fit=crop',
-                rating: 4.5,
-                reviews: 234,
-                delivery: '10 mins',
-                description: 'Crisp and refreshing green apples, handpicked from premium orchards. Perfect for snacking, baking, or adding a tangy crunch to your salads. Rich in fiber and antioxidants.',
-            },
-            {
-                id: 3,
-                name: 'Fresh Oranges',
-                brand: 'Citrus Co',
-                price: 80,
-                originalPrice: 100,
-                discount: 20,
-                weight: '6 pcs',
-                category: 'fruits',
-                image: 'https://images.unsplash.com/photo-1582979512210-99b6a53386f9?w=200&h=200&fit=crop',
-                rating: 4.7,
-                reviews: 189,
-                delivery: '8 mins',
-                description: 'Juicy and sweet oranges bursting with vitamin C. Sourced from sun-kissed groves to bring you the freshest citrus experience. Great for fresh juice or healthy snacking.',
-            },
-            {
-                id: 4,
-                name: 'Red Grapes',
-                brand: 'Valley Fresh',
-                price: 95,
-                originalPrice: 120,
-                discount: 21,
-                weight: '500g',
-                category: 'fruits',
-                image: 'https://images.unsplash.com/photo-1571663716920-9fd87840c9ef?w=200&h=200&fit=crop',
-                rating: 4.4,
-                reviews: 156,
-                delivery: '12 mins',
-                description: 'Sweet and seedless red grapes, perfect for a healthy snack or dessert. Packed with natural sugars and antioxidants to boost your energy and health.',
-            },
-            {
-                id: 5,
-                name: 'Strawberries',
-                brand: 'Berry Farm',
-                price: 150,
-                originalPrice: 180,
-                discount: 17,
-                weight: '250g',
-                category: 'fruits',
-                image: 'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=200&h=200&fit=crop',
-                rating: 4.8,
-                reviews: 312,
-                delivery: '15 mins',
-                description: 'Premium fresh strawberries with vibrant color and sweet flavor. Handpicked at peak ripeness to ensure maximum taste and nutrition. Perfect for desserts, smoothies, or eating fresh.',
-            },
-            {
-                id: 6,
-                name: 'Starfruit',
-                brand: 'Ignyter Farm',
-                price: 400,
-                originalPrice: 789,
-                discount: 49,
-                weight: '250g',
-                category: 'fruits',
-                image: 'https://img.lb.wbmdstatic.com/vim/live/webmd/consumer_assets/site_images/articles/health_tools/11_exotic_fruits_you_should_try_slideshow/1800ss_getty_rf_star_fruit_carambola.jpg?resize=750px:*&output-quality=75',
-                rating: 4.2,
-                reviews: 87,
-                delivery: '20 mins',
-                description: 'Exotic starfruit with a unique sweet-tart flavor and distinctive star shape. Rich in vitamin C and fiber, this tropical treat adds a special touch to fruit salads and garnishes.',
-            },
-            {
-                id: 7,
-                name: 'Watermelon',
-                brand: 'Berry Farm',
-                price: 150,
-                originalPrice: 180,
-                discount: 17,
-                weight: '2 kg',
-                category: 'fruits',
-                image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=200&h=200&fit=crop',
-                rating: 4.6,
-                reviews: 278,
-                delivery: '10 mins',
-                description: 'Fresh and juicy watermelon, perfect for hot summer days. Sweet, hydrating, and packed with vitamins A and C. Great for refreshing snacks or making fresh juice.',
-            },
-            {
-                id: 8,
-                name: 'Banana',
-                brand: 'Unsplash Farm',
-                price: 150,
-                originalPrice: 180,
-                discount: 17,
-                weight: '6 pcs',
-                category: 'fruits',
-                image: 'https://images.unsplash.com/photo-1587132137056-bfbf0166836e?w=200&h=200&fit=crop',
-                rating: 4.5,
-                reviews: 445,
-                delivery: '8 mins',
-                description: 'Fresh yellow bananas, nature\'s perfect snack. Rich in potassium, fiber, and natural energy. Ideal for breakfast, smoothies, or a quick energy boost throughout the day.',
-            },
-        ];
+        const allProducts = products;
+
         return category
-            ? products.filter(p => p.category === category)
-            : products;
+            ? allProducts.filter(p => p.category === category)
+            : allProducts;
     }
     const itemCount = categories.length; //replace later with item count from Cart.
 
@@ -232,9 +139,6 @@ export default function Index() {
             {/* Header */}
             <View style={styles.header}>
                 <View style={{flex: 1, marginRight: 12}}>
-                    <TouchableOpacity>
-                        <Text style={styles.headerGreeting}>Hello Ji! 👋</Text>
-                    </TouchableOpacity>
                     <Text style={styles.headerTitle}>FreshCart</Text>
                     <TouchableOpacity
                         style={{
@@ -247,20 +151,20 @@ export default function Index() {
                         <Text
                             style={{
                                 color: '#f4f4f4',
-                                fontSize: 16,
+                                fontSize: 12,
                                 fontWeight: '700',
-                                lineHeight: 20,
                             }}
                         >{address?.type?.toUpperCase()} - </Text>
                         <Text
                             numberOfLines={1}
                             style={{
                                 color: '#f4f4f4',
-                                fontSize: 16,
-                                fontWeight: '300',
+                                fontSize: 12,
+                                fontWeight: '400',
                                 flexShrink: 1,
                             }}
                         >{fullAddress.split(',').slice(0, 3).join(',')}</Text>
+                        <ChevronDown size={24} color={'#f4f4f4'}/>
                     </TouchableOpacity>
                 </View>
                 <TouchableOpacity
@@ -282,7 +186,7 @@ export default function Index() {
             {/* Search Bar */}
             <View style={styles.searchSection}>
                 <View style={styles.searchContainer}>
-                    <AnimatedSearchBar value={searchTerm} onChange={setSearchTerm} />
+                    <AnimatedSearchBar value={searchTerm} onChange={setSearchTerm}/>
                     {searchTerm.length > 0 && (
                         <TouchableOpacity
                             onPress={() => setSearchTerm('')}
@@ -306,11 +210,16 @@ export default function Index() {
                     onPress={() => setCategory('')}
                     activeOpacity={0.7}
                 >
+                    <HomeIcon
+                        size={16}
+                        color={category === '' ? '#fff' : 'rgba(241,241,241,0.6)'}
+                        fill={category === '' ? 'rgba(51,154,56,0.98)' : 'rgba(0,0,0,0)'}
+                    />
                     <Text style={[
                         styles.categoryText,
                         category === '' && styles.categoryTextActive
                     ]}>
-                        All
+                        Home
                     </Text>
                 </TouchableOpacity>
                 <ScrollView
@@ -332,15 +241,17 @@ export default function Index() {
                             >
                                 <Icon
                                     size={18}
-                                    color={category === cat.id ? '#ffffff' : '#339a38'}
-                                    style={{marginRight: 6}}
+                                    color={category === cat.id ? '#ffffff' : 'rgba(241,241,241,0.6)'}
+                                    fill={category === cat.id ? 'rgba(51,154,56,0.98)' : 'rgba(0,0,0,0)'}
                                 />
+
                                 <Text style={[
                                     styles.categoryText,
                                     category === cat.id && styles.categoryTextActive
                                 ]}>
                                     {cat.label}
                                 </Text>
+
                             </TouchableOpacity>
                         );
                     })}
@@ -466,12 +377,12 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#191919',
+        paddingHorizontal: 20,
     },
 
     // Header Styles
     header: {
         backgroundColor: '#191919',
-        paddingHorizontal: 20,
         paddingTop: 8,
         paddingBottom: 16,
         flexDirection: 'row',
@@ -487,7 +398,7 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: 32,
         fontWeight: '900',
-        color: '#339a38',
+        color: 'rgba(51,154,56,0.98)',
         marginBottom: 2,
     },
     cartIconButton: {
@@ -529,14 +440,12 @@ const styles = StyleSheet.create({
     // Search Styles
     searchSection: {
         backgroundColor: '#191919',
-        paddingHorizontal: 20,
         paddingBottom: 16,
     },
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         borderRadius: 16,
-        paddingHorizontal: 16,
         paddingVertical: 12,
     },
     searchIcon: {
@@ -554,41 +463,31 @@ const styles = StyleSheet.create({
 
     // Categories Styles
     categoriesSection: {
-        backgroundColor: '#191919',
-        paddingVertical: 16,
         flexDirection: 'row',
-        paddingHorizontal: 20,
     },
     sectionTitle: {
         fontSize: 18,
         fontWeight: '700',
         color: '#eaffea',
         marginBottom: 12,
-        paddingHorizontal: 20,
     },
-    categoriesContent: {
-        paddingHorizontal: 0,
-    },
+    categoriesContent: {},
     categoryChip: {
-        flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
-        paddingHorizontal: 16,
+        paddingHorizontal: 15,
         paddingVertical: 10,
-        borderRadius: 20,
         marginHorizontal: 4,
-        backgroundColor: '#252525',
-        borderWidth: 1,
-        borderColor: '#2a2a2a',
     },
     categoryChipActive: {
-        backgroundColor: '#339a38',
-        borderColor: '#339a38',
+        borderBottomColor: '#f2f2f2',
+        borderBottomWidth: 2,
+
     },
     categoryText: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#64748b',
+        color: 'rgba(241,241,241,0.6)',
     },
     categoryTextActive: {
         color: '#ffffff',
@@ -600,8 +499,8 @@ const styles = StyleSheet.create({
         paddingTop: 16,
     },
     productsList: {
-        paddingHorizontal: 12,
         paddingBottom: 20,
+        alignItems: 'center'
     },
     // Loading & Error States
     loadingContainer: {

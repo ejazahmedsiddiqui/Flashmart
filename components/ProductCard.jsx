@@ -1,23 +1,33 @@
-import {Text, TouchableOpacity, View, StyleSheet, Dimensions, Image} from "react-native";
-import React, {useState} from "react";
-import {router} from "expo-router";
+import {
+    Text,
+    TouchableOpacity,
+    View,
+    StyleSheet,
+    Dimensions,
+    Image,
+} from "react-native";
+import React, { useState, useMemo } from "react";
+import { router } from "expo-router";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 const CARD_WIDTH = (width - 48) / 2;
 
-const ProductCard = ({product, path=''}) => {
+const ProductCard = ({ product }) => {
     const [cart, setCart] = useState({});
+    const [selectedVariantIndex] = useState(0); // default first variant
+
+    const selectedVariant = product.variants?.[selectedVariantIndex];
 
     const addToCart = (productId) => {
-        setCart(prev => ({
+        setCart((prev) => ({
             ...prev,
-            [productId]: (prev[productId] || 0) + 1
+            [productId]: (prev[productId] || 0) + 1,
         }));
     };
 
     const removeFromCart = (productId) => {
-        setCart(prev => {
-            const newCart = {...prev};
+        setCart((prev) => {
+            const newCart = { ...prev };
             if (newCart[productId] > 1) {
                 newCart[productId]--;
             } else {
@@ -28,58 +38,75 @@ const ProductCard = ({product, path=''}) => {
     };
 
     const handleCardPush = () => {
-        console.log("=== ProductCard Click ===");
-        console.log("Product ID:", product.id);
-        console.log("Product Name:", product.name);
-        console.log("Navigating to product");
         router.push(`/(home)/${product.id}`);
-    }
+    };
 
     const quantity = cart[product.id] || 0;
 
-    return (
-        <TouchableOpacity
-            style={styles.productCard}
-            onPress={handleCardPush}
-        >
-            {/* Product Image */}
-            <View style={styles.imageContainer}>
-                {product.image?.startsWith('http') ? (
-                    <Image source={{ uri: product.image }} style={styles.productImage} />
-                ) : (
-                    <Text style={styles.productEmoji}>{product.image}</Text>
-                )}
+    const discountPercent = useMemo(() => {
+        if (!selectedVariant?.originalPrice) return 0;
+        return Math.round(
+            ((selectedVariant.originalPrice - selectedVariant.price) /
+                selectedVariant.originalPrice) *
+            100
+        );
+    }, [selectedVariant]);
 
-                {/* Discount Badge */}
-                {product.discount && (
+    return (
+        <TouchableOpacity style={styles.productCard} onPress={handleCardPush}>
+            {/* Image */}
+            <View style={styles.imageContainer}>
+                <Image
+                    source={{ uri: product.image }}
+                    style={styles.productImage}
+                />
+
+                {discountPercent > 0 && (
                     <View style={styles.discountBadge}>
-                        <Text style={styles.discountText}>{product.discount}% OFF</Text>
+                        <Text style={styles.discountText}>
+                            {discountPercent}% OFF
+                        </Text>
                     </View>
                 )}
             </View>
 
-            {/* Product Info */}
+            {/* Info */}
             <View style={styles.productInfo}>
                 {product.brand && (
                     <Text style={styles.brandText}>{product.brand}</Text>
                 )}
+
                 <Text style={styles.productName} numberOfLines={2}>
                     {product.name}
                 </Text>
-                <Text style={styles.productWeight}>{product.unit}</Text>
 
-                <View style={styles.priceRow}>
-                    <Text style={styles.productPrice}>₹{product.originalPrice - product.discount * product.originalPrice/100}</Text>
-                    {product.originalPrice && (
-                        <Text style={styles.originalPrice}>₹{product.originalPrice}</Text>
-                    )}
-                </View>
+                {selectedVariant && (
+                    <Text style={styles.productWeight}>
+                        {selectedVariant.label}
+                    </Text>
+                )}
 
+                {/* Price */}
+                {selectedVariant && (
+                    <View style={styles.priceRow}>
+                        <Text style={styles.productPrice}>
+                            ₹{selectedVariant.price}
+                        </Text>
+
+                        {selectedVariant.originalPrice >
+                            selectedVariant.price && (
+                                <Text style={styles.originalPrice}>
+                                    ₹{selectedVariant.originalPrice}
+                                </Text>
+                            )}
+                    </View>
+                )}
+
+                {/* Cart Controls */}
                 {quantity === 0 ? (
                     <TouchableOpacity
                         style={styles.addButton}
                         onPress={(e) => {
-                            // Stop propagation to prevent navigation when adding to cart
                             e.stopPropagation();
                             addToCart(product.id);
                         }}
@@ -95,18 +122,18 @@ const ProductCard = ({product, path=''}) => {
                                 e.stopPropagation();
                                 removeFromCart(product.id);
                             }}
-                            activeOpacity={0.7}
                         >
                             <Text style={styles.quantityButtonText}>−</Text>
                         </TouchableOpacity>
+
                         <Text style={styles.quantityText}>{quantity}</Text>
+
                         <TouchableOpacity
                             style={styles.quantityButton}
                             onPress={(e) => {
                                 e.stopPropagation();
                                 addToCart(product.id);
                             }}
-                            activeOpacity={0.7}
                         >
                             <Text style={styles.quantityButtonText}>+</Text>
                         </TouchableOpacity>
@@ -119,14 +146,13 @@ const ProductCard = ({product, path=''}) => {
 
 export default ProductCard;
 
+
 const styles = StyleSheet.create({
     productCard: {
         width: CARD_WIDTH,
         backgroundColor: '#ffffff',
         borderRadius: 12,
         margin: 6,
-        borderWidth: 1,
-        borderColor: '#f0f0f0',
         overflow: 'hidden',
     },
     imageContainer: {
