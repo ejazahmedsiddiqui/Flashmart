@@ -1,7 +1,9 @@
 import {Tabs} from "expo-router";
 import {HomeIcon, ShoppingCart} from "lucide-react-native";
+import {useCartCount} from "../store/cartStore";
 
 export default function RootLayout() {
+    const itemCount = useCartCount()
     return <Tabs
         screenOptions={{
             headerShown: false,
@@ -30,7 +32,7 @@ export default function RootLayout() {
                 tabBarIcon: ({color, size}) => (
                     <ShoppingCart color={color} size={size}/>
                 ),
-                tabBarBadge: 3,
+                tabBarBadge: itemCount,
             }}/>
     </Tabs>;
 }

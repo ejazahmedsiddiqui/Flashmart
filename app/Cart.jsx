@@ -10,59 +10,13 @@ import {
     ScrollView,
 } from 'react-native';
 import { router } from "expo-router";
-import { ArrowLeft, Trash2, Plus, Minus, ShoppingBag } from "lucide-react-native";
+import {ArrowLeft, Trash2, Plus, Minus, ShoppingBag, ShoppingCart} from "lucide-react-native";
+import {useCartStore, useCartItems, useCartSubtotal} from '../store/cartStore'
 
 export default function Cart() {
-    const [cartItems, setCartItems] = useState([
-        {
-            id: 2,
-            name: 'Green Apples',
-            brand: 'Fresh Farm',
-            price: 120,
-            originalPrice: 150,
-            weight: '4 pcs',
-            quantity: 2,
-            image: 'https://images.unsplash.com/photo-1619546813926-a78fa6372cd2?w=200&h=200&fit=crop',
-        },
-        {
-            id: 3,
-            name: 'Fresh Oranges',
-            brand: 'Citrus Co',
-            price: 80,
-            originalPrice: 100,
-            weight: '6 pcs',
-            quantity: 1,
-            image: 'https://images.unsplash.com/photo-1582979512210-99b6a53386f9?w=200&h=200&fit=crop',
-        },
-        {
-            id: 5,
-            name: 'Strawberries',
-            brand: 'Berry Farm',
-            price: 150,
-            originalPrice: 180,
-            weight: '250g',
-            quantity: 3,
-            image: 'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=200&h=200&fit=crop',
-        },
-    ]);
-
-    const updateQuantity = (id, change) => {
-        setCartItems(prevItems =>
-            prevItems.map(item =>
-                item.id === id
-                    ? { ...item, quantity: Math.max(1, item.quantity + change) }
-                    : item
-            )
-        );
-    };
-
-    const removeItem = (id) => {
-        setCartItems(prevItems => prevItems.filter(item => item.id !== id));
-    };
-
-    const calculateSubtotal = () => {
-        return cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    };
+    const cartItems = useCartItems();
+    const subtotal = useCartSubtotal();
+    const { updateQuantity, removeItem, incrementQuantity, decrementQuantity } = useCartStore();
 
     const calculateSavings = () => {
         return cartItems.reduce((sum, item) =>
@@ -70,10 +24,18 @@ export default function Cart() {
         );
     };
 
-    const subtotal = calculateSubtotal();
     const savings = calculateSavings();
     const deliveryFee = subtotal > 500 ? 0 : 40;
     const total = subtotal + deliveryFee;
+
+    // Updated handler to use cartKey
+    const handleUpdateQuantity = (cartKey, change) => {
+        if (change > 0) {
+            incrementQuantity(cartKey);
+        } else {
+            decrementQuantity(cartKey);
+        }
+    };
 
     const renderCartItem = ({ item }) => (
         <TouchableOpacity style={styles.cartItem} onPress={() => router.push(`/${item.id}?from=cart`)}>
@@ -82,7 +44,13 @@ export default function Cart() {
             <View style={styles.itemDetails}>
                 <Text style={styles.itemName}>{item.name}</Text>
                 <Text style={styles.itemBrand}>{item.brand}</Text>
-                <Text style={styles.itemWeight}>{item.weight}</Text>
+
+                {/* Display variant label if available */}
+                <View style={styles.variantContainer}>
+                    <Text style={styles.itemWeight}>
+                        {item.variantLabel || item.weight}
+                    </Text>
+                </View>
 
                 <View style={styles.priceRow}>
                     <Text style={styles.itemPrice}>₹{item.price}</Text>
@@ -95,7 +63,7 @@ export default function Cart() {
             <View style={styles.itemActions}>
                 <TouchableOpacity
                     style={styles.deleteButton}
-                    onPress={() => removeItem(item.id)}
+                    onPress={() => removeItem(item.cartKey)}
                     activeOpacity={0.7}
                 >
                     <Trash2 size={18} color="#ef4444" />
@@ -104,7 +72,7 @@ export default function Cart() {
                 <View style={styles.quantityControl}>
                     <TouchableOpacity
                         style={styles.quantityButton}
-                        onPress={() => updateQuantity(item.id, -1)}
+                        onPress={() => handleUpdateQuantity(item.cartKey, -1)}
                         activeOpacity={0.7}
                     >
                         <Minus size={16} color="#0c831f" />
@@ -114,7 +82,7 @@ export default function Cart() {
 
                     <TouchableOpacity
                         style={styles.quantityButton}
-                        onPress={() => updateQuantity(item.id, 1)}
+                        onPress={() => handleUpdateQuantity(item.cartKey, 1)}
                         activeOpacity={0.7}
                     >
                         <Plus size={16} color="#0c831f" />
@@ -170,9 +138,19 @@ export default function Cart() {
                     <ArrowLeft size={24} color="#0f172a" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>My Cart</Text>
-                <View style={styles.itemCount}>
-                    <Text style={styles.itemCountText}>{cartItems.length}</Text>
-                </View>
+                <TouchableOpacity
+                    style={[styles.cartIconButton, {flexShrink: 0}]}
+                    activeOpacity={0.7}
+                >
+                    <View style={styles.cartIcon}>
+                        <ShoppingCart size={20} color={'#fff'}/>
+                    </View>
+                    {cartItems.length > 0 && (
+                        <View style={styles.cartBadge}>
+                            <Text style={styles.cartBadgeText}>{cartItems.length}</Text>
+                        </View>
+                    )}
+                </TouchableOpacity>
             </View>
 
             <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -181,7 +159,7 @@ export default function Cart() {
                     <FlatList
                         data={cartItems}
                         renderItem={renderCartItem}
-                        keyExtractor={item => item.id.toString()}
+                        keyExtractor={(item, index) => item.cartKey || `cart-item-${index}`}
                         scrollEnabled={false}
                         ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
                     />
@@ -257,7 +235,7 @@ export default function Cart() {
                     style={styles.checkoutButton}
                     onPress={() => {
                         // Handle checkout
-                        console.log('Proceeding to checkout...');
+                        console.log('Proceeding to checkout');
                     }}
                     activeOpacity={0.7}
                 >
@@ -273,70 +251,92 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#f8fafc',
     },
+
+    // Header
     header: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
+        justifyContent: 'space-between',
         paddingHorizontal: 20,
         paddingVertical: 16,
         backgroundColor: '#ffffff',
         borderBottomWidth: 1,
-        borderBottomColor: '#f1f5f9',
+        borderBottomColor: '#e2e8f0',
     },
     backButton: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
+        padding: 4,
     },
     headerTitle: {
         fontSize: 20,
         fontWeight: '700',
         color: '#0f172a',
+        flex: 1,
+        textAlign: 'center',
+    },
+    cartIconButton: {
+        width: 48,
+        height: 48,
+        backgroundColor: '#0c831f',
+        borderRadius: 24,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#0c831f',
+        shadowOffset: {width: 0, height: 4},
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 4,
+    },
+    cartIcon: {
+        fontSize: 24,
+    },
+    cartBadge: {
+        position: 'absolute',
+        top: -4,
+        right: -4,
+        backgroundColor: '#ef4444',
+        borderRadius: 12,
+        minWidth: 24,
+        height: 24,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 6,
+        borderWidth: 2,
+        borderColor: '#ffffff',
+    },
+    cartBadgeText: {
+        color: '#ffffff',
+        fontSize: 12,
+        fontWeight: '700',
     },
     placeholder: {
-        width: 40,
-    },
-    itemCount: {
-        backgroundColor: '#0c831f',
-        borderRadius: 12,
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        minWidth: 28,
-        alignItems: 'center',
-    },
-    itemCountText: {
-        color: '#ffffff',
-        fontSize: 14,
-        fontWeight: '700',
+        width: 32,
     },
 
     // Content
     content: {
         flex: 1,
     },
-
-    // Cart Items
     cartSection: {
         backgroundColor: '#ffffff',
-        marginTop: 12,
-        paddingVertical: 8,
+        marginTop: 8,
     },
+
+    // Cart Item
     cartItem: {
         flexDirection: 'row',
-        paddingHorizontal: 20,
-        paddingVertical: 16,
+        padding: 16,
+        backgroundColor: '#ffffff',
     },
     itemImage: {
-        width: 80,
-        height: 80,
+        width: 90,
+        height: 90,
         borderRadius: 12,
-        backgroundColor: '#f1f5f9',
+        backgroundColor: '#f8fafc',
     },
     itemDetails: {
         flex: 1,
-        marginLeft: 12,
-        justifyContent: 'center',
+        marginLeft: 16,
+        justifyContent: 'space-between',
     },
     itemName: {
         fontSize: 16,
@@ -347,12 +347,20 @@ const styles = StyleSheet.create({
     itemBrand: {
         fontSize: 13,
         color: '#64748b',
-        marginBottom: 2,
+        marginBottom: 4,
+    },
+    variantContainer: {
+        backgroundColor: '#f1f5f9',
+        alignSelf: 'flex-start',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 6,
+        marginBottom: 4,
     },
     itemWeight: {
         fontSize: 12,
-        color: '#94a3b8',
-        marginBottom: 6,
+        color: '#475569',
+        fontWeight: '500',
     },
     priceRow: {
         flexDirection: 'row',

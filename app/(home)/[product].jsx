@@ -4,6 +4,7 @@ import { ShoppingCart, Heart, ArrowLeft, Minus, Plus } from 'lucide-react-native
 import { router, useLocalSearchParams } from "expo-router";
 import ProductCard from "../../components/ProductCard";
 import { products } from "../../utilities/products";
+import { useCartStore } from "../../store/cartStore";
 
 const ProductDetailsPage = () => {
     const params = useLocalSearchParams();
@@ -14,8 +15,24 @@ const ProductDetailsPage = () => {
 
     /* ---------------- Variant State ---------------- */
     const [selectedVariant, setSelectedVariant] = useState(product.variants[0]);
-    const [quantity, setQuantity] = useState(0);
     const [isFavorite, setIsFavorite] = useState(false);
+
+    /* ---------------- Cart Store ---------------- */
+    const addItem = useCartStore(state => state.addItem);
+    const incrementQuantity = useCartStore(state => state.incrementQuantity);
+    const decrementQuantity = useCartStore(state => state.decrementQuantity);
+    const getCartKey = useCartStore(state => state.getCartKey);
+
+    // Get quantity for the CURRENT selected variant
+    const quantity = useCartStore(state =>
+        state.getItemQuantity(product.id, selectedVariant.sku)
+    );
+
+    // Get the cart key for the current variant
+    const currentCartKey = useMemo(() =>
+            getCartKey(product.id, selectedVariant.sku),
+        [product.id, selectedVariant.sku, getCartKey]
+    );
 
     /* ---------------- Derived Values ---------------- */
     const discount = useMemo(() => {
@@ -31,9 +48,26 @@ const ProductDetailsPage = () => {
         .slice(0, 6);
 
     /* ---------------- Cart Logic ---------------- */
-    const addToCart = () => setQuantity(1);
-    const increment = () => quantity < selectedVariant.stock && setQuantity(q => q + 1);
-    const decrement = () => quantity > 0 && setQuantity(q => q - 1);
+    const addToCart = () => {
+        addItem({
+            ...product,
+            price: selectedVariant.price,
+            originalPrice: selectedVariant.originalPrice,
+            weight: selectedVariant.label,
+            variantSku: selectedVariant.sku,  // Important: Include variant SKU
+            variantLabel: selectedVariant.label,  // For display in cart
+        });
+    };
+
+    const increment = () => {
+        if (quantity < selectedVariant.stock) {
+            incrementQuantity(currentCartKey);
+        }
+    };
+
+    const decrement = () => {
+        decrementQuantity(currentCartKey);
+    };
 
     return (
         <View style={styles.container}>
@@ -99,7 +133,6 @@ const ProductDetailsPage = () => {
                                 ]}
                                 onPress={() => {
                                     setSelectedVariant(v);
-                                    setQuantity(0);
                                 }}
                             >
                                 <Text
