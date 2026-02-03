@@ -9,7 +9,6 @@ import {
     ScrollView,
     ActivityIndicator,
     Modal,
-    Animated,
     Dimensions
 } from 'react-native';
 import {router} from "expo-router";
@@ -48,7 +47,6 @@ export default function Index() {
     const [displayProducts, setDisplayProducts] = useState([]);
     const [error, setError] = useState(false);
     const scrollViewRef = useRef(null);
-    const categoryRefs = useRef({});
     const [categoryLayouts, setCategoryLayouts] = useState({});
     const [address, setAddress] = useState({
         type: 'Home',
