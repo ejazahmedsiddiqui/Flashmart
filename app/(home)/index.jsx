@@ -1,5 +1,5 @@
 import {SafeAreaView} from "react-native-safe-area-context";
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useEffect, useState, useRef, useCallback} from 'react';
 import {
     View,
     Text,
@@ -38,7 +38,7 @@ import {
 } from "lucide-react-native";
 import AnimatedSearchBar from "../../components/AnimatedSearchBar";
 import {products} from "../../utilities/products";
-import {useCartCount} from '../../store/cartStore'
+import {useCartCount} from "../../hooks/useCartCount";
 
 export default function Index() {
     const [category, setCategory] = useState('');
@@ -184,6 +184,11 @@ export default function Index() {
     };
 
     const itemCount = useCartCount();
+    const renderProduct = useCallback(
+        ({ item }) => <ProductCard product={item} />,
+        []
+    );
+
 
     return (
         <SafeAreaView style={styles.container}>
@@ -309,12 +314,17 @@ export default function Index() {
                 ) : (
                     <FlatList
                         data={displayProducts}
-                        renderItem={({item}) => <ProductCard product={item}/>}
-                        keyExtractor={(item) => item.id.toString()}
+                        renderItem={renderProduct}
+                        keyExtractor={item => item.id.toString()}
                         numColumns={2}
                         contentContainerStyle={styles.productsList}
                         showsVerticalScrollIndicator={false}
+                        initialNumToRender={6}
+                        maxToRenderPerBatch={6}
+                        windowSize={5}
+                        removeClippedSubviews
                     />
+
                 )) : (
                     <View style={styles.errorContainer}>
                         <View style={styles.iconWrapper}>

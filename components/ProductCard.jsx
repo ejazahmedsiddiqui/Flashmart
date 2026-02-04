@@ -8,20 +8,15 @@ import {
 } from "react-native";
 import React, { useMemo } from "react";
 import { router } from "expo-router";
-import {useCartStore} from '../store/cartStore'
+import { useCartStore } from "../store/cartStore";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = (width - 48) / 2;
 
 const ProductCard = ({ product }) => {
-
-    const addItem = useCartStore(state => state.addItem);
-    const incrementQuantity = useCartStore(state => state.incrementQuantity);
-    const decrementQuantity = useCartStore(state => state.decrementQuantity);
-
     const selectedVariant = product.variants?.[0];
 
-    const currentCartKey = useMemo(
+    const cartKey = useMemo(
         () =>
             selectedVariant
                 ? `${product.id}-${selectedVariant.sku}`
@@ -29,14 +24,14 @@ const ProductCard = ({ product }) => {
         [product.id, selectedVariant?.sku]
     );
 
-    const item = useCartStore(
-        state =>
-            currentCartKey
-                ? state.getItemByCartKey(currentCartKey)
-                : undefined
+    // ✅ O(1) subscription — this is ALL you need
+    const quantity = useCartStore(
+        state => (cartKey ? state.itemsByKey[cartKey]?.quantity ?? 0 : 0)
     );
 
-    const quantity = item?.quantity ?? 0;
+    const addItem = useCartStore(state => state.addItem);
+    const increment = useCartStore(state => state.incrementQuantity);
+    const decrement = useCartStore(state => state.decrementQuantity);
 
     const handleCardPush = () => {
         router.push(`/(home)/${product.id}`);
@@ -52,39 +47,27 @@ const ProductCard = ({ product }) => {
     }, [selectedVariant]);
 
     const handleAddToCart = () => {
-        if (!selectedVariant) return;
-
         addItem({
-            ...product,
+            id: product.id,
+            variantSku: selectedVariant.sku,
             price: selectedVariant.price,
             originalPrice: selectedVariant.originalPrice,
+            name: product.name,
+            image: product.image,
+            brand: product.brand,
             weight: selectedVariant.label,
-            variantSku: selectedVariant.sku,      // Include variant SKU
-            variantLabel: selectedVariant.label,  // Include variant label
         });
     };
 
-    const handleIncrement = () => {
-        if (currentCartKey) {
-            incrementQuantity(currentCartKey);
-        }
-    };
+    const handleIncrement = () => increment(cartKey);
+    const handleDecrement = () => decrement(cartKey);
 
-    const handleDecrement = () => {
-        if (currentCartKey) {
-            decrementQuantity(currentCartKey);
-        }
-    };
-    console.log('Render ProductCard', product.id);
+    console.log("Render ProductCard", product.id);
 
     return (
         <TouchableOpacity style={styles.productCard} onPress={handleCardPush}>
-            {/* Image */}
             <View style={styles.imageContainer}>
-                <Image
-                    source={{ uri: product.image }}
-                    style={styles.productImage}
-                />
+                <Image source={{ uri: product.image }} style={styles.productImage} />
 
                 {discountPercent > 0 && (
                     <View style={styles.discountBadge}>
@@ -95,7 +78,6 @@ const ProductCard = ({ product }) => {
                 )}
             </View>
 
-            {/* Info */}
             <View style={styles.productInfo}>
                 {product.brand && (
                     <Text style={styles.brandText}>{product.brand}</Text>
@@ -111,13 +93,11 @@ const ProductCard = ({ product }) => {
                     </Text>
                 )}
 
-                {/* Price */}
                 {selectedVariant && (
                     <View style={styles.priceRow}>
                         <Text style={styles.productPrice}>
                             ₹{selectedVariant.price}
                         </Text>
-
                         {selectedVariant.originalPrice >
                             selectedVariant.price && (
                                 <Text style={styles.originalPrice}>
@@ -127,7 +107,6 @@ const ProductCard = ({ product }) => {
                     </View>
                 )}
 
-                {/* Cart Controls */}
                 {quantity === 0 ? (
                     <TouchableOpacity
                         style={styles.addButton}
@@ -161,6 +140,7 @@ const ProductCard = ({ product }) => {
 };
 
 export default React.memo(ProductCard);
+
 
 const styles = StyleSheet.create({
     productCard: {

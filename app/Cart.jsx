@@ -1,5 +1,5 @@
-import { SafeAreaView } from "react-native-safe-area-context";
-import React, { useState } from 'react';
+import {SafeAreaView} from "react-native-safe-area-context";
+import React, {useMemo} from 'react';
 import {
     View,
     Text,
@@ -9,26 +9,46 @@ import {
     Image,
     ScrollView,
 } from 'react-native';
-import { router } from "expo-router";
+import {router} from "expo-router";
 import {ArrowLeft, Trash2, Plus, Minus, ShoppingBag, ShoppingCart} from "lucide-react-native";
-import {useCartStore, useCartItems, useCartSubtotal} from '../store/cartStore'
+import {useCartStore} from '../store/cartStore';
+import {shallow} from 'zustand/shallow';
+
 
 export default function Cart() {
-    const cartItems = useCartItems();
-    const subtotal = useCartSubtotal();
-    const { updateQuantity, removeItem, incrementQuantity, decrementQuantity } = useCartStore();
+    // Updated handler to use cartKey
+    const incrementQuantity = useCartStore(state => state.incrementQuantity);
+    const decrementQuantity = useCartStore(state => state.decrementQuantity);
 
-    const calculateSavings = () => {
-        return cartItems.reduce((sum, item) =>
-            sum + ((item.originalPrice - item.price) * item.quantity), 0
-        );
-    };
+    const itemsByKey = useCartStore(state => state.itemsByKey);
+    const cartItems = useMemo(() => Object.values(itemsByKey), [itemsByKey]);
 
-    const savings = calculateSavings();
+    const subtotal = useMemo(
+        () =>
+            cartItems.reduce(
+                (s, i) => s + i.price * i.quantity,
+                0
+            ),
+        [cartItems]
+    );
+
+    const savings = useMemo(
+        () =>
+            cartItems.reduce(
+                (s, i) =>
+                    s +
+                    ((i.originalPrice ?? i.price) - i.price) * i.quantity,
+                0
+            ),
+        [cartItems]
+    );
+
+
+
+    const removeItem = useCartStore(state => state.removeItem);
+
     const deliveryFee = subtotal > 500 ? 0 : 40;
     const total = subtotal + deliveryFee;
-
-    // Updated handler to use cartKey
     const handleUpdateQuantity = (cartKey, change) => {
         if (change > 0) {
             incrementQuantity(cartKey);
@@ -37,9 +57,10 @@ export default function Cart() {
         }
     };
 
-    const renderCartItem = ({ item }) => (
+
+    const renderCartItem = ({item}) => (
         <TouchableOpacity style={styles.cartItem} onPress={() => router.push(`/${item.id}?from=cart`)}>
-            <Image source={{ uri: item.image }} style={styles.itemImage} />
+            <Image source={{uri: item.image}} style={styles.itemImage}/>
 
             <View style={styles.itemDetails}>
                 <Text style={styles.itemName}>{item.name}</Text>
@@ -66,7 +87,7 @@ export default function Cart() {
                     onPress={() => removeItem(item.cartKey)}
                     activeOpacity={0.7}
                 >
-                    <Trash2 size={18} color="#ef4444" />
+                    <Trash2 size={18} color="#ef4444"/>
                 </TouchableOpacity>
 
                 <View style={styles.quantityControl}>
@@ -75,7 +96,7 @@ export default function Cart() {
                         onPress={() => handleUpdateQuantity(item.cartKey, -1)}
                         activeOpacity={0.7}
                     >
-                        <Minus size={16} color="#0c831f" />
+                        <Minus size={16} color="#0c831f"/>
                     </TouchableOpacity>
 
                     <Text style={styles.quantityText}>{item.quantity}</Text>
@@ -85,7 +106,7 @@ export default function Cart() {
                         onPress={() => handleUpdateQuantity(item.cartKey, 1)}
                         activeOpacity={0.7}
                     >
-                        <Plus size={16} color="#0c831f" />
+                        <Plus size={16} color="#0c831f"/>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -101,22 +122,22 @@ export default function Cart() {
                         style={styles.backButton}
                         activeOpacity={0.7}
                     >
-                        <ArrowLeft size={24} color="#0f172a" />
+                        <ArrowLeft size={24} color="#0f172a"/>
                     </TouchableOpacity>
                     <Text style={styles.headerTitle}>My Cart</Text>
-                    <View style={styles.placeholder} />
+                    <View style={styles.placeholder}/>
                 </View>
 
                 <View style={styles.emptyContainer}>
                     <View style={styles.emptyIconContainer}>
-                        <ShoppingBag size={80} color="#cbd5e1" />
+                        <ShoppingBag size={80} color="#cbd5e1"/>
                     </View>
                     <Text style={styles.emptyTitle}>Your cart is empty</Text>
                     <Text style={styles.emptySubtitle}>Add some delicious items to get started!</Text>
 
                     <TouchableOpacity
                         style={styles.shopButton}
-                        onPress={() => router.back()}
+                        onPress={() => router.push('/index')}
                         activeOpacity={0.7}
                     >
                         <Text style={styles.shopButtonText}>Start Shopping</Text>
@@ -135,7 +156,7 @@ export default function Cart() {
                     style={styles.backButton}
                     activeOpacity={0.7}
                 >
-                    <ArrowLeft size={24} color="#0f172a" />
+                    <ArrowLeft size={24} color="#0f172a"/>
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>My Cart</Text>
                 <TouchableOpacity
@@ -159,9 +180,9 @@ export default function Cart() {
                     <FlatList
                         data={cartItems}
                         renderItem={renderCartItem}
-                        keyExtractor={(item, index) => item.cartKey || `cart-item-${index}`}
+                        keyExtractor={item => item.cartKey}
                         scrollEnabled={false}
-                        ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
+                        ItemSeparatorComponent={() => <View style={styles.itemSeparator}/>}
                     />
                 </View>
 
@@ -205,7 +226,7 @@ export default function Cart() {
                         )}
                     </View>
 
-                    <View style={styles.billDivider} />
+                    <View style={styles.billDivider}/>
 
                     <View style={styles.billRow}>
                         <Text style={styles.billLabelTotal}>To Pay</Text>
@@ -222,7 +243,7 @@ export default function Cart() {
                 </View>
 
                 {/* Spacer for checkout button */}
-                <View style={{ height: 100 }} />
+                <View style={{height: 100}}/>
             </ScrollView>
 
             {/* Checkout Button */}
@@ -552,7 +573,7 @@ const styles = StyleSheet.create({
         paddingVertical: 14,
         borderRadius: 12,
         shadowColor: '#0c831f',
-        shadowOffset: { width: 0, height: 4 },
+        shadowOffset: {width: 0, height: 4},
         shadowOpacity: 0.3,
         shadowRadius: 8,
         elevation: 4,
@@ -575,7 +596,7 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: '#e2e8f0',
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: -2 },
+        shadowOffset: {width: 0, height: -2},
         shadowOpacity: 0.1,
         shadowRadius: 8,
         elevation: 8,
@@ -601,7 +622,7 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         alignItems: 'center',
         shadowColor: '#0c831f',
-        shadowOffset: { width: 0, height: 4 },
+        shadowOffset: {width: 0, height: 4},
         shadowOpacity: 0.3,
         shadowRadius: 8,
         elevation: 4,

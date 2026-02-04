@@ -21,17 +21,16 @@ const ProductDetailsPage = () => {
     const addItem = useCartStore(state => state.addItem);
     const incrementQuantity = useCartStore(state => state.incrementQuantity);
     const decrementQuantity = useCartStore(state => state.decrementQuantity);
-    const getCartKey = useCartStore(state => state.getCartKey);
 
-    // Get quantity for the CURRENT selected variant
-    const quantity = useCartStore(state =>
-        state.getItemQuantity(product.id, selectedVariant.sku)
+    /* ---------------- Cart Key (single source of truth) ---------------- */
+    const cartKey = useMemo(
+        () => `${product.id}-${selectedVariant.sku}`,
+        [product.id, selectedVariant.sku]
     );
 
-    // Get the cart key for the current variant
-    const currentCartKey = useMemo(() =>
-            getCartKey(product.id, selectedVariant.sku),
-        [product.id, selectedVariant.sku, getCartKey]
+    /* ---------------- Quantity (O(1) subscription) ---------------- */
+    const quantity = useCartStore(
+        state => state.itemsByKey[cartKey]?.quantity ?? 0
     );
 
     /* ---------------- Derived Values ---------------- */
@@ -47,27 +46,24 @@ const ProductDetailsPage = () => {
         .filter(p => p.category === product.category && p.id !== product.id)
         .slice(0, 6);
 
-    /* ---------------- Cart Logic ---------------- */
     const addToCart = () => {
         addItem({
-            ...product,
+            id: product.id,
+            variantSku: selectedVariant.sku,
             price: selectedVariant.price,
-            originalPrice: selectedVariant.originalPrice,
-            weight: selectedVariant.label,
-            variantSku: selectedVariant.sku,  // Important: Include variant SKU
-            variantLabel: selectedVariant.label,  // For display in cart
         });
     };
 
     const increment = () => {
         if (quantity < selectedVariant.stock) {
-            incrementQuantity(currentCartKey);
+            incrementQuantity(cartKey);
         }
     };
 
     const decrement = () => {
-        decrementQuantity(currentCartKey);
+        decrementQuantity(cartKey);
     };
+
 
     return (
         <View style={styles.container}>
