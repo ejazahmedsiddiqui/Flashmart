@@ -6,42 +6,35 @@ import {
     Dimensions,
     Image,
 } from "react-native";
-import React, { useState, useMemo } from "react";
+import React, { useMemo } from "react";
 import { router } from "expo-router";
+import { useCartStore } from "../store/cartStore";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = (width - 48) / 2;
 
 const ProductCard = ({ product }) => {
-    const [cart, setCart] = useState({});
-    const [selectedVariantIndex] = useState(0); // default first variant
+    const selectedVariant = product.variants?.[0];
 
-    const selectedVariant = product.variants?.[selectedVariantIndex];
+    const cartKey = useMemo(
+        () =>
+            selectedVariant
+                ? `${product.id}-${selectedVariant.sku}`
+                : null,
+        [product.id, selectedVariant?.sku]
+    );
 
-    const addToCart = (productId) => {
-        setCart((prev) => ({
-            ...prev,
-            [productId]: (prev[productId] || 0) + 1,
-        }));
-    };
+    const quantity = useCartStore(
+        state => (cartKey ? state.itemsByKey[cartKey]?.quantity ?? 0 : 0)
+    );
 
-    const removeFromCart = (productId) => {
-        setCart((prev) => {
-            const newCart = { ...prev };
-            if (newCart[productId] > 1) {
-                newCart[productId]--;
-            } else {
-                delete newCart[productId];
-            }
-            return newCart;
-        });
-    };
+    const addItem = useCartStore(state => state.addItem);
+    const increment = useCartStore(state => state.incrementQuantity);
+    const decrement = useCartStore(state => state.decrementQuantity);
 
     const handleCardPush = () => {
         router.push(`/(home)/${product.id}`);
     };
-
-    const quantity = cart[product.id] || 0;
 
     const discountPercent = useMemo(() => {
         if (!selectedVariant?.originalPrice) return 0;
@@ -52,14 +45,28 @@ const ProductCard = ({ product }) => {
         );
     }, [selectedVariant]);
 
+    const handleAddToCart = () => {
+        addItem({
+            id: product.id,
+            variantSku: selectedVariant.sku,
+            price: selectedVariant.price,
+            originalPrice: selectedVariant.originalPrice,
+            name: product.name,
+            image: product.image,
+            brand: product.brand,
+            weight: selectedVariant.label,
+        });
+    };
+
+    const handleIncrement = () => increment(cartKey);
+    const handleDecrement = () => decrement(cartKey);
+
+    console.log("Render ProductCard", product.id);
+
     return (
         <TouchableOpacity style={styles.productCard} onPress={handleCardPush}>
-            {/* Image */}
             <View style={styles.imageContainer}>
-                <Image
-                    source={{ uri: product.image }}
-                    style={styles.productImage}
-                />
+                <Image source={{ uri: product.image }} style={styles.productImage} />
 
                 {discountPercent > 0 && (
                     <View style={styles.discountBadge}>
@@ -70,7 +77,6 @@ const ProductCard = ({ product }) => {
                 )}
             </View>
 
-            {/* Info */}
             <View style={styles.productInfo}>
                 {product.brand && (
                     <Text style={styles.brandText}>{product.brand}</Text>
@@ -86,13 +92,11 @@ const ProductCard = ({ product }) => {
                     </Text>
                 )}
 
-                {/* Price */}
                 {selectedVariant && (
                     <View style={styles.priceRow}>
                         <Text style={styles.productPrice}>
                             ₹{selectedVariant.price}
                         </Text>
-
                         {selectedVariant.originalPrice >
                             selectedVariant.price && (
                                 <Text style={styles.originalPrice}>
@@ -102,14 +106,10 @@ const ProductCard = ({ product }) => {
                     </View>
                 )}
 
-                {/* Cart Controls */}
                 {quantity === 0 ? (
                     <TouchableOpacity
                         style={styles.addButton}
-                        onPress={(e) => {
-                            e.stopPropagation();
-                            addToCart(product.id);
-                        }}
+                        onPress={handleAddToCart}
                         activeOpacity={0.8}
                     >
                         <Text style={styles.addButtonText}>ADD</Text>
@@ -118,10 +118,7 @@ const ProductCard = ({ product }) => {
                     <View style={styles.quantityControl}>
                         <TouchableOpacity
                             style={styles.quantityButton}
-                            onPress={(e) => {
-                                e.stopPropagation();
-                                removeFromCart(product.id);
-                            }}
+                            onPress={handleDecrement}
                         >
                             <Text style={styles.quantityButtonText}>−</Text>
                         </TouchableOpacity>
@@ -130,10 +127,7 @@ const ProductCard = ({ product }) => {
 
                         <TouchableOpacity
                             style={styles.quantityButton}
-                            onPress={(e) => {
-                                e.stopPropagation();
-                                addToCart(product.id);
-                            }}
+                            onPress={handleIncrement}
                         >
                             <Text style={styles.quantityButtonText}>+</Text>
                         </TouchableOpacity>
@@ -144,7 +138,7 @@ const ProductCard = ({ product }) => {
     );
 };
 
-export default ProductCard;
+export default React.memo(ProductCard);
 
 
 const styles = StyleSheet.create({

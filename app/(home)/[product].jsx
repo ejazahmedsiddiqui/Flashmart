@@ -4,6 +4,7 @@ import { ShoppingCart, Heart, ArrowLeft, Minus, Plus } from 'lucide-react-native
 import { router, useLocalSearchParams } from "expo-router";
 import ProductCard from "../../components/ProductCard";
 import { products } from "../../utilities/products";
+import { useCartStore } from "../../store/cartStore";
 
 const ProductDetailsPage = () => {
     const params = useLocalSearchParams();
@@ -12,17 +13,31 @@ const ProductDetailsPage = () => {
         p => p.id === Number(params.product)
     ) || products[0];
 
-    /* ---------------- Variant State ---------------- */
-    const [selectedVariant, setSelectedVariant] = useState(product.variants[0]);
-    const [quantity, setQuantity] = useState(0);
+    const [selectedVariant, setSelectedVariant] = useState(product.variants?.[0]);
     const [isFavorite, setIsFavorite] = useState(false);
+    const cartKey = useMemo(
+        () =>
+            selectedVariant
+                ? `${product.id}-${selectedVariant.sku}`
+                : null,
+        [product.id, selectedVariant?.sku]
+    );
+    const addItem = useCartStore(state => state.addItem);
+    const increment = useCartStore(state => state.incrementQuantity);
+    const decrement = useCartStore(state => state.decrementQuantity);
+
+    const quantity = useCartStore(
+        state => (cartKey ? state.itemsByKey[cartKey]?.quantity ?? 0 : 0)
+    );
+
 
     /* ---------------- Derived Values ---------------- */
     const discount = useMemo(() => {
-        if (!selectedVariant.originalPrice) return null;
+        if (!selectedVariant?.originalPrice) return 0;
         return Math.round(
             ((selectedVariant.originalPrice - selectedVariant.price) /
-                selectedVariant.originalPrice) * 100
+                selectedVariant.originalPrice) *
+            100
         );
     }, [selectedVariant]);
 
@@ -30,10 +45,21 @@ const ProductDetailsPage = () => {
         .filter(p => p.category === product.category && p.id !== product.id)
         .slice(0, 6);
 
-    /* ---------------- Cart Logic ---------------- */
-    const addToCart = () => setQuantity(1);
-    const increment = () => quantity < selectedVariant.stock && setQuantity(q => q + 1);
-    const decrement = () => quantity > 0 && setQuantity(q => q - 1);
+    const handleAddToCart = () => {
+        addItem({
+            id: product.id,
+            variantSku: selectedVariant.sku,
+            price: selectedVariant.price,
+            originalPrice: selectedVariant.originalPrice,
+            name: product.name,
+            image: product.image,
+            brand: product.brand,
+            weight: selectedVariant.label,
+        });
+    };
+    const handleIncrement = () => increment(cartKey);
+    const handleDecrement = () => decrement(cartKey);
+
 
     return (
         <View style={styles.container}>
@@ -99,7 +125,6 @@ const ProductDetailsPage = () => {
                                 ]}
                                 onPress={() => {
                                     setSelectedVariant(v);
-                                    setQuantity(0);
                                 }}
                             >
                                 <Text
@@ -137,16 +162,16 @@ const ProductDetailsPage = () => {
             {/* Bottom Bar */}
             <View style={styles.bottomBar}>
                 {quantity === 0 ? (
-                    <TouchableOpacity style={styles.addButton} onPress={addToCart}>
+                    <TouchableOpacity style={styles.addButton} onPress={handleAddToCart}>
                         <Text style={styles.addButtonText}>ADD TO CART</Text>
                     </TouchableOpacity>
                 ) : (
                     <View style={styles.quantityContainer}>
-                        <TouchableOpacity onPress={decrement}>
+                        <TouchableOpacity onPress={handleDecrement}>
                             <Minus size={20} color="#fff" />
                         </TouchableOpacity>
                         <Text style={styles.quantityText}>{quantity}</Text>
-                        <TouchableOpacity onPress={increment}>
+                        <TouchableOpacity onPress={handleIncrement}>
                             <Plus size={20} color="#fff" />
                         </TouchableOpacity>
                     </View>

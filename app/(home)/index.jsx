@@ -1,5 +1,5 @@
 import {SafeAreaView} from "react-native-safe-area-context";
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useEffect, useState, useRef, useCallback} from 'react';
 import {
     View,
     Text,
@@ -34,16 +34,18 @@ import {
     Baby,
     HeartPulse,
     Shirt,
-    PawPrint
+    PawPrint, Pickaxe, PackageX
 } from "lucide-react-native";
 import AnimatedSearchBar from "../../components/AnimatedSearchBar";
 import {products} from "../../utilities/products";
+import {useCartCount} from "../../hooks/useCartCount";
+import {addresses} from "../../utilities/address";
 
 export default function Index() {
     const [category, setCategory] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [isSearching, setIsSearching] = useState(false);
+    // const [isSearching, setIsSearching] = useState(false);
     const [displayProducts, setDisplayProducts] = useState([]);
     const [error, setError] = useState(false);
     const scrollViewRef = useRef(null);
@@ -61,50 +63,7 @@ export default function Index() {
     const [showModal, setShowModal] = useState({
         addressModalVisible: false,
     })
-
-
-    const [savedAddresses, setSavedAddresses] = useState([
-        {
-            id: 1,
-            type: 'Home',
-            pinCode: '201007',
-            houseNumber: 'A-1909',
-            buildingAddress: `Manager's Tropics`,
-            streetAddress: 'Rajnagar Extension',
-            city: 'Solapur',
-            state: 'Uttar Pradesh'
-        },
-        {
-            id: 2,
-            type: 'Work',
-            pinCode: '110001',
-            houseNumber: 'B-305',
-            buildingAddress: 'Tech Tower',
-            streetAddress: 'Connaught Place',
-            city: 'New Delhi',
-            state: 'Delhi'
-        },
-        {
-            id: 3,
-            type: 'Other',
-            pinCode: '400001',
-            houseNumber: 'C-12',
-            buildingAddress: 'Sea View Apartments',
-            streetAddress: 'Marine Drive',
-            city: 'Mumbai',
-            state: 'Maharashtra'
-        },
-        {
-            id: 4,
-            type: 'Home',
-            pinCode: '560001',
-            houseNumber: 'D-45',
-            buildingAddress: 'Garden Residency',
-            streetAddress: 'MG Road',
-            city: 'Bangalore',
-            state: 'Karnataka'
-        }
-    ])
+    const savedAddresses = addresses
 
     useEffect(() => {
         if (savedAddresses.length > 0) {
@@ -132,23 +91,24 @@ export default function Index() {
     }, [category]);
 
     const categories = [
-        { id: '', label: 'Home', icon: HomeIcon },
-        { id: 'vegetables', label: 'Vegetables', icon: Carrot },
-        { id: 'fruits', label: 'Fruits', icon: Apple },
-        { id: 'dairy', label: 'Dairy', icon: Milk },
-        { id: 'meat', label: 'Meat', icon: Beef },
-        { id: 'bakery', label: 'Bakery', icon: Croissant },
-        { id: 'electronics', label: 'Electronics', icon: Headphones },
-        { id: 'snacks', label: 'Snacks', icon: Candy },
-        { id: 'beverages', label: 'Beverages', icon: Coffee },
-        { id: 'seafood', label: 'Seafood', icon: Fish },
-        { id: 'frozen', label: 'Frozen Food', icon: Pizza },
-        { id: 'grains', label: 'Grains & Rice', icon: Wheat },
-        { id: 'household', label: 'Household', icon: SprayCan },
-        { id: 'baby', label: 'Baby Care', icon: Baby },
-        { id: 'health', label: 'Health', icon: HeartPulse },
-        { id: 'fashion', label: 'Fashion', icon: Shirt },
-        { id: 'pets', label: 'Pet Supplies', icon: PawPrint },
+        {id: '', label: 'Home', icon: HomeIcon},
+        {id: 'vegetables', label: 'Vegetables', icon: Carrot},
+        {id: 'mine', label: 'Mining Supplies', icon: Pickaxe},
+        {id: 'fruits', label: 'Fruits', icon: Apple},
+        {id: 'dairy', label: 'Dairy', icon: Milk},
+        {id: 'meat', label: 'Meat', icon: Beef},
+        {id: 'bakery', label: 'Bakery', icon: Croissant},
+        {id: 'electronics', label: 'Electronics', icon: Headphones},
+        {id: 'snacks', label: 'Snacks', icon: Candy},
+        {id: 'beverages', label: 'Beverages', icon: Coffee},
+        {id: 'seafood', label: 'Seafood', icon: Fish},
+        {id: 'frozen', label: 'Frozen Food', icon: Pizza},
+        {id: 'grains', label: 'Grains & Rice', icon: Wheat},
+        {id: 'household', label: 'Household', icon: SprayCan},
+        {id: 'baby', label: 'Baby Care', icon: Baby},
+        {id: 'health', label: 'Health', icon: HeartPulse},
+        {id: 'fashion', label: 'Fashion', icon: Shirt},
+        {id: 'pets', label: 'Pet Supplies', icon: PawPrint},
     ];
     const fetchProducts = async (category = '') => {
         await new Promise(resolve => setTimeout(resolve, 800));
@@ -176,14 +136,19 @@ export default function Index() {
     };
 
     const handleCategoryLayout = (catId, event) => {
-        const { x, width } = event.nativeEvent.layout;
+        const {x, width} = event.nativeEvent.layout;
         setCategoryLayouts(prev => ({
             ...prev,
-            [catId]: { x, width }
+            [catId]: {x, width}
         }));
     };
 
-    const itemCount = categories.length; //replace later with item count from Cart.
+    const itemCount = useCartCount();
+    const renderProduct = useCallback(
+        ({ item }) => <ProductCard product={item} />,
+        []
+    );
+
 
     return (
         <SafeAreaView style={styles.container}>
@@ -300,7 +265,7 @@ export default function Index() {
                         <ActivityIndicator size="large" color="#339a38"/>
                         <Text style={styles.loadingText}>Loading fresh products...</Text>
                     </View>
-                ) : error ? (
+                ) : displayProducts.length !== 0 ? (error ? (
                     <View style={styles.errorContainer}>
                         <Text style={styles.errorEmoji}>🥺</Text>
                         <Text style={styles.errorText}>Oops! Something went wrong</Text>
@@ -309,12 +274,26 @@ export default function Index() {
                 ) : (
                     <FlatList
                         data={displayProducts}
-                        renderItem={({item}) => <ProductCard product={item}/>}
-                        keyExtractor={(item) => item.id.toString()}
+                        renderItem={renderProduct}
+                        keyExtractor={item => item.id.toString()}
                         numColumns={2}
                         contentContainerStyle={styles.productsList}
                         showsVerticalScrollIndicator={false}
+                        initialNumToRender={6}
+                        maxToRenderPerBatch={6}
+                        windowSize={5}
+                        removeClippedSubviews
                     />
+
+                )) : (
+                    <View style={styles.errorContainer}>
+                        <View style={styles.iconWrapper}>
+                            <PackageX size={42} color="#196500"/>
+                        </View>
+
+                        <Text style={styles.title}>{'No products available'}</Text>
+                        <Text style={styles.subtitle}>{'Please come back later'}</Text>
+                    </View>
                 )}
             </View>
 
@@ -569,6 +548,30 @@ const styles = StyleSheet.create({
     errorSubtext: {
         fontSize: 14,
         color: '#94a3b8',
+    },
+    iconWrapper: {
+        width: 72,
+        height: 72,
+        borderRadius: 36,
+        backgroundColor: "#E9F5E9",
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 16,
+    },
+
+    title: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: "#fff",
+        marginBottom: 6,
+        textAlign: "center",
+    },
+
+    subtitle: {
+        fontSize: 14,
+        color: "#666",
+        textAlign: "center",
+        lineHeight: 20,
     },
 
     // Modal Styles
