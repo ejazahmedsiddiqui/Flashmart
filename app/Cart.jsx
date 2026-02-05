@@ -12,11 +12,11 @@ import {
 import {router} from "expo-router";
 import {ArrowLeft, Trash2, Plus, Minus, ShoppingBag, ShoppingCart} from "lucide-react-native";
 import {useCartStore} from '../store/cartStore';
-import {shallow} from 'zustand/shallow';
 
 
 export default function Cart() {
     // Updated handler to use cartKey
+    console.log('@/app/Cart accessed')
     const incrementQuantity = useCartStore(state => state.incrementQuantity);
     const decrementQuantity = useCartStore(state => state.decrementQuantity);
 
@@ -255,7 +255,16 @@ export default function Cart() {
                 <TouchableOpacity
                     style={styles.checkoutButton}
                     onPress={() => {
-                        // Handle checkout
+                        router.push({
+                            pathname: '/Checkout',
+                            params: {
+                                deliveryFee: deliveryFee,
+                                subTotal: subtotal,
+                                totalAmount: total,
+                                cartItems: cartItems,
+                                savings: savings,
+                            }
+                        })
                         console.log('Proceeding to checkout');
                     }}
                     activeOpacity={0.7}

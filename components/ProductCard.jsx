@@ -24,7 +24,6 @@ const ProductCard = ({ product }) => {
         [product.id, selectedVariant?.sku]
     );
 
-    // ✅ O(1) subscription — this is ALL you need
     const quantity = useCartStore(
         state => (cartKey ? state.itemsByKey[cartKey]?.quantity ?? 0 : 0)
     );

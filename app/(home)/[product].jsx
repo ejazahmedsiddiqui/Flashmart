@@ -13,32 +13,31 @@ const ProductDetailsPage = () => {
         p => p.id === Number(params.product)
     ) || products[0];
 
-    /* ---------------- Variant State ---------------- */
-    const [selectedVariant, setSelectedVariant] = useState(product.variants[0]);
+    const [selectedVariant, setSelectedVariant] = useState(product.variants?.[0]);
     const [isFavorite, setIsFavorite] = useState(false);
-
-    /* ---------------- Cart Store ---------------- */
-    const addItem = useCartStore(state => state.addItem);
-    const incrementQuantity = useCartStore(state => state.incrementQuantity);
-    const decrementQuantity = useCartStore(state => state.decrementQuantity);
-
-    /* ---------------- Cart Key (single source of truth) ---------------- */
     const cartKey = useMemo(
-        () => `${product.id}-${selectedVariant.sku}`,
-        [product.id, selectedVariant.sku]
+        () =>
+            selectedVariant
+                ? `${product.id}-${selectedVariant.sku}`
+                : null,
+        [product.id, selectedVariant?.sku]
+    );
+    const addItem = useCartStore(state => state.addItem);
+    const increment = useCartStore(state => state.incrementQuantity);
+    const decrement = useCartStore(state => state.decrementQuantity);
+
+    const quantity = useCartStore(
+        state => (cartKey ? state.itemsByKey[cartKey]?.quantity ?? 0 : 0)
     );
 
-    /* ---------------- Quantity (O(1) subscription) ---------------- */
-    const quantity = useCartStore(
-        state => state.itemsByKey[cartKey]?.quantity ?? 0
-    );
 
     /* ---------------- Derived Values ---------------- */
     const discount = useMemo(() => {
-        if (!selectedVariant.originalPrice) return null;
+        if (!selectedVariant?.originalPrice) return 0;
         return Math.round(
             ((selectedVariant.originalPrice - selectedVariant.price) /
-                selectedVariant.originalPrice) * 100
+                selectedVariant.originalPrice) *
+            100
         );
     }, [selectedVariant]);
 
@@ -46,23 +45,20 @@ const ProductDetailsPage = () => {
         .filter(p => p.category === product.category && p.id !== product.id)
         .slice(0, 6);
 
-    const addToCart = () => {
+    const handleAddToCart = () => {
         addItem({
             id: product.id,
             variantSku: selectedVariant.sku,
             price: selectedVariant.price,
+            originalPrice: selectedVariant.originalPrice,
+            name: product.name,
+            image: product.image,
+            brand: product.brand,
+            weight: selectedVariant.label,
         });
     };
-
-    const increment = () => {
-        if (quantity < selectedVariant.stock) {
-            incrementQuantity(cartKey);
-        }
-    };
-
-    const decrement = () => {
-        decrementQuantity(cartKey);
-    };
+    const handleIncrement = () => increment(cartKey);
+    const handleDecrement = () => decrement(cartKey);
 
 
     return (
@@ -166,16 +162,16 @@ const ProductDetailsPage = () => {
             {/* Bottom Bar */}
             <View style={styles.bottomBar}>
                 {quantity === 0 ? (
-                    <TouchableOpacity style={styles.addButton} onPress={addToCart}>
+                    <TouchableOpacity style={styles.addButton} onPress={handleAddToCart}>
                         <Text style={styles.addButtonText}>ADD TO CART</Text>
                     </TouchableOpacity>
                 ) : (
                     <View style={styles.quantityContainer}>
-                        <TouchableOpacity onPress={decrement}>
+                        <TouchableOpacity onPress={handleDecrement}>
                             <Minus size={20} color="#fff" />
                         </TouchableOpacity>
                         <Text style={styles.quantityText}>{quantity}</Text>
-                        <TouchableOpacity onPress={increment}>
+                        <TouchableOpacity onPress={handleIncrement}>
                             <Plus size={20} color="#fff" />
                         </TouchableOpacity>
                     </View>

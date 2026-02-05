@@ -11,7 +11,7 @@ export default function RootLayout() {
             tabBarActiveTintColor: '#0c831f',
             tabBarLabelStyle: {
                 fontSize: 12,
-                fontFamily: 'Georgia',
+                fontFamily: 'Georgnpx expia',
                 fontWeight: 300,
             },
         }}>
