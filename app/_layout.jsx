@@ -1,5 +1,5 @@
 import {Tabs} from "expo-router";
-import {HomeIcon, ShoppingCart, BaggageClaim} from "lucide-react-native";
+import {HomeIcon, ShoppingCart, BaggageClaim, User} from "lucide-react-native";
 import {useCartCount} from "../hooks/useCartCount";
 
 export default function RootLayout() {
@@ -24,6 +24,7 @@ export default function RootLayout() {
                     <HomeIcon color={color} size={size}/>
                 )
             }}/>
+
         <Tabs.Screen
             name='Cart'
             options={{
@@ -43,6 +44,15 @@ export default function RootLayout() {
                     <ShoppingCart color={color} size={size} fill={'#7bde4a'}/>
                 ),
                 tabBarBadge: itemCount,
+            }}/>
+        <Tabs.Screen
+            name='(auth)'
+            options={{
+                title: 'Auth',
+                tabBarLabel: 'Auth',
+                tabBarIcon: ({color, size}) => (
+                    <User color={color} size={size}/>
+                )
             }}/>
     </Tabs>;
 }
