@@ -9,9 +9,9 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 
-import Header from "../components/Header";
-import { categories } from "../utilities/categories";
-import { subCategories } from "../utilities/subCategoryList";
+import Header from "../../components/Header";
+import { categories } from "../../utilities/categories";
+import { subCategories } from "../../utilities/subCategoryList";
 
 const Categories = () => {
     return (

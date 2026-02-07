@@ -117,13 +117,16 @@ export default function Cart() {
         return (
             <SafeAreaView style={styles.container}>
                 <View style={styles.header}>
-                    <TouchableOpacity
-                        onPress={() => router.back()}
+                    {router.canGoBack() &&
+                        <TouchableOpacity
+                        onPress={() => {
+                            router.back()
+                        }}
                         style={styles.backButton}
                         activeOpacity={0.7}
                     >
                         <ArrowLeft size={24} color="#0f172a"/>
-                    </TouchableOpacity>
+                    </TouchableOpacity>}
                     <Text style={styles.headerTitle}>My Cart</Text>
                     <View style={styles.placeholder}/>
                 </View>
@@ -137,7 +140,7 @@ export default function Cart() {
 
                     <TouchableOpacity
                         style={styles.shopButton}
-                        onPress={() => router.push('/index')}
+                        onPress={() => router.push('/')}
                         activeOpacity={0.7}
                     >
                         <Text style={styles.shopButtonText}>Start Shopping</Text>
@@ -476,13 +479,14 @@ const styles = StyleSheet.create({
 
     // Bill Section
     billSection: {
-        backgroundColor: '#ffffff',
+        backgroundColor: '#fff',
         marginHorizontal: 20,
         marginTop: 16,
         padding: 20,
         borderRadius: 12,
         borderWidth: 1,
         borderColor: '#e2e8f0',
+        marginBottom: 12,
     },
     billTitle: {
         fontSize: 16,
@@ -599,7 +603,7 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: '#ffffff',
+        backgroundColor: '#fff',
         paddingHorizontal: 20,
         paddingVertical: 16,
         borderTopWidth: 1,

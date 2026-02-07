@@ -4,6 +4,7 @@ export const subCategories = [
         id: "vegetables",
         categoryId: "groceries_kitchen",
         label: "Vegetables",
+        categories: ['vegetables', 'fruits'],
         image: 'https://happyharvestfarms.com/blog/wp-content/uploads/2023/11/Organic-foods.jpg',
     },
 
@@ -29,7 +30,7 @@ export const subCategories = [
         id: "spices_masala",
         categoryId: "groceries_kitchen",
         label: "Spices & Masala",
-        image: "https://images.unsplash.com/photo-1596040033229-a0b23ee10a63?w=200&h=200&fit=crop",
+        image: "https://images.unsplash.com/photo-1767738912443-46be91790af7?w=200&h=200&fit=crop",
     },
     {
         id: "oil_ghee",
@@ -103,7 +104,7 @@ export const subCategories = [
         id: "batteries",
         categoryId: "household_essentials",
         label: "Batteries",
-        image: "https://images.unsplash.com/photo-1591033594902-fdee1c625ce9?w=200&h=200&fit=crop",
+        image: "https://images.unsplash.com/photo-1576834975354-ee694be1f0d1?w=200&h=200&fit=crop",
     },
     {
         id: "light_bulbs",
@@ -135,7 +136,7 @@ export const subCategories = [
         id: "skin_care",
         categoryId: "personal_care",
         label: "Skin Care",
-        image: "https://images.unsplash.com/photo-1556228852-80a992e7d5c9?w=200&h=200&fit=crop",
+        image: "https://images.unsplash.com/photo-1573461160327-b450ce3d8e7f?w=200&h=200&fit=crop",
     },
     {
         id: "mens_grooming",
@@ -147,7 +148,7 @@ export const subCategories = [
         id: "womens_hygiene",
         categoryId: "personal_care",
         label: "Women's Hygiene",
-        image: "https://images.unsplash.com/photo-1550256484-b4646e3c2d53?w=200&h=200&fit=crop",
+        image: "https://images.unsplash.com/photo-1508759073847-9ca702cec7d2?w=200&h=200&fit=crop",
     },
     {
         id: "baby_care",
@@ -165,6 +166,6 @@ export const subCategories = [
         id: "sanitizers",
         categoryId: "personal_care",
         label: "Sanitizers",
-        image: "https://images.unsplash.com/photo-1584744982493-141216d29c3b?w=200&h=200&fit=crop",
+        image: "https://images.unsplash.com/photo-1614835279765-a44519c2c762?w=200&h=200&fit=crop",
     },
 ];

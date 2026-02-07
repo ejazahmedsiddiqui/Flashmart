@@ -5,6 +5,7 @@ import {Phone, Lock, CheckCircle2, LucideMail} from 'lucide-react-native';
 import {router} from "expo-router";
 import RenderFormField from "../../components/RenderFormField";
 import SuccessModal from "../../components/SuccessModal";
+import Footer from "../../components/Footer";
 
 const SellerLogin = () => {
     const [phone, setPhone] = useState("");
@@ -130,142 +131,144 @@ const SellerLogin = () => {
     const disabled = isPhone ? phone.length !== 10 : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.content}>
-                {/* Header */}
-                <View style={styles.header}>
-                    <View style={styles.iconWrapper}>
-                        <Phone size={32} color="#fff" strokeWidth={2.5}/>
+        <>
+            <SafeAreaView style={styles.container}>
+                <View style={styles.content}>
+                    {/* Header */}
+                    <View style={styles.header}>
+                        <View style={styles.iconWrapper}>
+                            <Phone size={32} color="#fff" strokeWidth={2.5}/>
+                        </View>
+                        <Text style={styles.headerTitle}>
+                            {step === 1 ? "Welcome Back!" : "Verify OTP"}
+                        </Text>
+                        <Text style={styles.headerSubtitle}>
+                            {step === 1
+                                ? "Enter your phone number to continue"
+                                : `We've sent a code to ${isPhone ? '+91 ' + phone : email}`}
+                        </Text>
                     </View>
-                    <Text style={styles.headerTitle}>
-                        {step === 1 ? "Welcome Back!" : "Verify OTP"}
-                    </Text>
-                    <Text style={styles.headerSubtitle}>
-                        {step === 1
-                            ? "Enter your phone number to continue"
-                            : `We've sent a code to ${isPhone ? '+91 ' + phone : email}`}
-                    </Text>
-                </View>
 
-                {/* Form Card */}
-                <View style={styles.formCard}>
-                    {step === 1 ? (
-                        <>
-                            {isPhone ? <RenderFormField
-                                    label="Phone Number"
-                                    inputType="phone"
-                                    value={phone}
-                                    onChangeText={setPhone}
-                                    placeholder="Enter 10-digit mobile number"
-                                    icon={<Phone size={20} color="#9CA3AF"/>}
-                                    textColor="#1F2937"
-                                    error={errors.phone}
-                                    maxLength={10}
-                                /> :
-                                <RenderFormField
-                                    label="Email"
-                                    value={email}
-                                    onChangeText={setEmail}
-                                    placeholder="Enter your email"
-                                    icon={<LucideMail size={20} color="#9CA3AF"/>}
-                                    textColor="#1F2937"
-                                    error={errors.phone}
-                                />}
+                    {/* Form Card */}
+                    <View style={styles.formCard}>
+                        {step === 1 ? (
+                            <>
+                                {isPhone ? <RenderFormField
+                                        label="Phone Number"
+                                        inputType="phone"
+                                        value={phone}
+                                        onChangeText={setPhone}
+                                        placeholder="Enter 10-digit mobile number"
+                                        icon={<Phone size={20} color="#9CA3AF"/>}
+                                        textColor="#1F2937"
+                                        error={errors.phone}
+                                        maxLength={10}
+                                    /> :
+                                    <RenderFormField
+                                        label="Email"
+                                        value={email}
+                                        onChangeText={setEmail}
+                                        placeholder="Enter your email"
+                                        icon={<LucideMail size={20} color="#9CA3AF"/>}
+                                        textColor="#1F2937"
+                                        error={errors.phone}
+                                    />}
 
-                            <TouchableOpacity
-                                style={[
-                                    styles.primaryButton,
-                                    disabled && styles.buttonDisabled]}
-                                onPress={handleSendOTP}
-                                disabled={disabled}
-                            >
-                                <Text style={styles.primaryButtonText}>Send OTP</Text>
-                            </TouchableOpacity>
-
-                            <View style={styles.divider}>
-                                <View style={styles.dividerLine}/>
-                                <Text style={styles.dividerText}>OR</Text>
-                                <View style={styles.dividerLine}/>
-                            </View>
-
-                            <TouchableOpacity style={styles.secondaryButton}
-                                              onPress={() => setIsPhone(!isPhone)}>
-                                {isPhone ? <Text style={styles.secondaryButtonText}>
-                                        Continue with Email
-                                    </Text> :
-                                    <Text style={styles.secondaryButtonText}>
-                                        Continue with Phone
-                                    </Text>}
-                            </TouchableOpacity>
-                        </>
-                    ) : (
-                        <>
-                            <RenderFormField
-                                label="Enter OTP"
-                                inputType="numeric"
-                                value={otp}
-                                onChangeText={setOtp}
-                                placeholder="6-digit code"
-                                maxLength={6}
-                                icon={<Lock size={20} color="#9CA3AF"/>}
-                                textColor="#1F2937"
-                                error={errors.otp}
-                            />
-
-                            <View style={styles.otpHint}>
-                                <Text style={styles.otpHintText}>
-                                    For demo, use OTP: <Text style={styles.otpHintBold}>123456</Text>
-                                </Text>
-                            </View>
-
-                            <TouchableOpacity
-                                style={[styles.primaryButton, otp.length !== 6 && styles.buttonDisabled]}
-                                onPress={handleVerifyOTP}
-                                disabled={otp.length !== 6}
-                            >
-                                <Text style={styles.primaryButtonText}>Verify OTP</Text>
-                            </TouchableOpacity>
-
-                            <View style={styles.otpActions}>
                                 <TouchableOpacity
-                                    onPress={handleResendOTP}
-                                    disabled={resendTimer > 0}
+                                    style={[
+                                        styles.primaryButton,
+                                        disabled && styles.buttonDisabled]}
+                                    onPress={handleSendOTP}
+                                    disabled={disabled}
                                 >
-                                    <Text style={[
-                                        styles.resendLink,
-                                        resendTimer > 0 && styles.resendDisabled // Derive style
-                                    ]}>
-                                        {resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend OTP'}
+                                    <Text style={styles.primaryButtonText}>Send OTP</Text>
+                                </TouchableOpacity>
+
+                                <View style={styles.divider}>
+                                    <View style={styles.dividerLine}/>
+                                    <Text style={styles.dividerText}>OR</Text>
+                                    <View style={styles.dividerLine}/>
+                                </View>
+
+                                <TouchableOpacity style={styles.secondaryButton}
+                                                  onPress={() => setIsPhone(!isPhone)}>
+                                    {isPhone ? <Text style={styles.secondaryButtonText}>
+                                            Continue with Email
+                                        </Text> :
+                                        <Text style={styles.secondaryButtonText}>
+                                            Continue with Phone
+                                        </Text>}
+                                </TouchableOpacity>
+                            </>
+                        ) : (
+                            <>
+                                <RenderFormField
+                                    label="Enter OTP"
+                                    inputType="numeric"
+                                    value={otp}
+                                    onChangeText={setOtp}
+                                    placeholder="6-digit code"
+                                    maxLength={6}
+                                    icon={<Lock size={20} color="#9CA3AF"/>}
+                                    textColor="#1F2937"
+                                    error={errors.otp}
+                                />
+
+                                <View style={styles.otpHint}>
+                                    <Text style={styles.otpHintText}>
+                                        For demo, use OTP: <Text style={styles.otpHintBold}>123456</Text>
                                     </Text>
+                                </View>
+
+                                <TouchableOpacity
+                                    style={[styles.primaryButton, otp.length !== 6 && styles.buttonDisabled]}
+                                    onPress={handleVerifyOTP}
+                                    disabled={otp.length !== 6}
+                                >
+                                    <Text style={styles.primaryButtonText}>Verify OTP</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={handleChangeNumber}>
-                                    <Text style={styles.linkText}>Change Number</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </>
-                    )}
+
+                                <View style={styles.otpActions}>
+                                    <TouchableOpacity
+                                        onPress={handleResendOTP}
+                                        disabled={resendTimer > 0}
+                                    >
+                                        <Text style={[
+                                            styles.resendLink,
+                                            resendTimer > 0 && styles.resendDisabled // Derive style
+                                        ]}>
+                                            {resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend OTP'}
+                                        </Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={handleChangeNumber}>
+                                        <Text style={styles.linkText}>Change Number</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </>
+                        )}
+                    </View>
+
+                    {/* Footer */}
+                    <View style={styles.footer}>
+                        <Text style={styles.footerText}>
+                            Don&apos;t have an account?{" "}
+                            <Text style={styles.footerLink} onPress={() => router.push('/Register')}>Register Now</Text>
+                        </Text>
+                    </View>
                 </View>
 
-                {/* Footer */}
-                <View style={styles.footer}>
-                    <Text style={styles.footerText}>
-                        Don&apos;t have an account?{" "}
-                        <Text style={styles.footerLink} onPress={() => router.push('/Register')}>Register Now</Text>
-                    </Text>
-                </View>
-            </View>
-
-            {/* Success Modal */}
-            <SuccessModal
-                visible={showSuccessModal}
-                onAnimationComplete={() => {
-                    setShowSuccessModal(false)
-                    router.replace('/');
-                }}
-                subtitle={'Welcome Back! Redirecting to Dashboard...'}
-                title={'Logged in'}
-            />
-        </SafeAreaView>
+                {/* Success Modal */}
+                <SuccessModal
+                    visible={showSuccessModal}
+                    onAnimationComplete={() => {
+                        setShowSuccessModal(false)
+                        router.replace('/');
+                    }}
+                    subtitle={'Welcome Back! Redirecting to Dashboard...'}
+                    title={'Logged in'}
+                />
+            </SafeAreaView>
+        </>
     );
 };
 
