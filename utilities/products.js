@@ -21,7 +21,7 @@ export const products = [
         name: 'Banana',
         brand: 'Nature Pick',
         category: 'fruits',
-        image: 'https://images.unsplash.com/photo-1587132137056-bfbf0166836e?w=200&h=200&fit=crop',
+        image: 'https://images.unsplash.com/photo-1522338140262-f46f5913618a?w=200&h=200',
         rating: 4.6,
         reviews: 445,
         delivery: '8 mins',

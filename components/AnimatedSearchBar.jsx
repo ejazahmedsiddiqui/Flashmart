@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import {
     View,
-    Text,
-    TextInput,
     Animated,
-    StyleSheet,
+    StyleSheet, TouchableOpacity,
 } from 'react-native';
 import {SearchIcon} from "lucide-react-native";
+import {router} from "expo-router";
 
 const SUGGESTIONS = [
     'Search milk',
@@ -16,14 +15,13 @@ const SUGGESTIONS = [
     'Search vegetables',
 ];
 
-export default function AnimatedSearchBar({value, onChange}) {
+export default function AnimatedSearchBar({value, }) {
     const translateY = useRef(new Animated.Value(0)).current;
     const opacity = useRef(new Animated.Value(1)).current;
 
     const [index, setIndex] = useState(0);
 
     useEffect(() => {
-        if (value.length > 0) return;
 
         const interval = setInterval(() => {
             Animated.sequence([
@@ -53,34 +51,25 @@ export default function AnimatedSearchBar({value, onChange}) {
         }, 2000);
 
         return () => clearInterval(interval);
-    }, [value]);
+    }, []);
 
     return (
-        <View style={styles.container}>
+        <TouchableOpacity style={styles.container} onPress={() => router.push('/Search')}>
             <View style={styles.searchBox}>
                 <SearchIcon size={20} color={'#64748b'}/>
-                <TextInput
-                    value={value}
-                    onChangeText={onChange}
-                    style={styles.input}
-                    placeholderTextColor="transparent"
-                />
-
-                {value.length === 0 && (
-                    <Animated.Text
-                        style={[
-                            styles.placeholder,
-                            {
-                                transform: [{ translateY }],
-                                opacity,
-                            },
-                        ]}
-                    >
-                        {SUGGESTIONS[index]}
-                    </Animated.Text>
-                )}
+                <Animated.Text
+                    style={[
+                        styles.placeholder,
+                        {
+                            transform: [{ translateY }],
+                            opacity,
+                        },
+                    ]}
+                >
+                    {SUGGESTIONS[index]}
+                </Animated.Text>
             </View>
-        </View>
+        </TouchableOpacity>
     );
 }
 

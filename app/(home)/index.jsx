@@ -8,22 +8,17 @@ import {
     StyleSheet,
     ScrollView,
     ActivityIndicator,
-    Modal,
     Dimensions
 } from 'react-native';
-import {router} from "expo-router";
 import ProductCard from "../../components/ProductCard";
 import {
-    ShoppingCart,
+    PackageX,
     Headphones,
     Carrot,
     Apple,
     Milk,
     Beef,
     Croissant,
-    MapPin,
-    Navigation,
-    ChevronDown,
     HomeIcon,
     Pizza,
     Coffee,
@@ -34,65 +29,23 @@ import {
     Baby,
     HeartPulse,
     Shirt,
-    PawPrint, Pickaxe, PackageX
+    PawPrint, Pickaxe
 } from "lucide-react-native";
-import AnimatedSearchBar from "../../components/AnimatedSearchBar";
 import {products} from "../../utilities/products";
-import {useCartCount} from "../../hooks/useCartCount";
-import {addresses} from "../../utilities/address";
+import categoryList from "../../utilities/categories";
+import Header from "../../components/Header";
 
 export default function Index() {
     const [category, setCategory] = useState('');
-    const [searchTerm, setSearchTerm] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    // const [isSearching, setIsSearching] = useState(false);
     const [displayProducts, setDisplayProducts] = useState([]);
     const [error, setError] = useState(false);
     const scrollViewRef = useRef(null);
     const [categoryLayouts, setCategoryLayouts] = useState({});
-    const [address, setAddress] = useState({
-        type: 'Home',
-        pinCode: '',
-        houseNumber: '',
-        buildingAddress: '',
-        streetAddress: '',
-        city: '',
-        state: '',
-    });
-    const [fullAddress, setFullAddress] = useState('')
-    const [showModal, setShowModal] = useState({
-        addressModalVisible: false,
-    })
-    const savedAddresses = addresses
 
-    useEffect(() => {
-        if (savedAddresses.length > 0) {
-            setAddress(savedAddresses[0]);
-        }
-    }, []);
-    useEffect(() => {
-        setFullAddress(address.houseNumber + ', ' + address.buildingAddress + ', ' + address.streetAddress + ', ' + address.city);
-    }, [address])
-
-    useEffect(() => {
-        const loadProducts = async () => {
-            setIsLoading(true);
-            setError(false);
-            try {
-                const result = await fetchProducts(category);
-                setDisplayProducts(result);
-            } catch (error) {
-                setError(error);
-            } finally {
-                setIsLoading(false)
-            }
-        }
-        loadProducts();
-    }, [category]);
-
-    const categories = [
+    const categoryHeaderList = [
         {id: '', label: 'Home', icon: HomeIcon},
-        {id: 'vegetables', label: 'Vegetables', icon: Carrot},
+        {id: 'vegetables', label: 'Vegetables', icon: Carrot, title: 'Grocery & Kitchen'},
         {id: 'mine', label: 'Mining Supplies', icon: Pickaxe},
         {id: 'fruits', label: 'Fruits', icon: Apple},
         {id: 'dairy', label: 'Dairy', icon: Milk},
@@ -110,6 +63,22 @@ export default function Index() {
         {id: 'fashion', label: 'Fashion', icon: Shirt},
         {id: 'pets', label: 'Pet Supplies', icon: PawPrint},
     ];
+
+    useEffect(() => {
+        const loadProducts = async () => {
+            setIsLoading(true);
+            setError(false);
+            try {
+                const result = await fetchProducts(category);
+                setDisplayProducts(result);
+            } catch (error) {
+                setError(error);
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        loadProducts();
+    }, [category]);
     const fetchProducts = async (category = '') => {
         await new Promise(resolve => setTimeout(resolve, 800));
         const allProducts = products;
@@ -143,7 +112,6 @@ export default function Index() {
         }));
     };
 
-    const itemCount = useCartCount();
     const renderProduct = useCallback(
         ({ item }) => <ProductCard product={item} />,
         []
@@ -152,79 +120,17 @@ export default function Index() {
 
     return (
         <SafeAreaView style={styles.container}>
-            {/* Header */}
-            <View style={styles.header}>
-                <View style={{flex: 1, marginRight: 12}}>
-                    <Text style={styles.headerTitle}>FreshCart</Text>
-                    <TouchableOpacity
-                        style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            marginTop: 5,
-                        }}
-                        onPress={() => setShowModal(prev => ({...prev, addressModalVisible: true}))}
-                    >
-                        <Text
-                            style={{
-                                color: '#f4f4f4',
-                                fontSize: 12,
-                                fontWeight: '700',
-                            }}
-                        >{address?.type?.toUpperCase()} - </Text>
-                        <Text
-                            numberOfLines={1}
-                            style={{
-                                color: '#f4f4f4',
-                                fontSize: 12,
-                                fontWeight: '400',
-                                flexShrink: 1,
-                            }}
-                        >{fullAddress.split(',').slice(0, 3).join(',')}</Text>
-                        <ChevronDown size={24} color={'#f4f4f4'}/>
-                    </TouchableOpacity>
-                </View>
-                <TouchableOpacity
-                    style={[styles.cartIconButton, {flexShrink: 0}]}
-                    onPress={() => router.push('/Cart')}
-                    activeOpacity={0.7}
-                >
-                    <View style={styles.cartIcon}>
-                        <ShoppingCart size={20} color={'#fff'}/>
-                    </View>
-                    {itemCount > 0 && (
-                        <View style={styles.cartBadge}>
-                            <Text style={styles.cartBadgeText}>{itemCount}</Text>
-                        </View>
-                    )}
-                </TouchableOpacity>
-            </View>
-
-            {/* Search Bar */}
-            <View style={styles.searchSection}>
-                <View style={styles.searchContainer}>
-                    <AnimatedSearchBar value={searchTerm} onChange={setSearchTerm}/>
-                    {searchTerm.length > 0 && (
-                        <TouchableOpacity
-                            onPress={() => setSearchTerm('')}
-                            style={styles.clearButton}
-                        >
-                            <Text style={styles.clearIcon}>✕</Text>
-                        </TouchableOpacity>
-                    )}
-                </View>
-
-            </View>
-
+            <Header />
             {/* Categories */}
             <View style={styles.categoriesSection}>
                 <ScrollView
                     ref={scrollViewRef}
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.categoriesContent}
+                    contentContainerStyle={styles.categoryHeaderListContent}
                     decelerationRate="fast"
                 >
-                    {categories.map((cat, index) => {
+                    {categoryHeaderList.map((cat, index) => {
                         const Icon = cat.icon;
                         const isActive = category === cat.id;
 
@@ -298,91 +204,7 @@ export default function Index() {
             </View>
 
             {/* Address Selection Modal */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={showModal.addressModalVisible}
-                onRequestClose={() => setShowModal(prev => ({...prev, addressModalVisible: false}))}
-            >
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Select Delivery Address</Text>
-                            <TouchableOpacity
-                                style={styles.closeButton}
-                                onPress={() => setShowModal(prev => ({...prev, addressModalVisible: false}))}
-                            >
-                                <Text style={styles.closeButtonText}>✕</Text>
-                            </TouchableOpacity>
-                        </View>
 
-                        <ScrollView style={styles.addressList}>
-                            {/* Current Location Option */}
-                            <TouchableOpacity style={styles.currentLocationButton}>
-                                <View style={styles.currentLocationIcon}>
-                                    <Navigation size={24} color="#339a38"/>
-                                </View>
-                                <View style={styles.currentLocationTextContainer}>
-                                    <Text style={styles.currentLocationTitle}>Use Current Location</Text>
-                                    <Text style={styles.currentLocationSubtitle}>
-                                        Enable location to find stores near you
-                                    </Text>
-                                </View>
-                            </TouchableOpacity>
-
-                            {/* Divider */}
-                            <View style={styles.divider}>
-                                <View style={styles.dividerLine}/>
-                                <Text style={styles.dividerText}>SAVED ADDRESSES</Text>
-                                <View style={styles.dividerLine}/>
-                            </View>
-
-                            {/* Saved Addresses */}
-                            {savedAddresses.map((addr) => (
-                                <TouchableOpacity
-                                    key={addr.id}
-                                    style={[
-                                        styles.addressCard,
-                                        address.id === addr.id && styles.addressCardSelected
-                                    ]}
-                                    onPress={() => {
-                                        setAddress(addr);
-                                        setShowModal(prev => ({...prev, addressModalVisible: false}));
-                                    }}
-                                >
-                                    <View style={styles.addressIconContainer}>
-                                        <MapPin size={20} color="#339a38"/>
-                                    </View>
-                                    <View style={styles.addressInfo}>
-                                        <View style={styles.addressTypeRow}>
-                                            <Text
-                                                style={[
-                                                    styles.addressType,
-                                                    address.id === addr.id && styles.addressTypeSelected
-                                                ]}
-                                            >
-                                                {addr.type}
-                                            </Text>
-                                            {address.id === addr.id && (
-                                                <View style={styles.selectedBadge}>
-                                                    <Text style={styles.selectedBadgeText}>SELECTED</Text>
-                                                </View>
-                                            )}
-                                        </View>
-                                        <Text style={styles.addressText}>
-                                            {addr.houseNumber}, {addr.buildingAddress}
-                                        </Text>
-                                        <Text style={styles.addressText}>
-                                            {addr.streetAddress}, {addr.city}
-                                        </Text>
-                                        <Text style={styles.addressPinCode}>PIN: {addr.pinCode}</Text>
-                                    </View>
-                                </TouchableOpacity>
-                            ))}
-                        </ScrollView>
-                    </View>
-                </View>
-            </Modal>
         </SafeAreaView>
     );
 }
@@ -453,8 +275,7 @@ const styles = StyleSheet.create({
 
     // Search Styles
     searchSection: {
-        backgroundColor: '#191919',
-        paddingBottom: 16,
+        backgroundColor: 'transparent',
     },
     searchContainer: {
         flexDirection: 'row',
@@ -469,15 +290,10 @@ const styles = StyleSheet.create({
         padding: 4,
         marginLeft: 8,
     },
-    clearIcon: {
-        fontSize: 18,
-        color: '#64748b',
-        fontWeight: '600',
-    },
 
     // Categories Styles
     categoriesSection: {
-        paddingVertical: 8,
+        paddingVertical: 2,
     },
     sectionTitle: {
         fontSize: 18,
@@ -485,7 +301,6 @@ const styles = StyleSheet.create({
         color: '#eaffea',
         marginBottom: 12,
     },
-    categoriesContent: {},
     categoryChip: {
         justifyContent: 'center',
         alignItems: 'center',
@@ -575,156 +390,5 @@ const styles = StyleSheet.create({
     },
 
     // Modal Styles
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'flex-end',
-    },
-    modalContent: {
-        backgroundColor: '#1e1e1e',
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24,
-        maxHeight: '85%',
-        paddingBottom: 20,
-    },
-    modalHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingVertical: 20,
-        borderBottomWidth: 1,
-        borderBottomColor: '#2a2a2a',
-    },
-    modalTitle: {
-        fontSize: 20,
-        fontWeight: '700',
-        color: '#ffffff',
-    },
-    closeButton: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        backgroundColor: '#2a2a2a',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    closeButtonText: {
-        fontSize: 18,
-        color: '#94a3b8',
-        fontWeight: '600',
-    },
-    addressList: {
-        paddingHorizontal: 20,
-    },
-    currentLocationButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#252525',
-        borderRadius: 16,
-        padding: 16,
-        marginTop: 20,
-        borderWidth: 2,
-        borderColor: '#339a38',
-    },
-    currentLocationIcon: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        backgroundColor: '#e8f5e9',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 12,
-    },
-    currentLocationTextContainer: {
-        flex: 1,
-    },
-    currentLocationTitle: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: '#339a38',
-        marginBottom: 4,
-    },
-    currentLocationSubtitle: {
-        fontSize: 13,
-        color: '#94a3b8',
-    },
-    divider: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginVertical: 24,
-    },
-    dividerLine: {
-        flex: 1,
-        height: 1,
-        backgroundColor: '#2a2a2a',
-    },
-    dividerText: {
-        fontSize: 12,
-        fontWeight: '600',
-        color: '#64748b',
-        paddingHorizontal: 12,
-        letterSpacing: 0.5,
-    },
-    addressCard: {
-        flexDirection: 'row',
-        backgroundColor: '#252525',
-        borderRadius: 16,
-        padding: 16,
-        marginBottom: 12,
-        borderWidth: 2,
-        borderColor: 'transparent',
-    },
-    addressCardSelected: {
-        backgroundColor: '#1a2e1b',
-        borderColor: '#339a38',
-    },
-    addressIconContainer: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: '#2a2a2a',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 12,
-    },
-    addressInfo: {
-        flex: 1,
-    },
-    addressTypeRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 6,
-    },
-    addressType: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: '#ffffff',
-    },
-    addressTypeSelected: {
-        color: '#339a38',
-    },
-    selectedBadge: {
-        backgroundColor: '#339a38',
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 12,
-    },
-    selectedBadgeText: {
-        fontSize: 11,
-        fontWeight: '700',
-        color: '#ffffff',
-    },
-    addressText: {
-        fontSize: 14,
-        color: '#cbd5e1',
-        lineHeight: 20,
-        marginBottom: 4,
-    },
-    addressPinCode: {
-        fontSize: 13,
-        color: '#64748b',
-        fontWeight: '500',
-    },
+
 })
