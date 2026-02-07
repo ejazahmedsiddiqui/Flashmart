@@ -143,16 +143,18 @@ export default React.memo(ProductCard);
 
 const styles = StyleSheet.create({
     productCard: {
-        width: CARD_WIDTH,
-        backgroundColor: '#ffffff',
+        width: '48%',
+        backgroundColor: '#242424',
         borderRadius: 12,
         margin: 4,
         overflow: 'hidden',
-    },
+        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)'
+
+},
     imageContainer: {
         width: '100%',
         height: 140,
-        backgroundColor: '#f8f8f8',
+        backgroundColor: '#2a2a2a',
         alignItems: 'center',
         justifyContent: 'center',
         position: 'relative',
@@ -183,18 +185,18 @@ const styles = StyleSheet.create({
     },
     brandText: {
         fontSize: 11,
-        color: '#999',
+        color: '#8A8A8A',
         marginBottom: 4,
     },
     productName: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#000',
+        color: '#FFFFFF',
         marginBottom: 4,
     },
     productWeight: {
         fontSize: 12,
-        color: '#666',
+        color: '#B3B3B3',
         marginBottom: 8,
     },
     priceRow: {
@@ -205,24 +207,24 @@ const styles = StyleSheet.create({
     productPrice: {
         fontSize: 16,
         fontWeight: '700',
-        color: '#000',
+        color: '#fff',
         marginRight: 6,
     },
     originalPrice: {
         fontSize: 12,
-        color: '#999',
+        color: '#888',
         textDecorationLine: 'line-through',
     },
     addButton: {
-        backgroundColor: '#ffffff',
-        borderWidth: 1.5,
-        borderColor: '#26702A',
+        backgroundColor: '#fff',
+        borderWidth: 2,
+        borderColor: 'rgb(123,222,74)',
         borderRadius: 8,
         paddingVertical: 8,
         alignItems: 'center',
     },
     addButtonText: {
-        color: '#26702A',
+        color: 'rgb(25,101,0)',
         fontSize: 13,
         fontWeight: '700',
     },
@@ -231,14 +233,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: '#26702A',
         borderRadius: 8,
-        paddingVertical: 6,
-        paddingHorizontal: 4,
+        paddingVertical: 4,
+        paddingHorizontal: 2,
+        borderWidth: 2,
+        borderColor: '#fff',
     },
     quantityButton: {
         width: 28,
         height: 28,
         justifyContent: 'center',
         alignItems: 'center',
+
     },
     quantityButtonText: {
         color: '#ffffff',

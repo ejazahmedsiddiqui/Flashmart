@@ -117,13 +117,16 @@ export default function Cart() {
         return (
             <SafeAreaView style={styles.container}>
                 <View style={styles.header}>
-                    <TouchableOpacity
-                        onPress={() => router.back()}
+                    {router.canGoBack() &&
+                        <TouchableOpacity
+                        onPress={() => {
+                            router.back()
+                        }}
                         style={styles.backButton}
                         activeOpacity={0.7}
                     >
                         <ArrowLeft size={24} color="#0f172a"/>
-                    </TouchableOpacity>
+                    </TouchableOpacity>}
                     <Text style={styles.headerTitle}>My Cart</Text>
                     <View style={styles.placeholder}/>
                 </View>
@@ -137,7 +140,7 @@ export default function Cart() {
 
                     <TouchableOpacity
                         style={styles.shopButton}
-                        onPress={() => router.push('/index')}
+                        onPress={() => router.push('/')}
                         activeOpacity={0.7}
                     >
                         <Text style={styles.shopButtonText}>Start Shopping</Text>

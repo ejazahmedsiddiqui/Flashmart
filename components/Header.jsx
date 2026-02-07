@@ -16,7 +16,12 @@ import AnimatedSearchBar from "../components/AnimatedSearchBar";
 import {useCartCount} from "../hooks/useCartCount";
 import {addresses} from "../utilities/address";
 
-const Header = () => {
+const Header = ({
+                    showAddress = true,
+                    showHeaderTitle = true,
+                    showCart = true,
+                    showSearchBar = true,
+                }) => {
     const [address, setAddress] = useState({
         type: 'Home',
         pinCode: '',
@@ -46,8 +51,11 @@ const Header = () => {
         <>
             <View style={styles.header}>
                 <View style={{flex: 1, marginRight: 12}}>
-                    <Text style={styles.headerTitle}>FreshCart</Text>
-                    <TouchableOpacity
+                    {showHeaderTitle &&
+                        <Text style={styles.headerTitle}>FreshCart</Text>
+                    }
+                    {showAddress &&
+                        <TouchableOpacity
                         style={{
                             flexDirection: 'row',
                             alignItems: 'center',
@@ -72,9 +80,10 @@ const Header = () => {
                             }}
                         >{fullAddress.split(',').slice(0, 3).join(',')}</Text>
                         <ChevronDown size={24} color={'#f4f4f4'}/>
-                    </TouchableOpacity>
+                    </TouchableOpacity>}
                 </View>
-                <TouchableOpacity
+                {showCart &&
+                    <TouchableOpacity
                     style={[styles.cartIconButton, {flexShrink: 0}]}
                     onPress={() => router.push('/Cart')}
                     activeOpacity={0.7}
@@ -87,15 +96,16 @@ const Header = () => {
                             <Text style={styles.cartBadgeText}>{itemCount}</Text>
                         </View>
                     )}
-                </TouchableOpacity>
+                </TouchableOpacity>}
             </View>
 
             {/* Search Bar */}
-            <View style={styles.searchSection}>
+            {showSearchBar &&
+                <View style={styles.searchSection}>
                 <View style={styles.searchContainer}>
-                    <AnimatedSearchBar />
+                    <AnimatedSearchBar/>
                 </View>
-            </View>
+            </View>}
             {/* Address Selection Modal */}
             <Modal
                 animationType="slide"
