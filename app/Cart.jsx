@@ -476,13 +476,14 @@ const styles = StyleSheet.create({
 
     // Bill Section
     billSection: {
-        backgroundColor: '#ffffff',
+        backgroundColor: '#fff',
         marginHorizontal: 20,
         marginTop: 16,
         padding: 20,
         borderRadius: 12,
         borderWidth: 1,
         borderColor: '#e2e8f0',
+        marginBottom: 12,
     },
     billTitle: {
         fontSize: 16,
@@ -599,7 +600,7 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: '#ffffff',
+        backgroundColor: '#fff',
         paddingHorizontal: 20,
         paddingVertical: 16,
         borderTopWidth: 1,

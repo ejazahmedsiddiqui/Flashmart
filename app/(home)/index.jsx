@@ -32,8 +32,8 @@ import {
     PawPrint, Pickaxe
 } from "lucide-react-native";
 import {products} from "../../utilities/products";
-import categoryList from "../../utilities/categories";
 import Header from "../../components/Header";
+import Footer from "../../components/Footer";
 
 export default function Index() {
     const [category, setCategory] = useState('');
@@ -113,99 +113,100 @@ export default function Index() {
     };
 
     const renderProduct = useCallback(
-        ({ item }) => <ProductCard product={item} />,
+        ({item}) => <ProductCard product={item}/>,
         []
     );
 
 
     return (
-        <SafeAreaView style={styles.container}>
-            <Header />
-            {/* Categories */}
-            <View style={styles.categoriesSection}>
-                <ScrollView
-                    ref={scrollViewRef}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.categoryHeaderListContent}
-                    decelerationRate="fast"
-                >
-                    {categoryHeaderList.map((cat, index) => {
-                        const Icon = cat.icon;
-                        const isActive = category === cat.id;
+        <>
+            <SafeAreaView style={styles.container}>
+                <Header/>
+                {/* Categories */}
+                <View style={styles.categoriesSection}>
+                    <ScrollView
+                        ref={scrollViewRef}
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={styles.categoryHeaderListContent}
+                        decelerationRate="fast"
+                    >
+                        {categoryHeaderList.map((cat, index) => {
+                            const Icon = cat.icon;
+                            const isActive = category === cat.id;
 
-                        return (
-                            <TouchableOpacity
-                                key={cat.id}
-                                style={[
-                                    styles.categoryChip,
-                                    isActive && styles.categoryChipActive
-                                ]}
-                                onPress={() => handleCategoryPress(cat.id, index)}
-                                onLayout={(event) => handleCategoryLayout(cat.id, event)}
-                                activeOpacity={0.7}
-                            >
-                                <Icon
-                                    size={18}
-                                    color={isActive ? '#ffffff' : 'rgba(241,241,241,0.6)'}
-                                    fill={isActive ? 'rgba(51,154,56,0.98)' : 'rgba(0,0,0,0)'}
-                                />
+                            return (
+                                <TouchableOpacity
+                                    key={cat.id}
+                                    style={[
+                                        styles.categoryChip,
+                                        isActive && styles.categoryChipActive
+                                    ]}
+                                    onPress={() => handleCategoryPress(cat.id, index)}
+                                    onLayout={(event) => handleCategoryLayout(cat.id, event)}
+                                    activeOpacity={0.7}
+                                >
+                                    <Icon
+                                        size={18}
+                                        color={isActive ? '#ffffff' : 'rgba(241,241,241,0.6)'}
+                                        fill={isActive ? 'rgba(51,154,56,0.98)' : 'rgba(0,0,0,0)'}
+                                    />
 
-                                <Text style={[
-                                    styles.categoryText,
-                                    isActive && styles.categoryTextActive
-                                ]}>
-                                    {cat.label}
-                                </Text>
+                                    <Text style={[
+                                        styles.categoryText,
+                                        isActive && styles.categoryTextActive
+                                    ]}>
+                                        {cat.label}
+                                    </Text>
 
-                            </TouchableOpacity>
-                        );
-                    })}
-                </ScrollView>
-            </View>
+                                </TouchableOpacity>
+                            );
+                        })}
+                    </ScrollView>
+                </View>
 
-            {/* Products List */}
-            <View style={styles.productsSection}>
-                {isLoading ? (
-                    <View style={styles.loadingContainer}>
-                        <ActivityIndicator size="large" color="#339a38"/>
-                        <Text style={styles.loadingText}>Loading fresh products...</Text>
-                    </View>
-                ) : displayProducts.length !== 0 ? (error ? (
-                    <View style={styles.errorContainer}>
-                        <Text style={styles.errorEmoji}>🥺</Text>
-                        <Text style={styles.errorText}>Oops! Something went wrong</Text>
-                        <Text style={styles.errorSubtext}>Please try again later</Text>
-                    </View>
-                ) : (
-                    <FlatList
-                        data={displayProducts}
-                        renderItem={renderProduct}
-                        keyExtractor={item => item.id.toString()}
-                        numColumns={2}
-                        contentContainerStyle={styles.productsList}
-                        showsVerticalScrollIndicator={false}
-                        initialNumToRender={6}
-                        maxToRenderPerBatch={6}
-                        windowSize={5}
-                        removeClippedSubviews
-                    />
-
-                )) : (
-                    <View style={styles.errorContainer}>
-                        <View style={styles.iconWrapper}>
-                            <PackageX size={42} color="#196500"/>
+                {/* Products List */}
+                <View style={styles.productsSection}>
+                    {isLoading ? (
+                        <View style={styles.loadingContainer}>
+                            <ActivityIndicator size="large" color="#339a38"/>
+                            <Text style={styles.loadingText}>Loading fresh products...</Text>
                         </View>
+                    ) : displayProducts.length !== 0 ? (error ? (
+                        <View style={styles.errorContainer}>
+                            <Text style={styles.errorEmoji}>🥺</Text>
+                            <Text style={styles.errorText}>Oops! Something went wrong</Text>
+                            <Text style={styles.errorSubtext}>Please try again later</Text>
+                        </View>
+                    ) : (
+                        <FlatList
+                            data={displayProducts}
+                            renderItem={renderProduct}
+                            keyExtractor={item => item.id.toString()}
+                            numColumns={2}
+                            contentContainerStyle={styles.productsList}
+                            showsVerticalScrollIndicator={false}
+                            initialNumToRender={6}
+                            maxToRenderPerBatch={6}
+                            windowSize={5}
+                            removeClippedSubviews
+                        />
 
-                        <Text style={styles.title}>{'No products available'}</Text>
-                        <Text style={styles.subtitle}>{'Please come back later'}</Text>
-                    </View>
-                )}
-            </View>
+                    )) : (
+                        <View style={styles.errorContainer}>
+                            <View style={styles.iconWrapper}>
+                                <PackageX size={42} color="#196500"/>
+                            </View>
 
-            {/* Address Selection Modal */}
+                            <Text style={styles.title}>{'No products available'}</Text>
+                            <Text style={styles.subtitle}>{'Please come back later'}</Text>
+                        </View>
+                    )}
+                </View>
 
-        </SafeAreaView>
+                {/* Address Selection Modal */}
+            </SafeAreaView>
+        </>
     );
 }
 

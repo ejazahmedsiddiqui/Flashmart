@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
         width: CARD_WIDTH,
         backgroundColor: '#ffffff',
         borderRadius: 12,
-        margin: 6,
+        margin: 4,
         overflow: 'hidden',
     },
     imageContainer: {
