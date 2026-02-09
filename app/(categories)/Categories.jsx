@@ -40,7 +40,6 @@ const Categories = () => {
                             {/* Sub Categories */}
                             <View style={styles.subCategoryGrid}>
                                 {filteredSubCategories.map((sub) => {
-                                    console.log(sub.image)
                                     return (
                                     <TouchableOpacity
                                         key={sub.id}
@@ -49,7 +48,8 @@ const Categories = () => {
                                         onPress={() =>
                                             router.push({
                                                 pathname: "/SubCategory",
-                                                params: { subCategoryId: sub.id },
+                                                params: { subCategoryId: sub.id, subLabel: sub.label,
+                                                subImage: sub.image},
                                             })
                                         }
                                     >

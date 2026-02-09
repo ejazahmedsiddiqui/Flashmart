@@ -4,14 +4,16 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
-    FlatList, Image,
+    FlatList, Image, StatusBar,
 } from "react-native";
-import {router} from "expo-router";
+import {router, useLocalSearchParams} from "expo-router";
 import {MoveLeft} from "lucide-react-native";
 import React, {useEffect, useMemo, useState, useRef} from "react";
 import ProductCard from "../../components/ProductCard";
 import {products} from "../../utilities/products";
 import Header from "../../components/Header";
+import {ImageBackground} from "expo-image";
+
 const BRAND_ITEM_HEIGHT = 72;
 
 const SubCategory = () => {
@@ -26,7 +28,7 @@ const SubCategory = () => {
             }
         });
         return [
-            { name: "All", image: null },
+            {name: "All", image: null},
             ...Array.from(brandMap.values())
         ];
     }, []);
@@ -35,6 +37,7 @@ const SubCategory = () => {
     const sidebarRef = useRef(null);
 
     const [activeBrand, setActiveBrand] = useState("All");
+    const params = useLocalSearchParams();
 
     const filteredProducts = useMemo(() => {
         if (activeBrand === "All") return products;
@@ -46,8 +49,10 @@ const SubCategory = () => {
             animated: false,
         });
     }, [activeBrand]);
+
+
     const renderBrand = React.useCallback(
-        ({ item, index }) => {
+        ({item, index}) => {
             const isActive = item.name === activeBrand;
 
             return (
@@ -59,7 +64,10 @@ const SubCategory = () => {
                     ]}
                 >
                     {item.image && (
-                        <Image source={{ uri: item.image }} style={styles.brandImage} />
+                        <Image
+                            source={{uri: item.image}}
+                            style={styles.brandImage}
+                        />
                     )}
                     <Text
                         style={[
@@ -85,60 +93,83 @@ const SubCategory = () => {
             viewPosition: 0.5,
         });
     };
+    console.log('Params is: ', params)
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()}>
-                    <MoveLeft size={22} color={'#b3b3b3'}/>
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>Sub Category</Text>
-            </View>
-            <View style={{paddingHorizontal: 20, backgroundColor: '#1f1f1f', paddingBottom: 12,}}>
-                <Header showHeaderTitle={false} showCart={true} showSearchBar={false} />
-            </View>
+        <>
+            <StatusBar backgroundColor={'#fff'}/>
+            <SafeAreaView style={styles.container}>
 
-            {/* Body */}
-            <View style={styles.body}>
-                {/* Left Brand Sidebar */}
-                <View style={styles.sidebar}>
+                <ImageBackground
+                    style={{
+                        justifyContent: 'flex-start',
+                        width: '100%',
+                        height: 80, // Add explicit height
+                        padding: 12,
+                        marginBottom: 12,
+
+                    }}
+                    source={{uri: params?.subImage}}
+                    imageStyle={{
+                        opacity: 0.1,
+                    }}>
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: 'flex-start',
+                        }}
+                    >
+                        <TouchableOpacity onPress={() => router.back()}>
+                            <MoveLeft size={22} color={'#fff'}/>
+                        </TouchableOpacity>
+                        <Text style={styles.headerTitle}>{params?.subLabel}</Text>
+                    </View>
+                    <Header showHeaderTitle={false} showCart={true} showSearchBar={false}/>
+                </ImageBackground>
+
+
+                {/* Body */}
+                <View style={styles.body}>
+                    {/* Left Brand Sidebar */}
+                    <View style={styles.sidebar}>
+                        <FlatList
+                            ref={sidebarRef}
+                            data={brands}
+                            keyExtractor={(item) => item.name}
+                            getItemLayout={(_, index) => ({
+                                length: BRAND_ITEM_HEIGHT,
+                                offset: BRAND_ITEM_HEIGHT * index,
+                                index,
+                            })}
+                            initialNumToRender={6}
+                            maxToRenderPerBatch={4}
+                            windowSize={3}
+                            removeClippedSubviews={true}
+                            showsVerticalScrollIndicator={false}
+                            renderItem={renderBrand}
+                        />
+
+                    </View>
+
+                    {/* Product Grid */}
                     <FlatList
-                        ref={sidebarRef}
-                        data={brands}
-                        keyExtractor={(item) => item.name}
-                        getItemLayout={(_, index) => ({
-                            length: BRAND_ITEM_HEIGHT,
-                            offset: BRAND_ITEM_HEIGHT * index,
-                            index,
-                        })}
-                        initialNumToRender={6}
-                        maxToRenderPerBatch={4}
-                        windowSize={3}
-                        removeClippedSubviews={true}
+                        ref={listRef}
+                        data={filteredProducts}
+                        keyExtractor={item => item.id.toString()}
+                        numColumns={2}
                         showsVerticalScrollIndicator={false}
-                        renderItem={renderBrand}
+                        contentContainerStyle={styles.productList}
+                        renderItem={({item}) => (
+                            <ProductCard product={item}/>
+                        )}
+                        initialNumToRender={6}
+                        maxToRenderPerBatch={6}
+                        windowSize={5}
+                        removeClippedSubviews
                     />
-
                 </View>
-
-                {/* Product Grid */}
-                <FlatList
-                    ref={listRef}
-                    data={filteredProducts}
-                    keyExtractor={item => item.id.toString()}
-                    numColumns={2}
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={styles.productList}
-                    renderItem={({item}) => (
-                        <ProductCard product={item}/>
-                    )}
-                    initialNumToRender={6}
-                    maxToRenderPerBatch={6}
-                    windowSize={5}
-                    removeClippedSubviews
-                />
-            </View>
-        </SafeAreaView>
+            </SafeAreaView>
+        </>
     );
 };
 
@@ -150,11 +181,8 @@ const styles = StyleSheet.create({
         backgroundColor: "#191919",
     },
     header: {
-        flexDirection: "row",
-        alignItems: "center",
         paddingHorizontal: 16,
         paddingVertical: 12,
-        backgroundColor: '#1f1f1f'
     },
     headerTitle: {
         fontSize: 16,

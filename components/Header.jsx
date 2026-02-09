@@ -199,7 +199,7 @@ const Header = ({
 export default Header;
 const styles = StyleSheet.create({
     header: {
-        backgroundColor: '#191919',
+        backgroundColor: 'transparent',
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
