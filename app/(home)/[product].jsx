@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import {View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, StatusBar} from 'react-native';
 import { ShoppingCart, Heart, ArrowLeft, Minus, Plus } from 'lucide-react-native';
 import { router, useLocalSearchParams } from "expo-router";
 import ProductCard from "../../components/ProductCard";
 import { products } from "../../utilities/products";
 import { useCartStore } from "../../store/cartStore";
+import {SafeAreaView} from "react-native-safe-area-context";
 
 const ProductDetailsPage = () => {
     const params = useLocalSearchParams();
@@ -63,14 +64,23 @@ const ProductDetailsPage = () => {
 
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
+            <StatusBar backgroundColor={'#fff'} />
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()}>
-                    <ArrowLeft size={24} />
+                    <ArrowLeft size={24} color={'#ccc'}/>
                 </TouchableOpacity>
+                <Text style={{
+                    fontSize: 24,
+                    fontWeight: '700',
+                    letterSpacing: -0.3,
+                    color: '#fff'
+                }}>
+                    {product.name}
+                </Text>
                 <TouchableOpacity onPress={() => router.push('/Cart')}>
-                    <ShoppingCart size={24} />
+                    <ShoppingCart size={24} color={'#ccc'}/>
                 </TouchableOpacity>
             </View>
 
@@ -85,7 +95,7 @@ const ProductDetailsPage = () => {
                     >
                         <Heart
                             size={20}
-                            color={isFavorite ? '#e74c3c' : '#666'}
+                            color={isFavorite ? '#e74c3c' : '#b5b5b5'}
                             fill={isFavorite ? '#e74c3c' : 'none'}
                         />
                     </TouchableOpacity>
@@ -182,7 +192,7 @@ const ProductDetailsPage = () => {
                     </View>
                 )}
             </View>
-        </View>
+        </SafeAreaView>
     );
 };
 
@@ -190,28 +200,25 @@ const ProductDetailsPage = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: '#191919',
     },
+
+    /* ---------------- Header ---------------- */
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: 16,
-        paddingTop: 50,
-        paddingBottom: 16,
-        backgroundColor: '#fff',
+        paddingVertical: 12,
+        backgroundColor: '#191919',
         borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
+        borderBottomColor: '#2a2a2a',
     },
-    iconButton: {
-        padding: 8,
-    },
-    scrollView: {
-        flex: 1,
-    },
+
+    /* ---------------- Image ---------------- */
     imageContainer: {
         alignItems: 'center',
-        backgroundColor: '#f8f8f8',
+        backgroundColor: '#222',
         paddingVertical: 30,
         position: 'relative',
     },
@@ -224,14 +231,14 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 20,
         right: 20,
-        backgroundColor: '#fff',
+        backgroundColor: '#1f1f1f',
         borderRadius: 20,
         padding: 8,
         shadowColor: '#000',
-        shadowOffset: {width: 0, height: 2},
-        shadowOpacity: 0.1,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
         shadowRadius: 4,
-        elevation: 3,
+        elevation: 2,
     },
     discountBadge: {
         position: 'absolute',
@@ -243,29 +250,32 @@ const styles = StyleSheet.create({
         borderRadius: 6,
     },
     discountText: {
-        color: '#fff',
+        color: '#ffffff',
         fontSize: 12,
         fontWeight: '700',
     },
+
+    /* ---------------- Product Info ---------------- */
     productInfo: {
         padding: 20,
     },
     brandText: {
         fontSize: 14,
-        color: '#666',
+        color: '#b3b3b3',
         marginBottom: 4,
     },
     productName: {
         fontSize: 22,
         fontWeight: '700',
-        color: '#000',
+        color: '#f5f5f5',
         marginBottom: 4,
     },
     weightText: {
         fontSize: 14,
-        color: '#999',
+        color: '#9a9a9a',
         marginBottom: 12,
     },
+
     ratingContainer: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -274,13 +284,14 @@ const styles = StyleSheet.create({
     ratingText: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#000',
+        color: '#e0e0e0',
         marginRight: 8,
     },
     reviewsText: {
         fontSize: 14,
-        color: '#666',
+        color: '#a0a0a0',
     },
+
     priceContainer: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -289,151 +300,87 @@ const styles = StyleSheet.create({
     price: {
         fontSize: 26,
         fontWeight: '700',
-        color: '#000',
+        color: '#ffffff',
         marginRight: 12,
     },
     originalPrice: {
         fontSize: 18,
-        color: '#999',
+        color: '#8a8a8a',
         textDecorationLine: 'line-through',
     },
-    deliveryContainer: {
-        backgroundColor: '#e8f5e9',
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        borderRadius: 8,
-        alignSelf: 'flex-start',
+
+    /* ---------------- Variants ---------------- */
+    variantRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginVertical: 16,
     },
-    deliveryText: {
-        color: '#26702A',
+    variantChip: {
+        borderWidth: 1,
+        borderColor: '#3a3a3a',
+        borderRadius: 20,
+        paddingHorizontal: 14,
+        paddingVertical: 8,
+        marginRight: 8,
+        marginBottom: 8,
+        backgroundColor: '#1f1f1f',
+    },
+    variantActive: {
+        backgroundColor: '#26702A',
+        borderColor: '#26702A',
+    },
+    variantText: {
         fontSize: 14,
+        color: '#d0d0d0',
         fontWeight: '600',
     },
-    descriptionContainer: {
-        marginTop: 24,
-        paddingTop: 24,
-        borderTopWidth: 1,
-        borderTopColor: '#f0f0f0',
+    variantTextActive: {
+        color: '#ffffff',
     },
+
+    /* ---------------- Description ---------------- */
     sectionTitle: {
         fontSize: 18,
         fontWeight: '700',
-        color: '#000',
+        color: '#f5f5f5',
         marginBottom: 12,
     },
     descriptionText: {
         fontSize: 15,
         lineHeight: 24,
-        color: '#666',
+        color: '#bdbdbd',
     },
+
+    /* ---------------- Similar Products ---------------- */
     similarSection: {
         paddingTop: 24,
+        paddingHorizontal: 12,
         borderTopWidth: 8,
-        borderTopColor: '#f8f8f8',
+        borderTopColor: '#222',
     },
     similarTitle: {
         fontSize: 20,
         fontWeight: '700',
-        color: '#000',
+        color: '#f5f5f5',
         marginBottom: 16,
         paddingHorizontal: 20,
     },
-    similarScroll: {
-        paddingLeft: 20,
-    },
-    similarCard: {
-        width: 160,
-        backgroundColor: '#fff',
-        borderRadius: 12,
-        marginRight: 12,
-        borderWidth: 1,
-        borderColor: '#f0f0f0',
-        overflow: 'hidden',
-    },
-    similarImage: {
-        width: '100%',
-        height: 140,
-        backgroundColor: '#f8f8f8',
-    },
-    similarDiscountBadge: {
-        position: 'absolute',
-        top: 8,
-        left: 8,
-        backgroundColor: '#26702A',
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 4,
-    },
-    similarDiscountText: {
-        color: '#fff',
-        fontSize: 10,
-        fontWeight: '700',
-    },
-    similarInfo: {
-        padding: 12,
-    },
-    similarBrand: {
-        fontSize: 11,
-        color: '#999',
-        marginBottom: 4,
-    },
-    similarName: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#000',
-        marginBottom: 4,
-    },
-    similarWeight: {
-        fontSize: 12,
-        color: '#666',
-        marginBottom: 8,
-    },
-    similarPriceRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 8,
-    },
-    similarPrice: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: '#000',
-        marginRight: 6,
-    },
-    similarOriginalPrice: {
-        fontSize: 12,
-        color: '#999',
-        textDecorationLine: 'line-through',
-    },
-    similarAddButton: {
-        backgroundColor: '#fff',
-        borderWidth: 1.5,
-        borderColor: '#26702A',
-        borderRadius: 8,
-        paddingVertical: 8,
-        alignItems: 'center',
-    },
-    similarAddText: {
-        color: '#26702A',
-        fontSize: 13,
-        fontWeight: '700',
-    },
-    bottomPadding: {
-        height: 100,
-    },
+
+    /* ---------------- Bottom Bar ---------------- */
     bottomBar: {
         position: 'absolute',
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: '#fff',
+        backgroundColor: '#191919',
         padding: 16,
         borderTopWidth: 1,
-        borderTopColor: '#f0f0f0',
+        borderTopColor: '#2a2a2a',
         shadowColor: '#000',
-        shadowOffset: {width: 0, height: -2},
-        shadowOpacity: 0.1,
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.05,
         shadowRadius: 4,
-        elevation: 5,
+        elevation: 4,
     },
     addButton: {
         backgroundColor: '#26702A',
@@ -442,7 +389,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     addButtonText: {
-        color: '#fff',
+        color: '#ffffff',
         fontSize: 16,
         fontWeight: '700',
     },
@@ -454,42 +401,12 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         paddingVertical: 12,
     },
-    quantityButton: {
-        padding: 8,
-    },
     quantityText: {
-        color: '#fff',
+        color: '#ffffff',
         fontSize: 20,
         fontWeight: '700',
         marginHorizontal: 30,
     },
-    variantRow: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        marginVertical: 16,
-    },
-    variantChip: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 20,
-        paddingHorizontal: 14,
-        paddingVertical: 8,
-        marginRight: 8,
-        marginBottom: 8,
-    },
-    variantActive: {
-        backgroundColor: '#26702A',
-        borderColor: '#26702A',
-    },
-    variantText: {
-        fontSize: 14,
-        color: '#333',
-        fontWeight: '600',
-    },
-    variantTextActive: {
-        color: '#fff',
-    },
-
-})
+});
 
 export default ProductDetailsPage;

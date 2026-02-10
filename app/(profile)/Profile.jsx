@@ -8,14 +8,14 @@ import {
 import {router} from "expo-router";
 import React from "react";
 import {
-    ChevronRight, Home, ArrowLeft, User
+    ChevronRight, Home, User
 } from "lucide-react-native";
+import SuccessModal from "../../components/SuccessModal";
+
 const {height} = Dimensions.get('window');
 const Profile = () => {
+    const [showModal, setShowModal] = React.useState(false);
 
-    const handleLogout = () => {
-        router.replace("/Login");
-    };
     return (
         <SafeAreaView style={styles.container}>
             <KeyboardAvoidingView
@@ -39,7 +39,7 @@ const Profile = () => {
                             <View style={styles.infoRow}>
                                 <View style={styles.infoLeft}>
                                     <View style={styles.infoIcon}>
-                                        <User size={18} color="#93BD57" />
+                                        <User size={18} color="#93BD57"/>
                                     </View>
                                     <View>
                                         <Text style={styles.infoLabel}>Phone Number</Text>
@@ -57,13 +57,13 @@ const Profile = () => {
                                 activeOpacity={0.8}
                             >
                                 <View style={styles.actionLeft}>
-                                    <Home size={18} color="#0F172A" />
+                                    <Home size={18} color="#0F172A"/>
                                     <Text style={styles.actionText}>My Orders</Text>
                                 </View>
-                                <ChevronRight size={18} color="#94A3B8" />
+                                <ChevronRight size={18} color="#94A3B8"/>
                             </TouchableOpacity>
 
-                            <View style={styles.divider} />
+                            <View style={styles.divider}/>
 
                             <TouchableOpacity
                                 style={styles.actionRow}
@@ -71,10 +71,10 @@ const Profile = () => {
                                 activeOpacity={0.8}
                             >
                                 <View style={styles.actionLeft}>
-                                    <Home size={18} color="#0F172A" />
+                                    <Home size={18} color="#0F172A"/>
                                     <Text style={styles.actionText}>Saved Addresses</Text>
                                 </View>
-                                <ChevronRight size={18} color="#94A3B8" />
+                                <ChevronRight size={18} color="#94A3B8"/>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -83,7 +83,7 @@ const Profile = () => {
                             style={[
                                 styles.nextButton,
                             ]}
-                            onPress={() => router.push("/")}
+                            onPress={() => setShowModal(true)}
                         >
                             <Text style={styles.nextButtonText}>
                                 Logout
@@ -92,6 +92,18 @@ const Profile = () => {
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
+            <SuccessModal
+                visible={showModal}
+                autoCloseDuration={3000}
+                onAnimationComplete={() => {
+                    setShowModal(false)
+                    router.push('/Profile')
+                }}
+                title={'Logged Out'} progressBarColor={'#CA0B00'}
+                iconColor={'#880700'}
+                iconBackgroundColor={'#ff655e'}
+                subtitle={'Logged Out Successfully. Redirecting to Home...'}
+            />
         </SafeAreaView>
     );
 };
@@ -184,16 +196,12 @@ const styles = StyleSheet.create({
     },
     nextButton: {
         flex: 1,
-        backgroundColor: '#bd5757',
+        backgroundColor: '#CA0B00',
         borderRadius: 14,
         paddingVertical: 16,
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: '#93BD57',
-        shadowOffset: {width: 0, height: 4},
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 6,
+        boxShadow: '0px 4px 2px rgba(202, 11, 0, 0.5)'
     },
 
     nextButtonText: {
