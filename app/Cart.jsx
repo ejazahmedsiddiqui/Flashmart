@@ -12,11 +12,13 @@ import {
 import {router} from "expo-router";
 import {ArrowLeft, Trash2, Plus, Minus, ShoppingBag, ShoppingCart} from "lucide-react-native";
 import {useCartStore} from '../store/cartStore';
+import {useThemeStore} from "../store/themeStore";
 
 
 export default function Cart() {
-    // Updated handler to use cartKey
-    console.log('@/app/Cart accessed')
+    const theme = useThemeStore((s) => s.theme);
+    const styles = useMemo(() => createStyles(theme), [theme]);
+
     const incrementQuantity = useCartStore(state => state.incrementQuantity);
     const decrementQuantity = useCartStore(state => state.decrementQuantity);
 
@@ -279,10 +281,10 @@ export default function Cart() {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f8fafc',
+        backgroundColor: theme.colors.background,
     },
 
     // Header
@@ -292,7 +294,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: 20,
         paddingVertical: 16,
-        backgroundColor: '#ffffff',
+        backgroundColor: theme.colors.background,
         borderBottomWidth: 1,
         borderBottomColor: '#e2e8f0',
     },
@@ -309,7 +311,7 @@ const styles = StyleSheet.create({
     cartIconButton: {
         width: 48,
         height: 48,
-        backgroundColor: '#0c831f',
+        backgroundColor: theme.colors.accent,
         borderRadius: 24,
         justifyContent: 'center',
         alignItems: 'center',
@@ -326,7 +328,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: -4,
         right: -4,
-        backgroundColor: '#ef4444',
+        backgroundColor: theme.colors.danger,
         borderRadius: 12,
         minWidth: 24,
         height: 24,
@@ -350,7 +352,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     cartSection: {
-        backgroundColor: '#ffffff',
+        backgroundColor: theme.colors.background,
         marginTop: 8,
     },
 
@@ -358,13 +360,13 @@ const styles = StyleSheet.create({
     cartItem: {
         flexDirection: 'row',
         padding: 16,
-        backgroundColor: '#ffffff',
+        backgroundColor: theme.colors.background,
     },
     itemImage: {
         width: 90,
         height: 90,
         borderRadius: 12,
-        backgroundColor: '#f8fafc',
+        backgroundColor: theme.colors.muted,
     },
     itemDetails: {
         flex: 1,
@@ -383,7 +385,7 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     variantContainer: {
-        backgroundColor: '#f1f5f9',
+        backgroundColor: theme.colors.surface,
         alignSelf: 'flex-start',
         paddingHorizontal: 8,
         paddingVertical: 4,
@@ -420,7 +422,7 @@ const styles = StyleSheet.create({
     quantityControl: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#f8fafc',
+        backgroundColor: theme.colors.surface,
         borderRadius: 8,
         borderWidth: 1,
         borderColor: '#e2e8f0',
@@ -441,7 +443,7 @@ const styles = StyleSheet.create({
     },
     itemSeparator: {
         height: 1,
-        backgroundColor: '#f1f5f9',
+        backgroundColor: theme.colors.surface,
         marginHorizontal: 20,
     },
 
