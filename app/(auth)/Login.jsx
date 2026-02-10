@@ -1,20 +1,17 @@
 import {SafeAreaView} from "react-native-safe-area-context";
-import {Text, StyleSheet, View, TouchableOpacity, Animated, Modal} from "react-native";
+import {Text, StyleSheet, View, TouchableOpacity, Animated, } from "react-native";
 import React, {useState, useRef, useEffect} from "react";
-import {Phone, Lock, CheckCircle2, LucideMail} from 'lucide-react-native';
+import {Phone, Lock} from 'lucide-react-native';
 import {router} from "expo-router";
 import RenderFormField from "../../components/RenderFormField";
 import SuccessModal from "../../components/SuccessModal";
-import Footer from "../../components/Footer";
 
 const SellerLogin = () => {
     const [phone, setPhone] = useState("");
-    const [email, setEmail] = useState("");
     const [otp, setOtp] = useState("");
     const [step, setStep] = useState(1); // 1: Phone, 2: OTP
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [errors, setErrors] = useState({phone: "", otp: ""});
-    const [isPhone, setIsPhone] = useState(true);
     const [resendTimer, setResendTimer] = useState(0);
 
     // Animation
@@ -39,25 +36,13 @@ const SellerLogin = () => {
     }, [resendTimer]);
 
 
-    const validateLogin = () => {
-        if (isPhone && phone.length !== 10) {
-            setErrors({...errors, phone: "Please enter a valid 10-digit phone number"});
-            return false;
-        }
-        if (!isPhone && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            setErrors({...errors, email: "Please enter a valid email address"});
-            return false;
-        }
-        setErrors({...errors, phone: ""});
-        return true;
-    };
 
     const handleSendOTP = () => {
-        if (validateLogin()) {
-            console.log("Sending OTP to:", phone || email);
+
+            console.log("Sending OTP to:", phone);
             setStep(2);
-            setResendTimer(30); // Start timer
-        }
+            setResendTimer(30);
+
     };
 
     const handleVerifyOTP = () => {
@@ -72,7 +57,7 @@ const SellerLogin = () => {
             setErrors({...errors, otp: ""});
             showSuccessAnimation();
         } else {
-            setErrors({...errors, otp: "Invalid OTP. Try again or resend to " + `${isPhone ? phone : email}`});
+            setErrors({...errors, otp: "Invalid OTP. Try again or resend to " + phone});
         }
     };
 
@@ -118,7 +103,7 @@ const SellerLogin = () => {
 
         setOtp("");
         setErrors({...errors, otp: ""});
-        console.log("Resending OTP to:", phone || email);
+        console.log("Resending OTP to:", phone);
         setResendTimer(30);
     };
 
@@ -128,7 +113,7 @@ const SellerLogin = () => {
         setErrors({phone: "", otp: ""});
     };
 
-    const disabled = isPhone ? phone.length !== 10 : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const disabled =  phone.length !== 10;
 
     return (
         <>
@@ -140,12 +125,12 @@ const SellerLogin = () => {
                             <Phone size={32} color="#fff" strokeWidth={2.5}/>
                         </View>
                         <Text style={styles.headerTitle}>
-                            {step === 1 ? "Welcome Back!" : "Verify OTP"}
+                            {step === 1 ? "Welcome!" : "Verify OTP"}
                         </Text>
                         <Text style={styles.headerSubtitle}>
                             {step === 1
                                 ? "Enter your phone number to continue"
-                                : `We've sent a code to ${isPhone ? '+91 ' + phone : email}`}
+                                : `We've sent a code to +91 ` + phone }
                         </Text>
                     </View>
 
@@ -153,7 +138,7 @@ const SellerLogin = () => {
                     <View style={styles.formCard}>
                         {step === 1 ? (
                             <>
-                                {isPhone ? <RenderFormField
+                                <RenderFormField
                                         label="Phone Number"
                                         inputType="phone"
                                         value={phone}
@@ -163,17 +148,7 @@ const SellerLogin = () => {
                                         textColor="#1F2937"
                                         error={errors.phone}
                                         maxLength={10}
-                                    /> :
-                                    <RenderFormField
-                                        label="Email"
-                                        value={email}
-                                        onChangeText={setEmail}
-                                        placeholder="Enter your email"
-                                        icon={<LucideMail size={20} color="#9CA3AF"/>}
-                                        textColor="#1F2937"
-                                        error={errors.phone}
-                                    />}
-
+                                    />
                                 <TouchableOpacity
                                     style={[
                                         styles.primaryButton,
@@ -183,21 +158,8 @@ const SellerLogin = () => {
                                 >
                                     <Text style={styles.primaryButtonText}>Send OTP</Text>
                                 </TouchableOpacity>
-
-                                <View style={styles.divider}>
-                                    <View style={styles.dividerLine}/>
-                                    <Text style={styles.dividerText}>OR</Text>
-                                    <View style={styles.dividerLine}/>
-                                </View>
-
-                                <TouchableOpacity style={styles.secondaryButton}
-                                                  onPress={() => setIsPhone(!isPhone)}>
-                                    {isPhone ? <Text style={styles.secondaryButtonText}>
-                                            Continue with Email
-                                        </Text> :
-                                        <Text style={styles.secondaryButtonText}>
-                                            Continue with Phone
-                                        </Text>}
+                                <TouchableOpacity onPress={() => router.push('/AddressSetter')}>
+                                    <Text style={styles.linkText}>AddressSetter</Text>
                                 </TouchableOpacity>
                             </>
                         ) : (
@@ -243,18 +205,13 @@ const SellerLogin = () => {
                                     <TouchableOpacity onPress={handleChangeNumber}>
                                         <Text style={styles.linkText}>Change Number</Text>
                                     </TouchableOpacity>
+
                                 </View>
                             </>
                         )}
                     </View>
 
                     {/* Footer */}
-                    <View style={styles.footer}>
-                        <Text style={styles.footerText}>
-                            Don&apos;t have an account?{" "}
-                            <Text style={styles.footerLink} onPress={() => router.push('/Register')}>Register Now</Text>
-                        </Text>
-                    </View>
                 </View>
 
                 {/* Success Modal */}
@@ -264,7 +221,7 @@ const SellerLogin = () => {
                         setShowSuccessModal(false)
                         router.replace('/');
                     }}
-                    subtitle={'Welcome Back! Redirecting to Dashboard...'}
+                    subtitle={'Welcome Back! Redirecting to Home page...'}
                     title={'Logged in'}
                 />
             </SafeAreaView>

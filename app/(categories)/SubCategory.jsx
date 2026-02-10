@@ -7,7 +7,7 @@ import {
     FlatList, Image, StatusBar,
 } from "react-native";
 import {router, useLocalSearchParams} from "expo-router";
-import {MoveLeft} from "lucide-react-native";
+import {ArrowLeft} from "lucide-react-native";
 import React, {useEffect, useMemo, useState, useRef} from "react";
 import ProductCard from "../../components/ProductCard";
 import {products} from "../../utilities/products";
@@ -17,6 +17,7 @@ import {ImageBackground} from "expo-image";
 const BRAND_ITEM_HEIGHT = 72;
 
 const SubCategory = () => {
+    const [cardWidth, setCardWidth] = useState(1);
     const brands = useMemo(() => {
         const brandMap = new Map();
         products.forEach(p => {
@@ -93,25 +94,23 @@ const SubCategory = () => {
             viewPosition: 0.5,
         });
     };
-    console.log('Params is: ', params)
 
     return (
         <>
             <StatusBar backgroundColor={'#fff'}/>
             <SafeAreaView style={styles.container}>
-
                 <ImageBackground
                     style={{
                         justifyContent: 'flex-start',
                         width: '100%',
-                        height: 80, // Add explicit height
-                        padding: 12,
-                        marginBottom: 12,
-
+                        height: 100,
+                        paddingTop: 12,
+                        paddingBottom: 0,
+                        paddingHorizontal: 12,
                     }}
                     source={{uri: params?.subImage}}
                     imageStyle={{
-                        opacity: 0.1,
+                        opacity: 0.2,
                     }}>
                     <View
                         style={{
@@ -119,8 +118,13 @@ const SubCategory = () => {
                             justifyContent: 'flex-start',
                         }}
                     >
-                        <TouchableOpacity onPress={() => router.back()}>
-                            <MoveLeft size={22} color={'#fff'}/>
+                        <TouchableOpacity
+                            onPress={() => router.back()}
+                            style={{
+                                justifyContent: 'center'
+                            }}
+                        >
+                            <ArrowLeft size={22} color={'#fff'}/>
                         </TouchableOpacity>
                         <Text style={styles.headerTitle}>{params?.subLabel}</Text>
                     </View>
@@ -153,6 +157,10 @@ const SubCategory = () => {
 
                     {/* Product Grid */}
                     <FlatList
+                        onLayout={(event) => {
+                            const containerWidth = event.nativeEvent.layout.width;
+                            setCardWidth(containerWidth);
+                        }}
                         ref={listRef}
                         data={filteredProducts}
                         keyExtractor={item => item.id.toString()}
@@ -160,12 +168,14 @@ const SubCategory = () => {
                         showsVerticalScrollIndicator={false}
                         contentContainerStyle={styles.productList}
                         renderItem={({item}) => (
-                            <ProductCard product={item}/>
+                            <ProductCard product={item} width={cardWidth}/>
                         )}
                         initialNumToRender={6}
                         maxToRenderPerBatch={6}
                         windowSize={5}
                         removeClippedSubviews
+                        style={{ paddingTop: 12,}}
+
                     />
                 </View>
             </SafeAreaView>
@@ -182,10 +192,10 @@ const styles = StyleSheet.create({
     },
     header: {
         paddingHorizontal: 16,
-        paddingVertical: 12,
+        paddingTop: 12,
     },
     headerTitle: {
-        fontSize: 16,
+        fontSize: 24,
         fontWeight: "700",
         marginLeft: 12,
         color: '#eee'
@@ -204,7 +214,7 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 15,
     },
     brandItem: {
-        paddingVertical: 14,
+        paddingVertical: 20,
         paddingHorizontal: 8,
         alignItems: "center",
         justifyContent: "center",

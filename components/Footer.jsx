@@ -28,7 +28,7 @@ const Footer = () => {
             id: 'profile',
             label: 'Profile',
             icon: User,
-            route: '/(auth)/Login'
+            route: '/(profile)/Profile'
         },
     ];
 
@@ -36,8 +36,8 @@ const Footer = () => {
         if (route === '/(home)') {
             return pathname === '/' || pathname.startsWith('/(home)');
         }
-        if (route.startsWith('/(auth)')) {
-            return pathname.startsWith('/Login');
+        if (route.startsWith('/(profile)')) {
+            return pathname.startsWith('/Profile');
         }
         if (route.startsWith('/Categories')) {
             return pathname.startsWith('/Categories');

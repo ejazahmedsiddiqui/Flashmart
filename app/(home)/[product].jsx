@@ -8,6 +8,7 @@ import { useCartStore } from "../../store/cartStore";
 
 const ProductDetailsPage = () => {
     const params = useLocalSearchParams();
+    const [cardWidth, setCardWidth] = useState(0);
 
     const product = products.find(
         p => p.id === Number(params.product)
@@ -148,9 +149,13 @@ const ProductDetailsPage = () => {
                 {similarProducts.length > 0 && (
                     <View style={styles.similarSection}>
                         <Text style={styles.similarTitle}>Similar Products</Text>
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false}
+                                    onLayout={(event) => {
+                                        const containerWidth = event.nativeEvent.layout.width;
+                                        setCardWidth(containerWidth);
+                                    }}>
                             {similarProducts.map(item => (
-                                <ProductCard key={item.id} product={item} />
+                                <ProductCard key={item.id} product={item} width={cardWidth} />
                             ))}
                         </ScrollView>
                     </View>
