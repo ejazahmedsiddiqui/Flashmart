@@ -33,7 +33,6 @@ import {
 } from "lucide-react-native";
 import {products} from "../../utilities/products";
 import Header from "../../components/Header";
-import Footer from "../../components/Footer";
 
 export default function Index() {
     const [category, setCategory] = useState('');
@@ -42,7 +41,7 @@ export default function Index() {
     const [error, setError] = useState(false);
     const scrollViewRef = useRef(null);
     const [categoryLayouts, setCategoryLayouts] = useState({});
-
+    const [cardWidth, setCardWidth] = useState(0);
     const categoryHeaderList = [
         {id: '', label: 'Home', icon: HomeIcon},
         {id: 'vegetables', label: 'Vegetables', icon: Carrot, title: 'Grocery & Kitchen'},
@@ -113,8 +112,8 @@ export default function Index() {
     };
 
     const renderProduct = useCallback(
-        ({item}) => <ProductCard product={item}/>,
-        []
+        ({item}) => <ProductCard product={item} width={cardWidth}/>,
+        [cardWidth]
     );
 
 
@@ -180,6 +179,10 @@ export default function Index() {
                         </View>
                     ) : (
                         <FlatList
+                            onLayout={(event) => {
+                                const containerWidth = event.nativeEvent.layout.width;
+                                setCardWidth(containerWidth);
+                            }}
                             data={displayProducts}
                             renderItem={renderProduct}
                             keyExtractor={item => item.id.toString()}
@@ -191,7 +194,6 @@ export default function Index() {
                             windowSize={5}
                             removeClippedSubviews
                         />
-
                     )) : (
                         <View style={styles.errorContainer}>
                             <View style={styles.iconWrapper}>
@@ -330,7 +332,8 @@ const styles = StyleSheet.create({
     },
     productsList: {
         paddingBottom: 20,
-        alignItems: 'center'
+        alignItems: 'center',
+        justifyContent: 'space-between',
     },
     // Loading & Error States
     loadingContainer: {

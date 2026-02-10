@@ -6,16 +6,15 @@ import {
     Dimensions,
     Image,
 } from "react-native";
-import React, { useMemo } from "react";
-import { router } from "expo-router";
-import { useCartStore } from "../store/cartStore";
+import React, {useEffect, useMemo, useRef} from "react";
+import {router} from "expo-router";
+import {useCartStore} from "../store/cartStore";
 
-const { width } = Dimensions.get("window");
+const {width} = Dimensions.get("window");
 const CARD_WIDTH = (width - 48) / 2;
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({product, width = CARD_WIDTH}) => {
     const selectedVariant = product.variants?.[0];
-
     const cartKey = useMemo(
         () =>
             selectedVariant
@@ -63,10 +62,17 @@ const ProductCard = ({ product }) => {
 
     console.log("Render ProductCard", product.id);
 
+
     return (
-        <TouchableOpacity style={styles.productCard} onPress={handleCardPush}>
+        <TouchableOpacity
+            style={[
+                styles.productCard,
+                {width: (width / 2) - 8} // Divide by 2 for numColumns, subtract margins
+            ]}
+            onPress={handleCardPush}
+        >
             <View style={styles.imageContainer}>
-                <Image source={{ uri: product.image }} style={styles.productImage} />
+                <Image source={{uri: product.image}} style={styles.productImage}/>
 
                 {discountPercent > 0 && (
                     <View style={styles.discountBadge}>
@@ -138,19 +144,20 @@ const ProductCard = ({ product }) => {
     );
 };
 
-export default React.memo(ProductCard);
+export default React.memo(
+    ProductCard);
 
 
 const styles = StyleSheet.create({
     productCard: {
-        width: '48%',
+        // width: '48%',
         backgroundColor: '#242424',
         borderRadius: 12,
         margin: 4,
         overflow: 'hidden',
         boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)'
 
-},
+    },
     imageContainer: {
         width: '100%',
         height: 140,
