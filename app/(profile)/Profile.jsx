@@ -7,10 +7,10 @@ import {
     KeyboardAvoidingView,
     Platform,
     ScrollView,
-    Dimensions,
+    Dimensions, ActivityIndicator,
 } from "react-native";
 import {router} from "expo-router";
-import React, {useMemo} from "react";
+import React, {useEffect, useMemo} from "react";
 import {
     ChevronRight,
     Home,
@@ -22,10 +22,12 @@ import {
 import SuccessModal from "../../components/SuccessModal";
 import AnimatedContainer from "../../components/AnimatedContainer";
 import {useThemeStore} from "../../store/themeStore";
+import {useUser} from "../../context/UserContext";
 
 const {height} = Dimensions.get("window");
 
 const Profile = () => {
+    const { isAuthenticated, isLoading, logout } = useUser();
     const [showModal, setShowModal] = React.useState(false);
 
     const theme = useThemeStore((s) => s.theme);
@@ -34,6 +36,27 @@ const Profile = () => {
 
     const styles = useMemo(() => createStyles(theme), [theme]);
 
+    useEffect(() => {
+        console.log ('Profile isAuthenticated', isAuthenticated);
+        if(!isAuthenticated) router.replace('/Login')
+    }, [isAuthenticated]);
+
+    if(isLoading) {
+        return (
+            <AnimatedContainer>
+                <SafeAreaView style={[styles.container]}>
+                    <ActivityIndicator size={'large'} color={theme.colors.inverted} />
+                    <Text style={{
+                        color: theme.colors.text,
+                        fontSize: theme.fontSize.lg,
+                        fontWeigh: theme.fontWeight.bold
+                    }}>
+                        Loading...
+                    </Text>
+                </SafeAreaView>
+            </AnimatedContainer>
+        )
+    }
     return (
         <AnimatedContainer>
             <SafeAreaView style={styles.container}>
@@ -149,8 +172,8 @@ const Profile = () => {
                         visible={showModal}
                         autoCloseDuration={1000}
                         onAnimationComplete={() => {
+                            logout();
                             setShowModal(false);
-                            router.push("/Login");
                         }}
                         title={"Logged Out"}
                         subtitle={"Logged Out Successfully. Redirecting to Home..."}

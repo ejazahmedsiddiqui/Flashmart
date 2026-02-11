@@ -7,12 +7,11 @@ import {
     FlatList, Image, StatusBar,
 } from "react-native";
 import {router, useLocalSearchParams} from "expo-router";
-import {ArrowLeft} from "lucide-react-native";
+import {ChevronLeft} from "lucide-react-native";
 import React, {useEffect, useMemo, useState, useRef} from "react";
 import ProductCard from "../../components/ProductCard";
 import {products} from "../../utilities/products";
 import Header from "../../components/Header";
-import {ImageBackground} from "expo-image";
 import {useThemeStore} from "../../store/themeStore";
 
 const BRAND_ITEM_HEIGHT = 72;
@@ -104,37 +103,27 @@ const SubCategory = () => {
         <>
             <StatusBar backgroundColor={theme.colors.inverted}/>
             <SafeAreaView style={styles.container}>
-                <ImageBackground
+                <View
                     style={{
                         justifyContent: 'flex-start',
                         width: '100%',
-                        height: 100,
                         paddingTop: 12,
                         paddingBottom: 0,
                         paddingHorizontal: 12,
-                    }}
-                    source={{uri: params?.subImage}}
-                    imageStyle={{
-                        opacity: 0.2,
                     }}>
-                    <View
+
+                    <TouchableOpacity
+                        onPress={() => router.back()}
                         style={{
                             flexDirection: 'row',
-                            justifyContent: 'flex-start',
+                            alignItems: 'center',
                         }}
                     >
-                        <TouchableOpacity
-                            onPress={() => router.back()}
-                            style={{
-                                justifyContent: 'center'
-                            }}
-                        >
-                            <ArrowLeft size={22} color={theme.colors.inverted}/>
-                        </TouchableOpacity>
+                        <ChevronLeft size={16} color={theme.colors.inverted}/>
                         <Text style={styles.headerTitle}>{params?.subLabel}</Text>
-                    </View>
+                    </TouchableOpacity>
                     <Header showHeaderTitle={false} showCart={true} showSearchBar={false}/>
-                </ImageBackground>
+                </View>
 
 
                 {/* Body */}
@@ -179,7 +168,7 @@ const SubCategory = () => {
                         maxToRenderPerBatch={6}
                         windowSize={5}
                         removeClippedSubviews
-                        style={{ paddingTop: 12,}}
+                        style={{paddingTop: 12,}}
 
                     />
                 </View>
@@ -200,10 +189,10 @@ const createStyles = (theme) => StyleSheet.create({
         paddingTop: theme.spacing.md,
     },
     headerTitle: {
-        fontSize: theme.fontSize.xxxl,
+        fontSize: theme.fontSize.xl,
         fontWeight: theme.fontWeight.bold,
-        marginLeft: theme.spacing.md,
         color: theme.colors.textPrimary,
+        marginLeft: 4,
     },
     body: {
         flex: 1,

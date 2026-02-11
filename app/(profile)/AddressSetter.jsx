@@ -21,7 +21,7 @@ import {
     Navigation,
     Edit3,
     X,
-    AlertCircleIcon
+    AlertCircleIcon, LucideHome
 } from 'lucide-react-native';
 import CustomAlert from "../../components/CustomAlert";
 import {useAlert} from "../../utilities/alertConfig";
@@ -29,6 +29,7 @@ import SuccessModal from "../../components/SuccessModal";
 import * as Location from 'expo-location';
 import MapView from 'react-native-maps';
 import {router} from "expo-router";
+import HomeLayout from "../(home)/_layout";
 
 const {width, height} = Dimensions.get('window');
 
@@ -67,7 +68,7 @@ const AddressSetter = () => {
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(50)).current;
     const updateTimerRef = useRef(null);
-
+    const [addressTitle, setAddressTitle] = useState("");
     useEffect(() => {
         Animated.parallel([
             Animated.timing(progressAnim, {
@@ -302,6 +303,10 @@ const AddressSetter = () => {
     };
 
     const handleSubmit = () => {
+        if (!addressTitle || !homeAddress.formattedAddress || (!homeAddress.latitude && !homeAddress.longitude)) {
+            showAlert('Incomplete Form', 'Please enter a valid title/address');
+            return;
+        }
         console.log("Form submitted");
         setShowSuccessModal(true);
     };
@@ -559,10 +564,17 @@ const AddressSetter = () => {
         >
             <Text style={styles.sectionTitle}>Review Your Details</Text>
             <Text style={styles.sectionSubtitle}>
-                Please verify all information before submitting
+                Please give this address a title and verify all information before submitting
             </Text>
 
             <View style={styles.reviewContainer}>
+                <RenderFormField
+                    label={'Title'}
+                    placeholder={'Enter Address title: (Home, Work, Office, etc.)'}
+                    icon={<LucideHome size={24} color={'#9CA3AF'}/>}
+                    value={addressTitle}
+                    onChangeText={setAddressTitle}
+                />
 
                 {/* Address Information */}
                 <View style={styles.reviewSection}>
