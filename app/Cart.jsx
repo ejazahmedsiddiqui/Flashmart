@@ -12,11 +12,13 @@ import {
 import {router} from "expo-router";
 import {ArrowLeft, Trash2, Plus, Minus, ShoppingBag, ShoppingCart} from "lucide-react-native";
 import {useCartStore} from '../store/cartStore';
+import {useThemeStore} from "../store/themeStore";
 
 
 export default function Cart() {
-    // Updated handler to use cartKey
-    console.log('@/app/Cart accessed')
+    const theme = useThemeStore((s) => s.theme);
+    const styles = useMemo(() => createStyles(theme), [theme]);
+
     const incrementQuantity = useCartStore(state => state.incrementQuantity);
     const decrementQuantity = useCartStore(state => state.decrementQuantity);
 
@@ -87,7 +89,7 @@ export default function Cart() {
                     onPress={() => removeItem(item.cartKey)}
                     activeOpacity={0.7}
                 >
-                    <Trash2 size={18} color="#ef4444"/>
+                    <Trash2 size={18} color={theme.colors.danger}/>
                 </TouchableOpacity>
 
                 <View style={styles.quantityControl}>
@@ -96,7 +98,7 @@ export default function Cart() {
                         onPress={() => handleUpdateQuantity(item.cartKey, -1)}
                         activeOpacity={0.7}
                     >
-                        <Minus size={16} color="#0c831f"/>
+                        <Minus size={16} color={theme.colors.accent}/>
                     </TouchableOpacity>
 
                     <Text style={styles.quantityText}>{item.quantity}</Text>
@@ -106,7 +108,7 @@ export default function Cart() {
                         onPress={() => handleUpdateQuantity(item.cartKey, 1)}
                         activeOpacity={0.7}
                     >
-                        <Plus size={16} color="#0c831f"/>
+                        <Plus size={16} color={theme.colors.accent}/>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -125,7 +127,7 @@ export default function Cart() {
                         style={styles.backButton}
                         activeOpacity={0.7}
                     >
-                        <ArrowLeft size={24} color="#0f172a"/>
+                        <ArrowLeft size={24} color={theme.colors.textSecondary}/>
                     </TouchableOpacity>}
                     <Text style={styles.headerTitle}>My Cart</Text>
                     <View style={styles.placeholder}/>
@@ -133,7 +135,7 @@ export default function Cart() {
 
                 <View style={styles.emptyContainer}>
                     <View style={styles.emptyIconContainer}>
-                        <ShoppingBag size={80} color="#cbd5e1"/>
+                        <ShoppingBag size={80} color={theme.colors.muted}/>
                     </View>
                     <Text style={styles.emptyTitle}>Your cart is empty</Text>
                     <Text style={styles.emptySubtitle}>Add some delicious items to get started!</Text>
@@ -159,7 +161,7 @@ export default function Cart() {
                     style={styles.backButton}
                     activeOpacity={0.7}
                 >
-                    <ArrowLeft size={24} color="#0f172a"/>
+                    <ArrowLeft size={24} color={theme.colors.textSecondary}/>
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>My Cart</Text>
                 <TouchableOpacity
@@ -167,7 +169,7 @@ export default function Cart() {
                     activeOpacity={0.7}
                 >
                     <View style={styles.cartIcon}>
-                        <ShoppingCart size={20} color={'#fff'}/>
+                        <ShoppingCart size={20} color={theme.colors.accentText}/>
                     </View>
                     {cartItems.length > 0 && (
                         <View style={styles.cartBadge}>
@@ -279,10 +281,10 @@ export default function Cart() {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f8fafc',
+        backgroundColor: theme.colors.background,
     },
 
     // Header
@@ -290,44 +292,40 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: 20,
-        paddingVertical: 16,
-        backgroundColor: '#ffffff',
+        paddingHorizontal: theme.spacing.lg,
+        paddingVertical: theme.spacing.lg,
+        backgroundColor: theme.colors.background,
         borderBottomWidth: 1,
-        borderBottomColor: '#e2e8f0',
+        borderBottomColor: theme.colors.border,
     },
     backButton: {
-        padding: 4,
+        padding: theme.spacing.xs,
     },
     headerTitle: {
-        fontSize: 20,
-        fontWeight: '700',
-        color: '#0f172a',
+        fontSize: theme.fontSize.xl,
+        fontWeight: theme.fontWeight.bold,
+        color: theme.colors.textPrimary,
         flex: 1,
         textAlign: 'center',
     },
     cartIconButton: {
         width: 48,
         height: 48,
-        backgroundColor: '#0c831f',
-        borderRadius: 24,
+        backgroundColor: theme.colors.accent,
+        borderRadius: theme.radius.xl,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#0c831f',
-        shadowOffset: {width: 0, height: 4},
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 4,
+        boxShadow: '1px 3px 2px rgba(0, 0, 0, 0.4)',
     },
     cartIcon: {
-        fontSize: 24,
+        fontSize: theme.fontSize.xl,
     },
     cartBadge: {
         position: 'absolute',
         top: -4,
         right: -4,
-        backgroundColor: '#ef4444',
-        borderRadius: 12,
+        backgroundColor: theme.colors.danger,
+        borderRadius: theme.radius.md,
         minWidth: 24,
         height: 24,
         justifyContent: 'center',
@@ -337,8 +335,8 @@ const styles = StyleSheet.create({
         borderColor: '#ffffff',
     },
     cartBadgeText: {
-        color: '#ffffff',
-        fontSize: 12,
+        color: theme.colors.accentText,
+        fontSize: theme.fontSize.sm,
         fontWeight: '700',
     },
     placeholder: {
@@ -350,40 +348,40 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     cartSection: {
-        backgroundColor: '#ffffff',
+        backgroundColor: theme.colors.background,
         marginTop: 8,
     },
 
     // Cart Item
     cartItem: {
         flexDirection: 'row',
-        padding: 16,
-        backgroundColor: '#ffffff',
+        padding: theme.spacing.md,
+        backgroundColor: theme.colors.background,
     },
     itemImage: {
         width: 90,
         height: 90,
-        borderRadius: 12,
-        backgroundColor: '#f8fafc',
+        borderRadius: theme.radius.md,
+        backgroundColor: theme.colors.muted,
     },
     itemDetails: {
         flex: 1,
-        marginLeft: 16,
+        marginLeft: theme.spacing.md,
         justifyContent: 'space-between',
     },
     itemName: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#0f172a',
+        fontSize: theme.fontSize.lg,
+        fontWeight: theme.fontWeight.bold,
+        color: theme.colors.textPrimary,
         marginBottom: 4,
     },
     itemBrand: {
         fontSize: 13,
-        color: '#64748b',
+        color: theme.colors.textMuted,
         marginBottom: 4,
     },
     variantContainer: {
-        backgroundColor: '#f1f5f9',
+        backgroundColor: theme.colors.surface,
         alignSelf: 'flex-start',
         paddingHorizontal: 8,
         paddingVertical: 4,
@@ -392,7 +390,7 @@ const styles = StyleSheet.create({
     },
     itemWeight: {
         fontSize: 12,
-        color: '#475569',
+        color: theme.colors.textMuted,
         fontWeight: '500',
     },
     priceRow: {
@@ -403,11 +401,11 @@ const styles = StyleSheet.create({
     itemPrice: {
         fontSize: 16,
         fontWeight: '700',
-        color: '#0c831f',
+        color: theme.colors.accent,
     },
     itemOriginalPrice: {
         fontSize: 14,
-        color: '#94a3b8',
+        color: theme.colors.textMuted,
         textDecorationLine: 'line-through',
     },
     itemActions: {
@@ -420,10 +418,10 @@ const styles = StyleSheet.create({
     quantityControl: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#f8fafc',
+        backgroundColor: theme.colors.surface,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: '#e2e8f0',
+        borderColor: theme.colors.border,
     },
     quantityButton: {
         width: 32,
@@ -434,14 +432,14 @@ const styles = StyleSheet.create({
     quantityText: {
         fontSize: 15,
         fontWeight: '600',
-        color: '#0f172a',
+        color: theme.colors.textPrimary,
         paddingHorizontal: 12,
         minWidth: 32,
         textAlign: 'center',
     },
     itemSeparator: {
         height: 1,
-        backgroundColor: '#f1f5f9',
+        backgroundColor: theme.colors.surface,
         marginHorizontal: 20,
     },
 
@@ -458,7 +456,7 @@ const styles = StyleSheet.create({
     freeDeliveryText: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#166534',
+        color: theme.colors.accent,
         textAlign: 'center',
     },
     deliveryInfoBanner: {
@@ -479,19 +477,19 @@ const styles = StyleSheet.create({
 
     // Bill Section
     billSection: {
-        backgroundColor: '#fff',
+        backgroundColor: theme.colors.background,
         marginHorizontal: 20,
         marginTop: 16,
         padding: 20,
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: '#e2e8f0',
+        borderColor: theme.colors.border,
         marginBottom: 12,
     },
     billTitle: {
         fontSize: 16,
         fontWeight: '700',
-        color: '#0f172a',
+        color: theme.colors.textSecondary,
         marginBottom: 16,
     },
     billRow: {
@@ -502,26 +500,26 @@ const styles = StyleSheet.create({
     },
     billLabel: {
         fontSize: 14,
-        color: '#64748b',
+        color: theme.colors.textPrimary,
     },
     billValue: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#0f172a',
+        color: theme.colors.textPrimary,
     },
     billLabelSavings: {
         fontSize: 14,
-        color: '#0c831f',
+        color: theme.colors.accent,
     },
     billValueSavings: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#0c831f',
+        color: theme.colors.accent,
     },
     billValueFree: {
         fontSize: 14,
         fontWeight: '700',
-        color: '#0c831f',
+        color: theme.colors.accent,
     },
     billDivider: {
         height: 1,
@@ -531,12 +529,12 @@ const styles = StyleSheet.create({
     billLabelTotal: {
         fontSize: 16,
         fontWeight: '700',
-        color: '#0f172a',
+        color: theme.colors.textPrimary,
     },
     billValueTotal: {
         fontSize: 18,
         fontWeight: '700',
-        color: '#0c831f',
+        color: theme.colors.accent,
     },
     savingsTag: {
         backgroundColor: '#dcfce7',
@@ -548,7 +546,7 @@ const styles = StyleSheet.create({
     savingsTagText: {
         fontSize: 13,
         fontWeight: '600',
-        color: '#166534',
+        color: theme.colors.accent,
         textAlign: 'center',
     },
 
@@ -571,30 +569,25 @@ const styles = StyleSheet.create({
     emptyTitle: {
         fontSize: 22,
         fontWeight: '700',
-        color: '#0f172a',
+        color: theme.colors.textPrimary,
         marginBottom: 8,
     },
     emptySubtitle: {
         fontSize: 15,
-        color: '#64748b',
+        color: theme.colors.textSecondary,
         textAlign: 'center',
         marginBottom: 32,
     },
     shopButton: {
-        backgroundColor: '#0c831f',
+        backgroundColor: theme.colors.accent,
         paddingHorizontal: 32,
         paddingVertical: 14,
         borderRadius: 12,
-        shadowColor: '#0c831f',
-        shadowOffset: {width: 0, height: 4},
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 4,
     },
     shopButtonText: {
-        color: '#ffffff',
-        fontSize: 16,
-        fontWeight: '700',
+        color: theme.colors.accentText,
+        fontSize: theme.fontSize.lg,
+        fontWeight: theme.fontWeight.bold,
     },
 
     // Checkout Button
@@ -603,16 +596,11 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: '#fff',
+        backgroundColor: theme.colors.background,
         paddingHorizontal: 20,
         paddingVertical: 16,
         borderTopWidth: 1,
-        borderTopColor: '#e2e8f0',
-        shadowColor: '#000',
-        shadowOffset: {width: 0, height: -2},
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 8,
+        borderTopColor: theme.colors.border,
     },
     checkoutInfo: {
         flexDirection: 'row',
@@ -622,12 +610,12 @@ const styles = StyleSheet.create({
     },
     checkoutLabel: {
         fontSize: 14,
-        color: '#64748b',
+        color: theme.colors.textSecondary,
     },
     checkoutPrice: {
         fontSize: 20,
         fontWeight: '700',
-        color: '#0f172a',
+        color: theme.colors.textPrimary,
     },
     checkoutButton: {
         backgroundColor: '#0c831f',
@@ -641,7 +629,7 @@ const styles = StyleSheet.create({
         elevation: 4,
     },
     checkoutButtonText: {
-        color: '#ffffff',
+        color: theme.colors.accentText,
         fontSize: 16,
         fontWeight: '700',
     },

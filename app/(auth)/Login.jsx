@@ -1,29 +1,35 @@
-import {SafeAreaView} from "react-native-safe-area-context";
-import {Text, StyleSheet, View, TouchableOpacity, Animated, } from "react-native";
-import React, {useState, useRef, useEffect} from "react";
-import {Phone, Lock} from 'lucide-react-native';
-import {router} from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
+import {
+    Text,
+    View,
+    TouchableOpacity,
+    Animated,
+    StyleSheet,
+} from "react-native";
+import React, { useState, useRef, useEffect, useMemo } from "react";
+import { Phone, Lock } from "lucide-react-native";
+import { router } from "expo-router";
+
 import RenderFormField from "../../components/RenderFormField";
 import SuccessModal from "../../components/SuccessModal";
+import { useThemeStore } from "../../store/themeStore";
 
 const SellerLogin = () => {
+    const theme = useThemeStore((s) => s.theme);
+    const styles = useMemo(() => createStyles(theme), [theme]);
+
     const [phone, setPhone] = useState("");
     const [otp, setOtp] = useState("");
-    const [step, setStep] = useState(1); // 1: Phone, 2: OTP
+    const [step, setStep] = useState(1);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
-    const [errors, setErrors] = useState({phone: "", otp: ""});
+    const [errors, setErrors] = useState({ phone: "", otp: "" });
     const [resendTimer, setResendTimer] = useState(0);
 
-    // Animation
+    /* Animations */
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const scaleAnim = useRef(new Animated.Value(0.3)).current;
     const checkScaleAnim = useRef(new Animated.Value(0)).current;
     const progressAnim = useRef(new Animated.Value(0)).current;
-
-    useEffect(() => {
-        console.log('@/app/auth/Login -> Login Page Accessed');
-    }, []);
-
 
     useEffect(() => {
         let interval;
@@ -35,36 +41,31 @@ const SellerLogin = () => {
         return () => clearInterval(interval);
     }, [resendTimer]);
 
-
-
     const handleSendOTP = () => {
-
-            console.log("Sending OTP to:", phone);
-            setStep(2);
-            setResendTimer(30);
-
+        setStep(2);
+        setResendTimer(30);
     };
 
     const handleVerifyOTP = () => {
-        // Simulate OTP verification (accept any 6 digit OTP for demo)
         if (otp.length !== 6) {
-            setErrors({...errors, otp: "Please enter a valid 6-digit OTP"});
+            setErrors({ ...errors, otp: "Please enter a valid 6-digit OTP" });
             return;
         }
 
-        // For demo: accept "123456" as correct OTP
         if (otp === "123456") {
-            setErrors({...errors, otp: ""});
+            setErrors({ ...errors, otp: "" });
             showSuccessAnimation();
         } else {
-            setErrors({...errors, otp: "Invalid OTP. Try again or resend to " + phone});
+            setErrors({
+                ...errors,
+                otp: `Invalid OTP. Try again or resend to ${phone}`,
+            });
         }
     };
 
     const showSuccessAnimation = () => {
         setShowSuccessModal(true);
 
-        // Modal fade in and scale
         Animated.parallel([
             Animated.timing(fadeAnim, {
                 toValue: 1,
@@ -76,23 +77,20 @@ const SellerLogin = () => {
                 tension: 50,
                 friction: 7,
                 useNativeDriver: true,
-            })
+            }),
         ]).start(() => {
-            // Checkmark animation
             Animated.spring(checkScaleAnim, {
                 toValue: 1,
                 tension: 50,
                 friction: 7,
                 useNativeDriver: true,
             }).start(() => {
-                // Start progress bar animation
                 Animated.timing(progressAnim, {
                     toValue: 1,
                     duration: 800,
                     useNativeDriver: false,
                 }).start(() => {
-                    // Navigate to index after 3 seconds
-                    router.replace('/'); // Change 'Index' to your actual route name
+                    router.replace("/");
                 });
             });
         });
@@ -100,355 +98,234 @@ const SellerLogin = () => {
 
     const handleResendOTP = () => {
         if (resendTimer > 0) return;
-
         setOtp("");
-        setErrors({...errors, otp: ""});
-        console.log("Resending OTP to:", phone);
+        setErrors({ ...errors, otp: "" });
         setResendTimer(30);
     };
 
-    const handleChangeNumber = () => {
-        setStep(1);
-        setOtp("");
-        setErrors({phone: "", otp: ""});
-    };
-
-    const disabled =  phone.length !== 10;
+    const disabled = phone.length !== 10;
 
     return (
-        <>
-            <SafeAreaView style={styles.container}>
-                <View style={styles.content}>
-                    {/* Header */}
-                    <View style={styles.header}>
-                        <View style={styles.iconWrapper}>
-                            <Phone size={32} color="#fff" strokeWidth={2.5}/>
-                        </View>
-                        <Text style={styles.headerTitle}>
-                            {step === 1 ? "Welcome!" : "Verify OTP"}
-                        </Text>
-                        <Text style={styles.headerSubtitle}>
-                            {step === 1
-                                ? "Enter your phone number to continue"
-                                : `We've sent a code to +91 ` + phone }
-                        </Text>
+        <SafeAreaView style={styles.container}>
+            <View style={styles.content}>
+                {/* Header */}
+                <View style={styles.header}>
+                    <View style={styles.iconWrapper}>
+                        <Phone size={32} color={styles.iconAccent.color} />
                     </View>
-
-                    {/* Form Card */}
-                    <View style={styles.formCard}>
-                        {step === 1 ? (
-                            <>
-                                <RenderFormField
-                                        label="Phone Number"
-                                        inputType="phone"
-                                        value={phone}
-                                        onChangeText={setPhone}
-                                        placeholder="Enter 10-digit mobile number"
-                                        icon={<Phone size={20} color="#9CA3AF"/>}
-                                        textColor="#1F2937"
-                                        error={errors.phone}
-                                        maxLength={10}
-                                    />
-                                <TouchableOpacity
-                                    style={[
-                                        styles.primaryButton,
-                                        disabled && styles.buttonDisabled]}
-                                    onPress={handleSendOTP}
-                                    disabled={disabled}
-                                >
-                                    <Text style={styles.primaryButtonText}>Send OTP</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={() => router.push('/AddressSetter')}>
-                                    <Text style={styles.linkText}>AddressSetter</Text>
-                                </TouchableOpacity>
-                            </>
-                        ) : (
-                            <>
-                                <RenderFormField
-                                    label="Enter OTP"
-                                    inputType="numeric"
-                                    value={otp}
-                                    onChangeText={setOtp}
-                                    placeholder="6-digit code"
-                                    maxLength={6}
-                                    icon={<Lock size={20} color="#9CA3AF"/>}
-                                    textColor="#1F2937"
-                                    error={errors.otp}
-                                />
-
-                                <View style={styles.otpHint}>
-                                    <Text style={styles.otpHintText}>
-                                        For demo, use OTP: <Text style={styles.otpHintBold}>123456</Text>
-                                    </Text>
-                                </View>
-
-                                <TouchableOpacity
-                                    style={[styles.primaryButton, otp.length !== 6 && styles.buttonDisabled]}
-                                    onPress={handleVerifyOTP}
-                                    disabled={otp.length !== 6}
-                                >
-                                    <Text style={styles.primaryButtonText}>Verify OTP</Text>
-                                </TouchableOpacity>
-
-                                <View style={styles.otpActions}>
-                                    <TouchableOpacity
-                                        onPress={handleResendOTP}
-                                        disabled={resendTimer > 0}
-                                    >
-                                        <Text style={[
-                                            styles.resendLink,
-                                            resendTimer > 0 && styles.resendDisabled // Derive style
-                                        ]}>
-                                            {resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend OTP'}
-                                        </Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={handleChangeNumber}>
-                                        <Text style={styles.linkText}>Change Number</Text>
-                                    </TouchableOpacity>
-
-                                </View>
-                            </>
-                        )}
-                    </View>
-
-                    {/* Footer */}
+                    <Text style={styles.headerTitle}>
+                        {step === 1 ? "Welcome!" : "Verify OTP"}
+                    </Text>
+                    <Text style={styles.headerSubtitle}>
+                        {step === 1
+                            ? "Enter your phone number to continue"
+                            : `We've sent a code to +91 ${phone}`}
+                    </Text>
                 </View>
 
-                {/* Success Modal */}
-                <SuccessModal
-                    visible={showSuccessModal}
-                    onAnimationComplete={() => {
-                        setShowSuccessModal(false)
-                        router.replace('/');
-                    }}
-                    subtitle={'Welcome Back! Redirecting to Home page...'}
-                    title={'Logged in'}
-                />
-            </SafeAreaView>
-        </>
+                {/* Card */}
+                <View style={styles.formCard}>
+                    {step === 1 ? (
+                        <>
+                            <RenderFormField
+                                label="Phone Number"
+                                inputType="phone"
+                                value={phone}
+                                onChangeText={setPhone}
+                                placeholder="Enter 10-digit mobile number"
+                                icon={<Phone size={20} color={styles.iconMuted.color} />}
+                                textColor={styles.inputText.color}
+                                error={errors.phone}
+                                maxLength={10}
+                            />
+
+                            <TouchableOpacity
+                                style={[
+                                    styles.primaryButton,
+                                    disabled && styles.buttonDisabled,
+                                ]}
+                                onPress={handleSendOTP}
+                                disabled={disabled}
+                            >
+                                <Text style={styles.primaryButtonText}>Send OTP</Text>
+                            </TouchableOpacity>
+                        </>
+                    ) : (
+                        <>
+                            <RenderFormField
+                                label="Enter OTP"
+                                inputType="numeric"
+                                value={otp}
+                                onChangeText={setOtp}
+                                placeholder="6-digit code"
+                                maxLength={6}
+                                icon={<Lock size={20} color={styles.iconMuted.color} />}
+                                textColor={styles.inputText.color}
+                                error={errors.otp}
+                            />
+
+                            <View style={styles.otpHint}>
+                                <Text style={styles.otpHintText}>
+                                    For demo, use OTP:{" "}
+                                    <Text style={styles.otpHintBold}>123456</Text>
+                                </Text>
+                            </View>
+
+                            <TouchableOpacity
+                                style={[
+                                    styles.primaryButton,
+                                    otp.length !== 6 && styles.buttonDisabled,
+                                ]}
+                                onPress={handleVerifyOTP}
+                                disabled={otp.length !== 6}
+                            >
+                                <Text style={styles.primaryButtonText}>Verify OTP</Text>
+                            </TouchableOpacity>
+
+                            <View style={styles.otpActions}>
+                                <TouchableOpacity
+                                    onPress={handleResendOTP}
+                                    disabled={resendTimer > 0}
+                                >
+                                    <Text
+                                        style={[
+                                            styles.resendLink,
+                                            resendTimer > 0 && styles.resendDisabled,
+                                        ]}
+                                    >
+                                        {resendTimer > 0
+                                            ? `Resend in ${resendTimer}s`
+                                            : "Resend OTP"}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </>
+                    )}
+                </View>
+            </View>
+
+            <SuccessModal
+                visible={showSuccessModal}
+                onAnimationComplete={() => {
+                    setShowSuccessModal(false);
+                    router.replace("/");
+                }}
+                title="Logged in"
+                subtitle="Welcome Back! Redirecting to Home page..."
+            />
+        </SafeAreaView>
     );
 };
 
 export default SellerLogin;
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#F3F4F6',
-    },
-    content: {
-        flex: 1,
-        padding: 20,
-        justifyContent: 'center',
-    },
-    header: {
-        alignItems: 'center',
-        marginBottom: 32,
-    },
-    iconWrapper: {
-        width: 72,
-        height: 72,
-        backgroundColor: '#93BD57',
-        borderRadius: 36,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 20,
-        shadowColor: '#93BD57',
-        shadowOffset: {width: 0, height: 4},
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 8,
-    },
-    headerTitle: {
-        fontFamily: 'Montserrat',
-        fontSize: 28,
-        fontWeight: '700',
-        color: '#111827',
-        marginBottom: 8,
-    },
-    headerSubtitle: {
-        fontFamily: 'Montserrat',
-        fontSize: 14,
-        fontWeight: '400',
-        color: '#6B7280',
-        textAlign: 'center',
-        paddingHorizontal: 20,
-        lineHeight: 20,
-    },
-    formCard: {
-        backgroundColor: '#fff',
-        borderRadius: 16,
-        padding: 24,
-        shadowColor: '#000',
-        shadowOffset: {width: 0, height: 2},
-        shadowOpacity: 0.08,
-        shadowRadius: 12,
-        elevation: 4,
-    },
-    primaryButton: {
-        backgroundColor: '#93BD57',
-        borderRadius: 12,
-        paddingVertical: 16,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: 24,
-        shadowColor: '#93BD57',
-        shadowOffset: {width: 0, height: 4},
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 6,
-    },
-    buttonDisabled: {
-        backgroundColor: '#D1D5DB',
-        shadowOpacity: 0,
-        elevation: 0,
-    },
-    primaryButtonText: {
-        fontFamily: 'Montserrat',
-        fontSize: 16,
-        fontWeight: '700',
-        color: '#fff',
-    },
-    divider: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginVertical: 24,
-    },
-    dividerLine: {
-        flex: 1,
-        height: 1,
-        backgroundColor: '#E5E7EB',
-    },
-    dividerText: {
-        fontFamily: 'Montserrat',
-        fontSize: 12,
-        fontWeight: '600',
-        color: '#9CA3AF',
-        marginHorizontal: 12,
-    },
-    secondaryButton: {
-        backgroundColor: '#fff',
-        borderRadius: 12,
-        paddingVertical: 16,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderWidth: 1.5,
-        borderColor: '#E5E7EB',
-    },
-    secondaryButtonText: {
-        fontFamily: 'Montserrat',
-        fontSize: 15,
-        fontWeight: '600',
-        color: '#6B7280',
-    },
-    otpHint: {
-        backgroundColor: '#FEF3C7',
-        borderRadius: 8,
-        padding: 12,
-        marginTop: 12,
-        borderLeftWidth: 3,
-        borderLeftColor: '#F59E0B',
-    },
-    otpHintText: {
-        fontFamily: 'Montserrat',
-        fontSize: 13,
-        fontWeight: '500',
-        color: '#92400E',
-    },
-    otpHintBold: {
-        fontWeight: '700',
-        color: '#78350F',
-    },
-    otpActions: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 20,
-    },
-    resendLink: {
-        fontSize: 14,
-        color: '#5B5FED',
-        fontWeight: '600',
-        fontFamily: 'Montserrat',
-    },
-    resendDisabled: {
-        color: '#ccc',
-    },
-    linkText: {
-        fontFamily: 'Montserrat',
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#93BD57',
-    },
-    footer: {
-        marginTop: 32,
-        alignItems: 'center',
-    },
-    footerText: {
-        fontFamily: 'Montserrat',
-        fontSize: 14,
-        fontWeight: '400',
-        color: '#6B7280',
-    },
-    footerLink: {
-        fontWeight: '700',
-        color: '#93BD57',
-    },
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
-    },
-    modalContent: {
-        backgroundColor: '#fff',
-        borderRadius: 24,
-        padding: 32,
-        alignItems: 'center',
-        width: '90%',
-        maxWidth: 400,
-        shadowColor: '#000',
-        shadowOffset: {width: 0, height: 8},
-        shadowOpacity: 0.2,
-        shadowRadius: 16,
-        elevation: 12,
-    },
-    checkmarkContainer: {
-        marginBottom: 24,
-    },
-    checkmarkCircle: {
-        width: 96,
-        height: 96,
-        borderRadius: 48,
-        backgroundColor: '#D1FAE5',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    successTitle: {
-        fontFamily: 'Montserrat',
-        fontSize: 28,
-        fontWeight: '700',
-        color: '#111827',
-        marginBottom: 8,
-    },
-    successSubtitle: {
-        fontFamily: 'Montserrat',
-        fontSize: 15,
-        fontWeight: '400',
-        color: '#6B7280',
-        textAlign: 'center',
-        marginBottom: 32,
-    },
-    progressBarContainer: {
-        width: '100%',
-        height: 4,
-        backgroundColor: '#E5E7EB',
-        borderRadius: 2,
-        overflow: 'hidden',
-    },
-    progressBar: {
-        height: '100%',
-        backgroundColor: '#93BD57',
-        borderRadius: 2,
-    },
-});
+/* ================= STYLES ================= */
+
+const createStyles = (theme) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.colors.background,
+        },
+
+        content: {
+            flex: 1,
+            padding: theme.spacing.lg,
+            justifyContent: "center",
+        },
+
+        header: {
+            alignItems: "center",
+            marginBottom: theme.spacing.xl,
+        },
+
+        iconWrapper: {
+            width: 72,
+            height: 72,
+            backgroundColor: theme.colors.accent,
+            borderRadius: 36,
+            justifyContent: "center",
+            alignItems: "center",
+            marginBottom: theme.spacing.lg,
+        },
+
+        headerTitle: {
+            fontSize: theme.fontSize.xxxl,
+            fontWeight: theme.fontWeight.bold,
+            color: theme.colors.textPrimary,
+            marginBottom: theme.spacing.sm,
+        },
+
+        headerSubtitle: {
+            fontSize: theme.fontSize.sm,
+            color: theme.colors.textSecondary,
+            textAlign: "center",
+            lineHeight: 20,
+        },
+
+        formCard: {
+            backgroundColor: theme.colors.card,
+            borderRadius: theme.radius.md,
+            padding: theme.spacing.lg,
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+        },
+
+        primaryButton: {
+            backgroundColor: theme.colors.accent,
+            borderRadius: theme.radius.md,
+            paddingVertical: theme.spacing.md,
+            alignItems: "center",
+            marginTop: theme.spacing.lg,
+        },
+
+        buttonDisabled: {
+            backgroundColor: theme.colors.border,
+        },
+
+        primaryButtonText: {
+            fontSize: theme.fontSize.md,
+            fontWeight: theme.fontWeight.bold,
+            color: theme.colors.accentText,
+        },
+
+        otpHint: {
+            backgroundColor: theme.colors.surface,
+            borderRadius: theme.radius.sm,
+            padding: theme.spacing.sm,
+            marginTop: theme.spacing.sm,
+            borderLeftWidth: 3,
+            borderLeftColor: theme.colors.warning,
+        },
+
+        otpHintText: {
+            fontSize: theme.fontSize.sm,
+            color: theme.colors.textSecondary,
+        },
+
+        otpHintBold: {
+            fontWeight: theme.fontWeight.bold,
+            color: theme.colors.textPrimary,
+        },
+
+        otpActions: {
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginTop: theme.spacing.md,
+        },
+
+        resendLink: {
+            fontSize: theme.fontSize.sm,
+            color: theme.colors.info,
+            fontWeight: theme.fontWeight.medium,
+        },
+
+        resendDisabled: {
+            color: theme.colors.textMuted,
+        },
+
+        /* Icon helpers */
+        iconAccent: { color: theme.colors.accentText },
+        iconMuted: { color: theme.colors.textMuted },
+        inputText: { color: theme.colors.background },
+    });

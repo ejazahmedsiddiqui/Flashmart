@@ -13,10 +13,14 @@ import ProductCard from "../../components/ProductCard";
 import {products} from "../../utilities/products";
 import Header from "../../components/Header";
 import {ImageBackground} from "expo-image";
+import {useThemeStore} from "../../store/themeStore";
 
 const BRAND_ITEM_HEIGHT = 72;
 
 const SubCategory = () => {
+    const theme = useThemeStore((s) => s.theme);
+    const styles = useMemo(() => createStyles(theme), [theme]);
+
     const [cardWidth, setCardWidth] = useState(1);
     const brands = useMemo(() => {
         const brandMap = new Map();
@@ -44,6 +48,7 @@ const SubCategory = () => {
         if (activeBrand === "All") return products;
         return products.filter(p => p.brand === activeBrand);
     }, [activeBrand]);
+
     useEffect(() => {
         listRef.current?.scrollToOffset({
             offset: 0,
@@ -82,7 +87,7 @@ const SubCategory = () => {
                 </TouchableOpacity>
             );
         },
-        [activeBrand]
+        [activeBrand, styles]
     );
 
 
@@ -97,7 +102,7 @@ const SubCategory = () => {
 
     return (
         <>
-            <StatusBar backgroundColor={'#fff'}/>
+            <StatusBar backgroundColor={theme.colors.inverted}/>
             <SafeAreaView style={styles.container}>
                 <ImageBackground
                     style={{
@@ -124,7 +129,7 @@ const SubCategory = () => {
                                 justifyContent: 'center'
                             }}
                         >
-                            <ArrowLeft size={22} color={'#fff'}/>
+                            <ArrowLeft size={22} color={theme.colors.inverted}/>
                         </TouchableOpacity>
                         <Text style={styles.headerTitle}>{params?.subLabel}</Text>
                     </View>
@@ -185,20 +190,20 @@ const SubCategory = () => {
 
 export default SubCategory;
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#191919",
+        backgroundColor: theme.colors.background,
     },
     header: {
-        paddingHorizontal: 16,
-        paddingTop: 12,
+        paddingHorizontal: theme.spacing.md,
+        paddingTop: theme.spacing.md,
     },
     headerTitle: {
-        fontSize: 24,
-        fontWeight: "700",
-        marginLeft: 12,
-        color: '#eee'
+        fontSize: theme.fontSize.xxxl,
+        fontWeight: theme.fontWeight.bold,
+        marginLeft: theme.spacing.md,
+        color: theme.colors.textPrimary,
     },
     body: {
         flex: 1,
@@ -208,21 +213,21 @@ const styles = StyleSheet.create({
     /* Sidebar */
     sidebar: {
         width: 90,
-        backgroundColor: "#272727",
+        backgroundColor: theme.colors.surface,
         borderRightWidth: 1,
-        borderColor: "#1e1e1e",
+        borderColor: theme.colors.border,
         borderTopRightRadius: 15,
     },
     brandItem: {
         paddingVertical: 20,
-        paddingHorizontal: 8,
+        paddingHorizontal: theme.spacing.sm,
         alignItems: "center",
         justifyContent: "center",
     },
     brandItemActive: {
-        backgroundColor: "#191919",
+        backgroundColor: theme.colors.background,
         borderLeftWidth: 4,
-        borderLeftColor: "#26702A",
+        borderLeftColor: theme.colors.accent,
     },
     brandImage: {
         width: 40,
@@ -232,18 +237,18 @@ const styles = StyleSheet.create({
         resizeMode: 'contain',
     },
     brandText: {
-        fontSize: 12,
-        color: "#b5b5b5",
+        fontSize: theme.fontSize.sm,
+        color: theme.colors.textSecondary,
         textAlign: "center",
     },
     brandTextActive: {
-        color: "#16b910",
-        fontWeight: "700",
+        color: theme.colors.success,
+        fontWeight: theme.fontWeight.bold,
     },
 
     /* Product Grid */
     productList: {
         paddingHorizontal: 6,
-        paddingBottom: 24,
+        paddingBottom: theme.spacing.xl,
     },
 });

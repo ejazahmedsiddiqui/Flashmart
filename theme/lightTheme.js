@@ -1,0 +1,26 @@
+import { baseTokens } from './tokens';
+
+export const lightTheme = {
+    ...baseTokens,
+    colors: {
+        background: '#ffffff',
+        surface: '#f8f8f8',
+        card: '#ffffff',
+        border: '#f0f0f0',
+        inverted: '#000',
+        invertedMuted: '#333333',
+        invertedExtraMuted: '#ededed',
+
+        textPrimary: '#000000',
+        textSecondary: '#666666',
+        textMuted: '#999999',
+
+        accent: '#26702A',
+        accentText: '#ffffff',
+
+        success: '#2ecc71',
+        warning: '#f39c12',
+        info: '#3498db',
+        danger: '#e74c3c',
+    },
+};

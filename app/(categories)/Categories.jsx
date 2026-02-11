@@ -8,12 +8,16 @@ import {
     Image,
 } from "react-native";
 import { router } from "expo-router";
-
 import Header from "../../components/Header";
 import { categories } from "../../utilities/categories";
 import { subCategories } from "../../utilities/subCategoryList";
+import React, {useMemo} from "react";
+import { useThemeStore } from "../../store/themeStore";
 
 const Categories = () => {
+    const theme = useThemeStore((s) => s.theme);
+    const styles = useMemo(() => createStyles(theme), [theme]);
+
     return (
         <SafeAreaView style={styles.container}>
             <Header />
@@ -33,7 +37,7 @@ const Categories = () => {
                         <View key={category.id} style={styles.categoryBlock}>
                             {/* Category Header */}
                             <View style={styles.categoryHeader}>
-                                <Icon size={22} color="#fff" />
+                                <Icon size={22} color={theme.colors.textSecondary} />
                                 <Text style={styles.categoryTitle}>{category.label}</Text>
                             </View>
 
@@ -76,40 +80,40 @@ const Categories = () => {
 
 export default Categories;
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#191919",
-        padding: 12,
+        backgroundColor: theme.colors.background,
+        padding: theme.spacing.md,
         paddingTop: 0
     },
 
     scrollContent: {
-        paddingHorizontal: 16,
-        paddingBottom: 24,
+        paddingHorizontal: theme.spacing.md,
+        paddingBottom: theme.spacing.xl,
     },
 
     categoryBlock: {
-        marginBottom: 28,
+        marginBottom: theme.spacing.xl,
     },
 
     categoryHeader: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 10,
-        marginBottom: 14,
+        gap: theme.spacing.sm,
+        marginBottom: theme.spacing.sm,
     },
 
     categoryTitle: {
-        color: "#fff",
-        fontSize: 18,
-        fontWeight: "600",
+        color: theme.colors.textPrimary,
+        fontSize: theme.fontSize.lg,
+        fontWeight: theme.fontWeight.bold,
     },
 
     subCategoryGrid: {
         flexDirection: "row",
         flexWrap: "wrap",
-        gap: 12,
+        gap: theme.spacing.md,
     },
 
     subCategoryCard: {
@@ -120,14 +124,14 @@ const styles = StyleSheet.create({
     subCategoryImage: {
         width: "100%",
         aspectRatio: 1,
-        borderRadius: 12,
-        marginBottom: 6,
-        backgroundColor: "#333", // Add this to see if the space is there
+        borderRadius: theme.radius.md,
+        marginBottom: theme.spacing.xs,
+        backgroundColor: theme.colors.card,
     },
 
     subCategoryLabel: {
-        color: "#ddd",
-        fontSize: 12,
+        color: theme.colors.textPrimary,
+        fontSize: theme.fontSize.md,
         textAlign: "center",
     },
 });

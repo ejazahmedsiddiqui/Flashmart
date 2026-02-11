@@ -2,8 +2,13 @@ import {StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import {Home, LayoutDashboardIcon, LucideShoppingCart, User} from "lucide-react-native";
 import {router, usePathname} from "expo-router";
 import {useCartCount} from "../hooks/useCartCount"; // Adjust path as needed
+import { useThemeStore } from "../store/themeStore";
+import {useMemo} from "react";
 
 const Footer = () => {
+    const theme = useThemeStore((s) => s.theme);
+    const styles = useMemo(() => createStyles(theme), [theme]);
+
     const pathname = usePathname();
     const itemCount = useCartCount();
 
@@ -66,7 +71,7 @@ const Footer = () => {
                         <View style={styles.iconContainer}>
                             <item.icon
                                 size={24}
-                                color={active ? '#0c831f' : '#494949'}
+                                color={active ? theme.colors.accent : theme.colors.inverted}
                             />
                             {item.badge > 0 && (
                                 <View style={styles.badge}>
@@ -91,29 +96,30 @@ const Footer = () => {
 
 export default Footer;
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
     footerContainer: {
         height: 'auto',
-        paddingVertical: 12,
+        paddingVertical: theme.spacing.sm,
         justifyContent: 'space-evenly',
-        paddingHorizontal: 8,
-        backgroundColor: '#fff',
+        paddingHorizontal: theme.spacing.sm,
+        backgroundColor: theme.colors.background,
         bottom: 0,
         right: 0,
         left: 0,
         flexDirection: 'row',
         borderTopWidth: 1,
-        borderTopColor: '#e0e0e0',
+        borderTopColor: theme.colors.border,
     },
     item: {
+        width: '25%',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        borderRadius: 8,
+        paddingVertical: theme.spacing.sm,
+        paddingHorizontal: theme.spacing.sm,
+        borderRadius: theme.radius.sm
     },
     activeItem: {
-        backgroundColor: '#f0f0f0',
+        backgroundColor: theme.colors.invertedExtraMuted,
     },
     iconContainer: {
         position: 'relative',
@@ -122,26 +128,26 @@ const styles = StyleSheet.create({
         position: 'absolute',
         right: -8,
         top: -4,
-        backgroundColor: '#0c831f',
-        borderRadius: 10,
+        backgroundColor: theme.colors.accent,
+        borderRadius: theme.radius.md,
         minWidth: 18,
         height: 18,
         justifyContent: 'center',
         alignItems: 'center',
-        paddingHorizontal: 4,
+        paddingHorizontal: theme.spacing.xs,
     },
     badgeText: {
-        color: '#fff',
-        fontSize: 10,
-        fontWeight: 'bold',
+        color: theme.colors.accentText,
+        fontSize: theme.fontSize.sm,
+        fontWeight: theme.fontWeight.bold,
     },
     label: {
-        color: '#494949',
-        fontSize: 12,
-        marginTop: 4,
+        color: theme.colors.inverted,
+        fontSize: theme.fontSize.sm,
+        marginTop: theme.spacing.xs,
     },
     activeLabel: {
-        color: '#0c831f',
-        fontWeight: '600',
+        color: theme.colors.accent,
+        fontWeight: theme.fontWeight.bold,
     }
 })

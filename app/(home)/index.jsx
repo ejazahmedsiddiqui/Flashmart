@@ -1,5 +1,5 @@
 import {SafeAreaView} from "react-native-safe-area-context";
-import React, {useEffect, useState, useRef, useCallback} from 'react';
+import React, {useEffect, useState, useRef, useCallback, useMemo} from 'react';
 import {
     View,
     Text,
@@ -33,8 +33,14 @@ import {
 } from "lucide-react-native";
 import {products} from "../../utilities/products";
 import Header from "../../components/Header";
+import {useThemeStore} from "../../store/themeStore";
+import AnimatedContainer from "../../components/AnimatedContainer";
 
 export default function Index() {
+    const theme = useThemeStore((s) => s.theme);
+    const styles = useMemo(() => createStyles(theme), [theme]);
+
+
     const [category, setCategory] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [displayProducts, setDisplayProducts] = useState([]);
@@ -118,7 +124,7 @@ export default function Index() {
 
 
     return (
-        <>
+        <AnimatedContainer>
             <SafeAreaView style={styles.container}>
                 <Header/>
                 {/* Categories */}
@@ -147,7 +153,7 @@ export default function Index() {
                                 >
                                     <Icon
                                         size={18}
-                                        color={isActive ? '#ffffff' : 'rgba(241,241,241,0.6)'}
+                                        color={isActive ? theme.colors.textSecondary : theme.colors.textMuted}
                                         fill={isActive ? 'rgba(51,154,56,0.98)' : 'rgba(0,0,0,0)'}
                                     />
 
@@ -168,7 +174,7 @@ export default function Index() {
                 <View style={styles.productsSection}>
                     {isLoading ? (
                         <View style={styles.loadingContainer}>
-                            <ActivityIndicator size="large" color="#339a38"/>
+                            <ActivityIndicator size="large" color={"#339a38"}/>
                             <Text style={styles.loadingText}>Loading fresh products...</Text>
                         </View>
                     ) : displayProducts.length !== 0 ? (error ? (
@@ -197,7 +203,7 @@ export default function Index() {
                     )) : (
                         <View style={styles.errorContainer}>
                             <View style={styles.iconWrapper}>
-                                <PackageX size={42} color="#196500"/>
+                                <PackageX size={42} color={"#196500"}/>
                             </View>
 
                             <Text style={styles.title}>{'No products available'}</Text>
@@ -208,90 +214,14 @@ export default function Index() {
 
                 {/* Address Selection Modal */}
             </SafeAreaView>
-        </>
+        </AnimatedContainer>
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme) =>  StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#191919',
         paddingHorizontal: 20,
-    },
-
-    // Header Styles
-    header: {
-        backgroundColor: '#191919',
-        paddingTop: 8,
-        paddingBottom: 16,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    headerGreeting: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: '#c9c9c9',
-        marginBottom: 4,
-    },
-    headerTitle: {
-        fontSize: 32,
-        fontWeight: '900',
-        color: 'rgba(51,154,56,0.98)',
-        marginBottom: 2,
-    },
-    cartIconButton: {
-        width: 48,
-        height: 48,
-        backgroundColor: '#0c831f',
-        borderRadius: 24,
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowColor: '#0c831f',
-        shadowOffset: {width: 0, height: 4},
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 4,
-    },
-    cartIcon: {
-        fontSize: 24,
-    },
-    cartBadge: {
-        position: 'absolute',
-        top: -4,
-        right: -4,
-        backgroundColor: '#ef4444',
-        borderRadius: 12,
-        minWidth: 24,
-        height: 24,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: 6,
-        borderWidth: 2,
-        borderColor: '#ffffff',
-    },
-    cartBadgeText: {
-        color: '#ffffff',
-        fontSize: 12,
-        fontWeight: '700',
-    },
-
-    // Search Styles
-    searchSection: {
-        backgroundColor: 'transparent',
-    },
-    searchContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderRadius: 16,
-        paddingVertical: 12,
-    },
-    searchIcon: {
-        marginRight: 12,
-    },
-    clearButton: {
-        padding: 4,
-        marginLeft: 8,
     },
 
     // Categories Styles
@@ -301,7 +231,7 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 18,
         fontWeight: '700',
-        color: '#eaffea',
+        color: theme.colors.textPrimary,
         marginBottom: 12,
     },
     categoryChip: {
@@ -312,17 +242,17 @@ const styles = StyleSheet.create({
         marginHorizontal: 4,
     },
     categoryChipActive: {
-        borderBottomColor: '#f2f2f2',
+        borderBottomColor: theme.colors.invertedMuted,
         borderBottomWidth: 2,
 
     },
     categoryText: {
         fontSize: 14,
         fontWeight: '600',
-        color: 'rgba(241,241,241,0.6)',
+        color: theme.colors.textSecondary,
     },
     categoryTextActive: {
-        color: '#ffffff',
+        color: theme.colors.textPrimary,
     },
 
     // Products Section
@@ -345,7 +275,7 @@ const styles = StyleSheet.create({
     loadingText: {
         marginTop: 16,
         fontSize: 15,
-        color: '#339a38',
+        color: theme.colors.textSecondary,
         fontWeight: '500',
     },
     errorContainer: {
@@ -361,18 +291,18 @@ const styles = StyleSheet.create({
     errorText: {
         fontSize: 18,
         fontWeight: '600',
-        color: '#004c05',
+        color: theme.colors.danger,
         marginBottom: 4,
     },
     errorSubtext: {
         fontSize: 14,
-        color: '#94a3b8',
+        color: theme.colors.textPrimary,
     },
     iconWrapper: {
         width: 72,
         height: 72,
         borderRadius: 36,
-        backgroundColor: "#E9F5E9",
+        backgroundColor: theme.colors.background,
         alignItems: "center",
         justifyContent: "center",
         marginBottom: 16,
@@ -381,7 +311,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 18,
         fontWeight: "600",
-        color: "#fff",
+        color: theme.colors.textPrimary,
         marginBottom: 6,
         textAlign: "center",
     },

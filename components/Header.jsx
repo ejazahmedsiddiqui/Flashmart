@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {
     View,
     Text,
@@ -15,6 +15,7 @@ import {
 import AnimatedSearchBar from "../components/AnimatedSearchBar";
 import {useCartCount} from "../hooks/useCartCount";
 import {addresses} from "../utilities/address";
+import {useThemeStore} from "../store/themeStore";
 
 const Header = ({
                     showAddress = true,
@@ -35,6 +36,8 @@ const Header = ({
         addressModalVisible: false,
     });
     const [fullAddress, setFullAddress] = useState('')
+    const theme = useThemeStore((s) => s.theme);
+    const styles = useMemo(() => createStyles(theme), [theme]);
 
     const savedAddresses = addresses;
     useEffect(() => {
@@ -65,21 +68,21 @@ const Header = ({
                     >
                         <Text
                             style={{
-                                color: '#f4f4f4',
-                                fontSize: 12,
-                                fontWeight: '700',
+                                color: theme.colors.textPrimary,
+                                fontSize: theme.fontSize.sm,
+                                fontWeight: theme.fontWeight.bold,
                             }}
                         >{address?.type?.toUpperCase()} - </Text>
                         <Text
                             numberOfLines={1}
                             style={{
-                                color: '#f4f4f4',
-                                fontSize: 12,
-                                fontWeight: '400',
+                                color: theme.colors.textSecondary,
+                                fontSize: theme.fontSize.sm,
+                                fontWeight: theme.fontWeight.regular,
                                 flexShrink: 1,
                             }}
                         >{fullAddress.split(',').slice(0, 3).join(',')}</Text>
-                        <ChevronDown size={24} color={'#f4f4f4'}/>
+                        <ChevronDown size={24} color={theme.colors.textSecondary}/>
                     </TouchableOpacity>}
                 </View>
                 {showCart &&
@@ -197,21 +200,20 @@ const Header = ({
 }
 
 export default Header;
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
     header: {
-        backgroundColor: 'transparent',
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
     },
     headerGreeting: {
-        fontSize: 14,
+        fontSize: theme.fontSize.md,
         fontWeight: '400',
-        color: '#c9c9c9',
-        marginBottom: 4,
+        color: theme.colors.textPrimary,
+        marginBottom: theme.spacing.xs,
     },
     headerTitle: {
-        fontSize: 32,
+        fontSize: theme.fontSize.xxxxl,
         fontWeight: '900',
         color: 'rgba(51,154,56,0.98)',
         marginBottom: 2,
@@ -219,36 +221,31 @@ const styles = StyleSheet.create({
     cartIconButton: {
         width: 48,
         height: 48,
-        backgroundColor: '#0c831f',
-        borderRadius: 24,
+        backgroundColor: theme.colors.accent,
+        borderRadius: theme.radius.xl,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#0c831f',
-        shadowOffset: {width: 0, height: 4},
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 4,
     },
     cartIcon: {
-        fontSize: 24,
+        fontSize: theme.fontSize.xxl,
     },
     cartBadge: {
         position: 'absolute',
         top: -4,
         right: -4,
-        backgroundColor: '#ef4444',
-        borderRadius: 12,
-        minWidth: 24,
-        height: 24,
+        backgroundColor: theme.colors.danger,
+        borderRadius: theme.radius.md,
+        minWidth: theme.spacing.xl,
+        height: theme.spacing.xl,
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 6,
         borderWidth: 2,
-        borderColor: '#ffffff',
+        borderColor: theme.colors.border,
     },
     cartBadgeText: {
-        color: '#ffffff',
-        fontSize: 12,
+        color: theme.colors.accentText,
+        fontSize: theme.fontSize.sm,
         fontWeight: '700',
     },
 
@@ -277,7 +274,7 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
     },
     modalContent: {
-        backgroundColor: '#1e1e1e',
+        backgroundColor:  theme.colors.background,
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
         maxHeight: '85%',
@@ -290,24 +287,24 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 20,
         borderBottomWidth: 1,
-        borderBottomColor: '#2a2a2a',
+        borderBottomColor: theme.colors.border,
     },
     modalTitle: {
-        fontSize: 20,
+        fontSize: theme.fontSize.xl,
         fontWeight: '700',
-        color: '#ffffff',
+        color: theme.colors.textPrimary,
     },
     closeButton: {
         width: 32,
         height: 32,
         borderRadius: 16,
-        backgroundColor: '#2a2a2a',
+        backgroundColor:  theme.colors.background,
         justifyContent: 'center',
         alignItems: 'center',
     },
     closeButtonText: {
-        fontSize: 18,
-        color: '#94a3b8',
+        fontSize: theme.fontSize.xl,
+        color: theme.colors.textSecondary,
         fontWeight: '600',
     },
     addressList: {
@@ -316,7 +313,7 @@ const styles = StyleSheet.create({
     currentLocationButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#252525',
+        backgroundColor: theme.colors.background,
         borderRadius: 16,
         padding: 16,
         marginTop: 20,
@@ -327,7 +324,7 @@ const styles = StyleSheet.create({
         width: 48,
         height: 48,
         borderRadius: 24,
-        backgroundColor: '#e8f5e9',
+        backgroundColor: theme.colors.background,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 12,
@@ -336,14 +333,14 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     currentLocationTitle: {
-        fontSize: 16,
+        fontSize: theme.fontSize.lg,
         fontWeight: '700',
-        color: '#339a38',
+        color: theme.colors.accent,
         marginBottom: 4,
     },
     currentLocationSubtitle: {
-        fontSize: 13,
-        color: '#94a3b8',
+        fontSize: theme.fontSize.sm,
+        color: theme.colors.textSecondary,
     },
     divider: {
         flexDirection: 'row',
@@ -353,33 +350,33 @@ const styles = StyleSheet.create({
     dividerLine: {
         flex: 1,
         height: 1,
-        backgroundColor: '#2a2a2a',
+        backgroundColor: theme.colors.background,
     },
     dividerText: {
-        fontSize: 12,
+        fontSize: theme.fontSize.sm,
         fontWeight: '600',
-        color: '#64748b',
+        color: theme.colors.textSecondary,
         paddingHorizontal: 12,
         letterSpacing: 0.5,
     },
     addressCard: {
         flexDirection: 'row',
-        backgroundColor: '#252525',
-        borderRadius: 16,
+        backgroundColor: theme.colors.background,
+        borderRadius: theme.radius.lg,
         padding: 16,
         marginBottom: 12,
         borderWidth: 2,
-        borderColor: 'transparent',
+        borderColor: 'rgba(81,81,81,0.2)',
     },
     addressCardSelected: {
-        backgroundColor: '#1a2e1b',
+        backgroundColor: theme.colors.background,
         borderColor: '#339a38',
     },
     addressIconContainer: {
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: '#2a2a2a',
+        backgroundColor: theme.colors.background,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 12,
@@ -394,33 +391,33 @@ const styles = StyleSheet.create({
         marginBottom: 6,
     },
     addressType: {
-        fontSize: 16,
+        fontSize: theme.fontSize.md,
         fontWeight: '700',
-        color: '#ffffff',
+        color: theme.colors.textPrimary,
     },
     addressTypeSelected: {
-        color: '#339a38',
+        color: theme.colors.accent,
     },
     selectedBadge: {
-        backgroundColor: '#339a38',
+        backgroundColor: theme.colors.accent,
         paddingHorizontal: 10,
         paddingVertical: 4,
         borderRadius: 12,
     },
     selectedBadgeText: {
-        fontSize: 11,
+        fontSize: theme.fontSize.sm,
         fontWeight: '700',
-        color: '#ffffff',
+        color: theme.colors.accentText,
     },
     addressText: {
-        fontSize: 14,
-        color: '#cbd5e1',
+        fontSize: theme.fontSize.md,
+        color: theme.colors.textSecondary,
         lineHeight: 20,
         marginBottom: 4,
     },
     addressPinCode: {
-        fontSize: 13,
-        color: '#64748b',
+        fontSize: theme.fontSize.md,
+        color: theme.colors.muted,
         fontWeight: '500',
     },
 })

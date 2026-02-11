@@ -3,366 +3,322 @@ import {
     StyleSheet,
     TouchableOpacity,
     Text,
-    View, KeyboardAvoidingView, Platform, ScrollView, Dimensions,
+    View,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    Dimensions,
 } from "react-native";
 import {router} from "expo-router";
-import React from "react";
+import React, {useMemo} from "react";
 import {
-    ChevronRight, Home, ArrowLeft, User
+    ChevronRight,
+    Home,
+    User,
+    Sun,
+    Moon,
+    PackageOpen, MapPinHouse
 } from "lucide-react-native";
-const {height} = Dimensions.get('window');
+import SuccessModal from "../../components/SuccessModal";
+import AnimatedContainer from "../../components/AnimatedContainer";
+import {useThemeStore} from "../../store/themeStore";
+
+const {height} = Dimensions.get("window");
+
 const Profile = () => {
+    const [showModal, setShowModal] = React.useState(false);
 
-    const handleLogout = () => {
-        router.replace("/Login");
-    };
+    const theme = useThemeStore((s) => s.theme);
+    const mode = useThemeStore((s) => s.mode);
+    const toggleMode = useThemeStore((s) => s.toggleMode);
+
+    const styles = useMemo(() => createStyles(theme), [theme]);
+
     return (
-        <SafeAreaView style={styles.container}>
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={styles.container}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-            >
-                <ScrollView
+        <AnimatedContainer>
+            <SafeAreaView style={styles.container}>
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
                     style={styles.container}
-                    contentContainerStyle={styles.scrollContent}
-                    showsVerticalScrollIndicator={false}
                 >
-                    <View style={styles.formCard}>
-                        <View style={styles.header}>
-                            <View style={styles.iconWrapper}>
-                                <User size={36} color="#fff"/>
-                            </View>
-                            <Text style={styles.headerTitle}>Profile</Text>
-                        </View>
-                        <View style={styles.infoCard}>
-                            <View style={styles.infoRow}>
-                                <View style={styles.infoLeft}>
-                                    <View style={styles.infoIcon}>
-                                        <User size={18} color="#93BD57" />
-                                    </View>
-                                    <View>
-                                        <Text style={styles.infoLabel}>Phone Number</Text>
-                                        <Text style={styles.infoValue}>
-                                            +91 8452 1458 45
-                                        </Text>
-                                    </View>
+                    <ScrollView
+                        contentContainerStyle={styles.scrollContent}
+                        showsVerticalScrollIndicator={false}
+                    >
+                        <View style={styles.formCard}>
+                            {/* Header */}
+                            <View style={styles.header}>
+                                <View style={styles.iconWrapper}>
+                                    <User size={36} color={'#fff'}/>
+                                </View>
+
+                                <View style={styles.headerRow}>
+                                    <Text style={styles.headerTitle}>Profile</Text>
                                 </View>
                             </View>
-                        </View>
-                        <View style={styles.actionCard}>
-                            <TouchableOpacity
-                                style={styles.actionRow}
-                                onPress={() => router.push("/Orders")}
-                                activeOpacity={0.8}
-                            >
-                                <View style={styles.actionLeft}>
-                                    <Home size={18} color="#0F172A" />
-                                    <Text style={styles.actionText}>My Orders</Text>
-                                </View>
-                                <ChevronRight size={18} color="#94A3B8" />
-                            </TouchableOpacity>
 
-                            <View style={styles.divider} />
-
-                            <TouchableOpacity
-                                style={styles.actionRow}
-                                onPress={() => router.push("/Address")}
-                                activeOpacity={0.8}
-                            >
-                                <View style={styles.actionLeft}>
-                                    <Home size={18} color="#0F172A" />
-                                    <Text style={styles.actionText}>Saved Addresses</Text>
+                            {/* Info */}
+                            <View style={styles.infoCard}>
+                                <View style={styles.infoRow}>
+                                    <View style={styles.infoLeft}>
+                                        <View style={styles.infoIcon}>
+                                            <User size={18} color={styles.iconAccent.color}/>
+                                        </View>
+                                        <View>
+                                            <Text style={styles.infoLabel}>Phone Number</Text>
+                                            <Text style={styles.infoValue}>
+                                                +91 8452 1458 45
+                                            </Text>
+                                        </View>
+                                    </View>
                                 </View>
-                                <ChevronRight size={18} color="#94A3B8" />
+                            </View>
+
+                            {/* Actions */}
+                            <View style={styles.actionCard}>
+                                <TouchableOpacity
+                                    style={styles.actionRow}
+                                    onPress={() => router.push("/Orders")}
+                                    activeOpacity={0.8}
+                                >
+                                    <View style={styles.actionLeft}>
+                                        <PackageOpen size={18} color={styles.iconPrimary.color}/>
+                                        <Text style={styles.actionText}>My Orders</Text>
+                                    </View>
+                                    <ChevronRight size={18} color={styles.iconMuted.color}/>
+                                </TouchableOpacity>
+
+                                <View style={styles.divider}/>
+
+                                <TouchableOpacity
+                                    style={styles.actionRow}
+                                    onPress={() => router.push("/Address")}
+                                    activeOpacity={0.8}
+                                >
+                                    <View style={styles.actionLeft}>
+                                        <Home size={18} color={styles.iconPrimary.color}/>
+                                        <Text style={styles.actionText}>Saved Addresses</Text>
+                                    </View>
+                                    <ChevronRight size={18} color={styles.iconMuted.color}/>
+                                </TouchableOpacity>
+
+                                <View style={styles.divider}/>
+
+                                <TouchableOpacity
+                                    style={styles.actionRow}
+                                    onPress={() => router.push("/AddressSetter")}
+                                    activeOpacity={0.8}
+                                >
+                                    <View style={styles.actionLeft}>
+                                        <MapPinHouse size={18} color={styles.iconPrimary.color}/>
+                                        <Text style={styles.actionText}>Add New Address</Text>
+                                    </View>
+                                    <ChevronRight size={18} color={styles.iconMuted.color}/>
+                                </TouchableOpacity><View style={styles.divider}/>
+
+                                <TouchableOpacity
+                                    style={styles.actionRow}
+                                    onPress={toggleMode}
+                                    activeOpacity={0.8}
+                                >
+                                    <View style={styles.actionLeft}>
+                                        {mode === "dark" ? (
+                                            <Sun size={18} color={styles.iconSecondary.color}/>
+                                        ) : (
+                                            <Moon size={18} color={styles.iconSecondary.color}/>
+                                        )}
+                                        <Text style={styles.actionText}>Change Theme</Text>
+                                    </View>
+                                    <ChevronRight size={18} color={styles.iconMuted.color}/>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+
+                        {/* Logout */}
+                        <View style={styles.buttonContainer}>
+                            <TouchableOpacity
+                                style={styles.logoutButton}
+                                onPress={() => setShowModal(true)}
+                            >
+                                <Text style={styles.logoutText}>Logout</Text>
                             </TouchableOpacity>
                         </View>
-                    </View>
-                    <View style={styles.buttonContainer}>
-                        <TouchableOpacity
-                            style={[
-                                styles.nextButton,
-                            ]}
-                            onPress={() => router.push("/")}
-                        >
-                            <Text style={styles.nextButtonText}>
-                                Logout
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
-        </SafeAreaView>
+                    </ScrollView>
+
+                    <SuccessModal
+                        visible={showModal}
+                        autoCloseDuration={1000}
+                        onAnimationComplete={() => {
+                            setShowModal(false);
+                            router.push("/Login");
+                        }}
+                        title={"Logged Out"}
+                        subtitle={"Logged Out Successfully. Redirecting to Home..."}
+                        progressBarColor={theme.colors.danger}
+                        iconColor={theme.colors.warning}
+                        iconBackgroundColor={theme.colors.danger}
+                    />
+                </KeyboardAvoidingView>
+            </SafeAreaView>
+        </AnimatedContainer>
     );
 };
-
 export default Profile;
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#1e1e1e',
-    },
-    scrollContent: {
-        padding: 16,
-        paddingBottom: 32,
-    },
-    header: {
-        alignItems: 'center',
-        marginBottom: 24,
-        paddingTop: 8,
-    },
-    iconWrapper: {
-        width: 72,
-        height: 72,
-        backgroundColor: '#93BD57',
-        borderRadius: 36,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 16,
-        shadowColor: '#93BD57',
-        shadowOffset: {width: 0, height: 4},
-        shadowOpacity: 0.25,
-        shadowRadius: 8,
-        elevation: 8,
-    },
-    headerTitle: {
-        fontFamily: 'Montserrat',
-        fontSize: 26,
-        fontWeight: '700',
-        color: '#0F172A',
-        marginBottom: 8,
-        letterSpacing: -0.5,
-    },
-    headerSubtitle: {
-        fontFamily: 'Montserrat',
-        fontSize: 14,
-        fontWeight: '400',
-        color: '#64748B',
-        textAlign: 'center',
-        paddingHorizontal: 20,
-    },
-    formCard: {
-        backgroundColor: '#fff',
-        borderRadius: 20,
-        padding: 24,
-        marginBottom: 20,
-        shadowColor: '#000',
-        shadowOffset: {width: 0, height: 2},
-        shadowOpacity: 0.06,
-        shadowRadius: 16,
-        elevation: 4,
-    },
-    formSection: {
-        width: '100%',
-        backgroundColor: '#f2f2f2',
-        paddingHorizontal: 12,
-        paddingVertical: 20,
-        borderTopWidth: 1,
-        borderTopColor: 'rgba(156,156,156,0.2)',
-        borderBottomWidth: 1,
-        borderBottomColor: 'rgba(156,156,156,0.2)',
-    },
-    sectionTitle: {
-        fontFamily: 'Montserrat',
-        fontSize: 22,
-        fontWeight: '700',
-        color: '#0F172A',
-        marginBottom: 8,
-        letterSpacing: -0.3,
-    },
-    sectionSubtitle: {
-        fontFamily: 'Montserrat',
-        fontSize: 14,
-        fontWeight: '400',
-        color: '#64748B',
-        lineHeight: 20,
-    },
-    buttonContainer: {
-        flexDirection: 'row',
-        gap: 12,
-        marginBottom: 20,
-    },
-    nextButton: {
-        flex: 1,
-        backgroundColor: '#bd5757',
-        borderRadius: 14,
-        paddingVertical: 16,
-        alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: '#93BD57',
-        shadowOffset: {width: 0, height: 4},
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 6,
-    },
 
-    nextButtonText: {
-        fontFamily: 'Montserrat',
-        fontSize: 15,
-        fontWeight: '700',
-        color: '#fff',
-        letterSpacing: 0.3,
-    },
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'flex-end',
-    },
-    modalContent: {
-        backgroundColor: '#fff',
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24,
-        paddingTop: 24,
-        paddingHorizontal: 20,
-        paddingBottom: 32,
-        maxHeight: height * 0.8,
-    },
-    modalHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 24,
-    },
-    modalTitle: {
-        fontFamily: 'Montserrat',
-        fontSize: 20,
-        fontWeight: '700',
-        color: '#0F172A',
-    },
-    modalBody: {
-        gap: 16,
-        marginBottom: 24,
-    },
-    modalFooter: {
-        flexDirection: 'row',
-        gap: 12,
-    },
-    modalCancelButton: {
-        flex: 1,
-        backgroundColor: '#F1F5F9',
-        borderRadius: 12,
-        paddingVertical: 14,
-        alignItems: 'center',
-    },
-    modalCancelText: {
-        fontFamily: 'Montserrat',
-        fontSize: 15,
-        fontWeight: '600',
-        color: '#64748B',
-    },
-    modalSaveButton: {
-        flex: 1,
-        backgroundColor: '#93BD57',
-        borderRadius: 12,
-        paddingVertical: 14,
-        alignItems: 'center',
-    },
-    modalSaveText: {
-        fontFamily: 'Montserrat',
-        fontSize: 15,
-        fontWeight: '700',
-        color: '#fff',
-    },
-    /* ===== Profile Info ===== */
-    infoCard: {
-        backgroundColor: '#F8FAFC',
-        borderRadius: 16,
-        padding: 16,
-        borderWidth: 1,
-        borderColor: '#E2E8F0',
-    },
+/* ================== STYLES ================== */
 
-    infoRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
+const createStyles = (theme) =>
+    StyleSheet.create({
+        container: {
+            flex: 1,
+        },
 
-    infoLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
-    },
+        scrollContent: {
+            padding: theme.spacing.md,
+            paddingBottom: theme.spacing.xl,
+        },
 
-    infoIcon: {
-        width: 36,
-        height: 36,
-        borderRadius: 10,
-        backgroundColor: 'rgba(147,189,87,0.15)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
+        /* Header */
+        header: {
+            alignItems: "center",
+            marginBottom: theme.spacing.lg,
+        },
 
-    infoLabel: {
-        fontFamily: 'Montserrat',
-        fontSize: 13,
-        color: '#64748B',
-    },
+        headerRow: {
+            flexDirection: "row",
+            alignItems: "center",
+            gap: theme.spacing.sm,
+        },
 
-    infoValue: {
-        fontFamily: 'Montserrat',
-        fontSize: 16,
-        fontWeight: '700',
-        color: '#0F172A',
-        marginTop: 2,
-    },
+        iconWrapper: {
+            width: 72,
+            height: 72,
+            backgroundColor: theme.colors.accent,
+            borderRadius: 36,
+            justifyContent: "center",
+            alignItems: "center",
+            marginBottom: theme.spacing.md,
+        },
 
-    /* ===== Actions ===== */
-    actionCard: {
-        backgroundColor: '#FFFFFF',
-        borderRadius: 20,
-        marginTop: 20,
-        paddingVertical: 6,
-        shadowColor: '#000',
-        shadowOpacity: 0.06,
-        shadowRadius: 16,
-        elevation: 4,
-    },
+        headerTitle: {
+            fontSize: theme.fontSize.xxxl,
+            fontWeight: theme.fontWeight.bold,
+            color: theme.colors.textPrimary,
+        },
 
-    actionRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingVertical: 16,
-        paddingHorizontal: 20,
-    },
+        themeToggle: {
+            marginLeft: theme.spacing.sm,
+            padding: theme.spacing.sm,
+            borderRadius: theme.radius.md,
+            backgroundColor: theme.colors.surface,
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+        },
 
-    actionLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
-    },
+        /* Cards */
+        formCard: {
+            backgroundColor: theme.colors.card,
+            borderRadius: theme.radius.lg,
+            padding: theme.spacing.lg,
+            marginBottom: theme.spacing.lg,
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+        },
 
-    actionText: {
-        fontFamily: 'Montserrat',
-        fontSize: 15,
-        fontWeight: '600',
-        color: '#0F172A',
-    },
+        infoCard: {
+            backgroundColor: theme.colors.surface,
+            borderRadius: theme.radius.md,
+            padding: theme.spacing.md,
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+        },
 
-    divider: {
-        height: 1,
-        backgroundColor: '#E2E8F0',
-        marginHorizontal: 20,
-    },
+        infoRow: {
+            flexDirection: "row",
+            alignItems: "center",
+        },
 
-    /* ===== Logout ===== */
-    logoutWrapper: {
-        marginTop: 28,
-    },
+        infoLeft: {
+            flexDirection: "row",
+            alignItems: "center",
+            gap: theme.spacing.sm,
+        },
 
-    logoutButton: {
-        backgroundColor: '#FEE2E2',
-        borderRadius: 16,
-        paddingVertical: 16,
-        alignItems: 'center',
-    },
+        infoIcon: {
+            width: 36,
+            height: 36,
+            borderRadius: theme.radius.sm,
+            backgroundColor: theme.colors.surface,
+            justifyContent: "center",
+            alignItems: "center",
+        },
 
-    logoutText: {
-        fontFamily: 'Montserrat',
-        fontSize: 15,
-        fontWeight: '700',
-        color: '#B91C1C',
-    },
+        infoLabel: {
+            fontSize: theme.fontSize.sm,
+            color: theme.colors.textSecondary,
+        },
 
-});
+        infoValue: {
+            fontSize: theme.fontSize.lg,
+            fontWeight: theme.fontWeight.bold,
+            color: theme.colors.textPrimary,
+        },
+
+        /* Actions */
+        actionCard: {
+            backgroundColor: theme.colors.card,
+            borderRadius: theme.radius.lg,
+            marginTop: theme.spacing.lg,
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+        },
+
+        actionRow: {
+            flexDirection: "row",
+            justifyContent: "space-between",
+            paddingVertical: theme.spacing.md,
+            paddingHorizontal: theme.spacing.lg,
+        },
+
+        actionLeft: {
+            flexDirection: "row",
+            alignItems: "center",
+            gap: theme.spacing.sm,
+        },
+
+        actionText: {
+            fontSize: theme.fontSize.md,
+            fontWeight: theme.fontWeight.medium,
+            color: theme.colors.textPrimary,
+        },
+
+        divider: {
+            height: 1,
+            backgroundColor: theme.colors.border,
+            marginHorizontal: theme.spacing.lg,
+        },
+
+        /* Logout */
+        buttonContainer: {
+            marginBottom: theme.spacing.lg,
+        },
+
+        logoutButton: {
+            backgroundColor: theme.colors.danger,
+            borderRadius: theme.radius.md,
+            paddingVertical: theme.spacing.md,
+            alignItems: "center",
+        },
+
+        logoutText: {
+            fontSize: theme.fontSize.md,
+            fontWeight: theme.fontWeight.bold,
+            color: theme.colors.accentText,
+        },
+
+        /* Icon color helpers */
+        iconPrimary: {color: theme.colors.textPrimary},
+        iconSecondary: {color: theme.colors.textSecondary},
+        iconMuted: {color: theme.colors.textMuted},
+        iconAccent: {color: theme.colors.accent},
+    });
