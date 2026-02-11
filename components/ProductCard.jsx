@@ -9,6 +9,7 @@ import {
 import React, {useEffect, useMemo, useRef} from "react";
 import {router} from "expo-router";
 import {useCartStore} from "../store/cartStore";
+import {useThemeStore} from "../store/themeStore";
 
 const {width} = Dimensions.get("window");
 const CARD_WIDTH = (width - 48) / 2;
@@ -22,6 +23,8 @@ const ProductCard = ({product, width = CARD_WIDTH}) => {
                 : null,
         [product.id, selectedVariant?.sku]
     );
+    const theme = useThemeStore((s) => s.theme);
+    const styles = useMemo(() => createStyles(theme), [theme]);
 
     const quantity = useCartStore(
         state => (cartKey ? state.itemsByKey[cartKey]?.quantity ?? 0 : 0)
@@ -144,24 +147,21 @@ const ProductCard = ({product, width = CARD_WIDTH}) => {
     );
 };
 
-export default React.memo(
-    ProductCard);
+export default React.memo(ProductCard);
 
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
     productCard: {
-        // width: '48%',
-        backgroundColor: '#242424',
-        borderRadius: 12,
+        backgroundColor: theme.colors.card,
+        borderRadius: theme.radius.md,
         margin: 4,
         overflow: 'hidden',
-        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)'
-
+        boxShadow: `2px 4px 4px ${theme.colors.invertedExtraMuted}`,
     },
     imageContainer: {
         width: '100%',
         height: 140,
-        backgroundColor: '#2a2a2a',
+        backgroundColor: theme.colors.surface,
         alignItems: 'center',
         justifyContent: 'center',
         position: 'relative',
@@ -177,90 +177,88 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 8,
         left: 8,
-        backgroundColor: '#26702A',
+        backgroundColor: theme.colors.accent,
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 4,
     },
     discountText: {
-        color: '#fff',
-        fontSize: 10,
-        fontWeight: '700',
+        color: theme.colors.accentText,
+        fontSize: theme.fontSize.sm,
+        fontWeight: theme.fontWeight.bold,
     },
     productInfo: {
-        padding: 12,
+        padding: theme.spacing.md,
     },
     brandText: {
         fontSize: 11,
-        color: '#8A8A8A',
+        color: theme.colors.textMuted,
         marginBottom: 4,
     },
     productName: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#FFFFFF',
+        fontSize: theme.fontSize.md,
+        fontWeight: theme.fontWeight.medium,
+        color: theme.colors.textPrimary,
         marginBottom: 4,
     },
     productWeight: {
-        fontSize: 12,
-        color: '#B3B3B3',
-        marginBottom: 8,
+        fontSize: theme.fontSize.sm,
+        color: theme.colors.textSecondary,
+        marginBottom: theme.spacing.sm,
     },
     priceRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 8,
+        marginBottom: theme.spacing.sm,
     },
     productPrice: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: '#fff',
+        fontSize: theme.fontSize.lg,
+        fontWeight: theme.fontWeight.bold,
+        color: theme.colors.textPrimary,
         marginRight: 6,
     },
     originalPrice: {
-        fontSize: 12,
-        color: '#888',
+        fontSize: theme.fontSize.sm,
+        color: theme.colors.textMuted,
         textDecorationLine: 'line-through',
     },
     addButton: {
-        backgroundColor: '#fff',
         borderWidth: 2,
-        borderColor: 'rgb(123,222,74)',
-        borderRadius: 8,
-        paddingVertical: 8,
+        borderColor: theme.colors.accent,
+        borderRadius: theme.radius.sm,
+        paddingVertical: theme.spacing.sm,
         alignItems: 'center',
     },
     addButtonText: {
-        color: 'rgb(25,101,0)',
+        color: theme.colors.accent,
         fontSize: 13,
-        fontWeight: '700',
+        fontWeight: theme.fontWeight.bold,
     },
     quantityControl: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#26702A',
-        borderRadius: 8,
+        backgroundColor: theme.colors.accent,
+        borderRadius: theme.radius.sm,
         paddingVertical: 4,
         paddingHorizontal: 2,
         borderWidth: 2,
-        borderColor: '#fff',
+        borderColor: theme.colors.accent,
     },
     quantityButton: {
         width: 28,
         height: 28,
         justifyContent: 'center',
         alignItems: 'center',
-
     },
     quantityButtonText: {
-        color: '#ffffff',
+        color: theme.colors.accentText,
         fontSize: 18,
-        fontWeight: '700',
+        fontWeight: theme.fontWeight.bold,
     },
     quantityText: {
-        color: '#ffffff',
-        fontSize: 14,
-        fontWeight: '700',
+        color: theme.colors.accentText,
+        fontSize: theme.fontSize.md,
+        fontWeight: theme.fontWeight.bold,
         flex: 1,
         textAlign: 'center',
     },

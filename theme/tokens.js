@@ -3,6 +3,7 @@ export const baseTokens = {
         sm: 6,
         md: 12,
         lg: 20,
+        xl: 24,
     },
     spacing: {
         xs: 4,
@@ -18,6 +19,7 @@ export const baseTokens = {
         xl: 18,
         xxl: 22,
         xxxl: 26,
+        xxxxl: 32,
     },
     fontWeight: {
         regular: '400',

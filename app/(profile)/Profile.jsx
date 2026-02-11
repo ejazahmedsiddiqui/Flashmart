@@ -49,7 +49,7 @@ const Profile = () => {
                             {/* Header */}
                             <View style={styles.header}>
                                 <View style={styles.iconWrapper}>
-                                    <User size={36} color={styles.iconPrimary.color}/>
+                                    <User size={36} color={'#fff'}/>
                                 </View>
 
                                 <View style={styles.headerRow}>

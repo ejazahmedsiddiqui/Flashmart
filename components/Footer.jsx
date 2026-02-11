@@ -71,7 +71,7 @@ const Footer = () => {
                         <View style={styles.iconContainer}>
                             <item.icon
                                 size={24}
-                                color={active ? theme.colors.accent : '#494949'}
+                                color={active ? theme.colors.accent : theme.colors.inverted}
                             />
                             {item.badge > 0 && (
                                 <View style={styles.badge}>
@@ -142,7 +142,7 @@ const createStyles = (theme) => StyleSheet.create({
         fontWeight: theme.fontWeight.bold,
     },
     label: {
-        color: '#494949',
+        color: theme.colors.inverted,
         fontSize: theme.fontSize.sm,
         marginTop: theme.spacing.xs,
     },
