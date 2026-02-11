@@ -1,20 +1,23 @@
-import { SafeAreaView } from "react-native-safe-area-context";
+import {SafeAreaView} from "react-native-safe-area-context";
 import {
     Text,
     View,
     TouchableOpacity,
     Animated,
-    StyleSheet,
+    StyleSheet, Alert, ActivityIndicator,
 } from "react-native";
-import React, { useState, useRef, useEffect, useMemo } from "react";
-import { Phone, Lock } from "lucide-react-native";
-import { router } from "expo-router";
+import React, {useState, useRef, useEffect, useMemo} from "react";
+import {Phone, Lock} from "lucide-react-native";
+import {router} from "expo-router";
 
 import RenderFormField from "../../components/RenderFormField";
 import SuccessModal from "../../components/SuccessModal";
-import { useThemeStore } from "../../store/themeStore";
+import {useThemeStore} from "../../store/themeStore";
+import {useUser} from "../../context/UserContext";
 
 const SellerLogin = () => {
+    const {phone: userPhone, token, isAuthenticated, isLoading, login, logout} = useUser();
+
     const theme = useThemeStore((s) => s.theme);
     const styles = useMemo(() => createStyles(theme), [theme]);
 
@@ -22,7 +25,7 @@ const SellerLogin = () => {
     const [otp, setOtp] = useState("");
     const [step, setStep] = useState(1);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
-    const [errors, setErrors] = useState({ phone: "", otp: "" });
+    const [errors, setErrors] = useState({phone: "", otp: ""});
     const [resendTimer, setResendTimer] = useState(0);
 
     /* Animations */
@@ -30,6 +33,13 @@ const SellerLogin = () => {
     const scaleAnim = useRef(new Animated.Value(0.3)).current;
     const checkScaleAnim = useRef(new Animated.Value(0)).current;
     const progressAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            router.replace('/Profile')
+        }
+    }, [isAuthenticated]);
+
 
     useEffect(() => {
         let interval;
@@ -46,20 +56,21 @@ const SellerLogin = () => {
         setResendTimer(30);
     };
 
-    const handleVerifyOTP = () => {
+    const handleVerifyOTP = async () => {
         if (otp.length !== 6) {
-            setErrors({ ...errors, otp: "Please enter a valid 6-digit OTP" });
+            setErrors({...errors, otp: "Please enter a valid 6-digit OTP"});
             return;
         }
 
-        if (otp === "123456") {
-            setErrors({ ...errors, otp: "" });
-            showSuccessAnimation();
-        } else {
-            setErrors({
-                ...errors,
-                otp: `Invalid OTP. Try again or resend to ${phone}`,
-            });
+        try {
+            if (otp === '123456') {
+                const response = login(phone, 'ejwt72nma9787nnaouystb10357ss080e124n34n23423kj4bn23kj4234n23n42n42kj3n221nkjndasdjgfuxuiho1');
+                if (response.success)
+                    setShowSuccessModal(true);
+            }
+        } catch (error) {
+            setErrors({...errors, otp: "Invalid phone number"});
+            Alert.alert('Error', error);
         }
     };
 
@@ -99,11 +110,33 @@ const SellerLogin = () => {
     const handleResendOTP = () => {
         if (resendTimer > 0) return;
         setOtp("");
-        setErrors({ ...errors, otp: "" });
+        setErrors({...errors, otp: ""});
         setResendTimer(30);
     };
 
     const disabled = phone.length !== 10;
+
+    if (isLoading) {
+        return (
+            <SafeAreaView style={styles.container}>
+                <View style={styles.content}>
+                    {/* Header */}
+                    <View style={styles.header}>
+                        <View style={styles.iconWrapper}>
+                            <Phone size={32} color={styles.iconAccent.color}/>
+                        </View>
+                        <Text style={styles.headerTitle}>
+                            Welcome!
+                        </Text>
+                        <ActivityIndicator size={'large'} color={theme.colors.accent}/>
+                        <Text style={styles.headerSubtitle}>
+                            Loading...
+                        </Text>
+                    </View>
+                </View>
+            </SafeAreaView>
+        )
+    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -111,7 +144,7 @@ const SellerLogin = () => {
                 {/* Header */}
                 <View style={styles.header}>
                     <View style={styles.iconWrapper}>
-                        <Phone size={32} color={styles.iconAccent.color} />
+                        <Phone size={32} color={styles.iconAccent.color}/>
                     </View>
                     <Text style={styles.headerTitle}>
                         {step === 1 ? "Welcome!" : "Verify OTP"}
@@ -133,7 +166,7 @@ const SellerLogin = () => {
                                 value={phone}
                                 onChangeText={setPhone}
                                 placeholder="Enter 10-digit mobile number"
-                                icon={<Phone size={20} color={styles.iconMuted.color} />}
+                                icon={<Phone size={20} color={styles.iconMuted.color}/>}
                                 textColor={styles.inputText.color}
                                 error={errors.phone}
                                 maxLength={10}
@@ -159,7 +192,7 @@ const SellerLogin = () => {
                                 onChangeText={setOtp}
                                 placeholder="6-digit code"
                                 maxLength={6}
-                                icon={<Lock size={20} color={styles.iconMuted.color} />}
+                                icon={<Lock size={20} color={styles.iconMuted.color}/>}
                                 textColor={styles.inputText.color}
                                 error={errors.otp}
                             />
@@ -325,7 +358,7 @@ const createStyles = (theme) =>
         },
 
         /* Icon helpers */
-        iconAccent: { color: theme.colors.accentText },
-        iconMuted: { color: theme.colors.textMuted },
-        inputText: { color: theme.colors.background },
+        iconAccent: {color: theme.colors.accentText},
+        iconMuted: {color: theme.colors.textMuted},
+        inputText: {color: theme.colors.background},
     });
