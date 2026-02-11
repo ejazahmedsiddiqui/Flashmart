@@ -4,12 +4,13 @@ import {
     View,
     StyleSheet,
     Dimensions,
-    Image,
+    Image, ActivityIndicator,
 } from "react-native";
 import React, {useEffect, useMemo, useRef} from "react";
 import {router} from "expo-router";
 import {useCartStore} from "../store/cartStore";
 import {useThemeStore} from "../store/themeStore";
+import {SafeAreaView} from "react-native-safe-area-context";
 
 const {width} = Dimensions.get("window");
 const CARD_WIDTH = (width - 48) / 2;
@@ -33,6 +34,7 @@ const ProductCard = ({product, width = CARD_WIDTH}) => {
     const addItem = useCartStore(state => state.addItem);
     const increment = useCartStore(state => state.incrementQuantity);
     const decrement = useCartStore(state => state.decrementQuantity);
+    const hasHydrated = useThemeStore((s) => s._hasHydrated);
 
     const handleCardPush = () => {
         router.push(`/(home)/${product.id}`);
@@ -64,7 +66,23 @@ const ProductCard = ({product, width = CARD_WIDTH}) => {
     const handleDecrement = () => decrement(cartKey);
 
     console.log("Render ProductCard", product.id);
-
+    if (!hasHydrated) {
+        return (
+            <SafeAreaView style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: '#fff'
+            }}>
+                <ActivityIndicator size="large" color={'blue'}/>
+                <Text style={{
+                    color: '#1e1e1e'
+                }}>
+                    Loading...
+                </Text>
+            </SafeAreaView>
+        )
+    }
 
     return (
         <TouchableOpacity
@@ -156,7 +174,8 @@ const createStyles = (theme) => StyleSheet.create({
         borderRadius: theme.radius.md,
         margin: 4,
         overflow: 'hidden',
-        boxShadow: `2px 4px 4px ${theme.colors.invertedExtraMuted}`,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
     },
     imageContainer: {
         width: '100%',

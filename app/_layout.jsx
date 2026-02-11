@@ -1,14 +1,34 @@
 import {Stack, usePathname} from "expo-router";
 import Footer from "../components/Footer"; // Adjust the path based on where you place the Footer component
-import {View, StyleSheet, StatusBar} from "react-native";
+import {View, StyleSheet, StatusBar, ActivityIndicator, Text} from "react-native";
 import {UserProvider} from "../context/UserContext";
+import { useThemeStore } from "../store/themeStore";
+import {SafeAreaView} from "react-native-safe-area-context";
 
 export default function RootLayout() {
     const pathname = usePathname();
+    const hasHydrated = useThemeStore((s) => s._hasHydrated);
 
-    // Routes where footer should be hidden
     const hideFooterRoutes = ['/Checkout', '/Search', '/SubCategory'];
     const shouldShowFooter = !hideFooterRoutes.some(route => pathname.includes(route));
+
+    if (!hasHydrated) {
+        return (
+            <SafeAreaView style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: '#fff'
+            }}>
+                <ActivityIndicator size="large" color={'blue'}/>
+                <Text style={{
+                    color: '#1e1e1e'
+                }}>
+                    Loading...
+                </Text>
+            </SafeAreaView>
+        )
+    }
 
     return (
         <UserProvider>
@@ -18,7 +38,6 @@ export default function RootLayout() {
                 <Stack
                     screenOptions={{
                         headerShown: false,
-                        // animation: 'none',
                         animation: 'fade',
                         animationDuration: 150,
                     }}>

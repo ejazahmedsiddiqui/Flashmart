@@ -6,7 +6,7 @@ export const lightTheme = {
         background: '#ffffff',
         surface: '#f8f8f8',
         card: '#ffffff',
-        border: '#f0f0f0',
+        border: '#d1d1d1',
         inverted: '#000',
         invertedMuted: '#333333',
         invertedExtraMuted: '#ededed',

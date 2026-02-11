@@ -27,7 +27,7 @@ import {useUser} from "../../context/UserContext";
 const {height} = Dimensions.get("window");
 
 const Profile = () => {
-    const { phone, token, isAuthenticated, isLoading, login, logout } = useUser();
+    const { isAuthenticated, isLoading, logout } = useUser();
     const [showModal, setShowModal] = React.useState(false);
 
     const theme = useThemeStore((s) => s.theme);
@@ -35,14 +35,12 @@ const Profile = () => {
     const toggleMode = useThemeStore((s) => s.toggleMode);
 
     const styles = useMemo(() => createStyles(theme), [theme]);
+
     useEffect(() => {
-        if(!isAuthenticated) router.replace('/')
+        console.log ('Profile isAuthenticated', isAuthenticated);
+        if(!isAuthenticated) router.replace('/Login')
     }, [isAuthenticated]);
 
-    const handleLogout = async () => {
-        await logout();
-        setShowModal(true);
-    }
     if(isLoading) {
         return (
             <AnimatedContainer>
@@ -163,7 +161,7 @@ const Profile = () => {
                         <View style={styles.buttonContainer}>
                             <TouchableOpacity
                                 style={styles.logoutButton}
-                                onPress={handleLogout}
+                                onPress={() => setShowModal(true)}
                             >
                                 <Text style={styles.logoutText}>Logout</Text>
                             </TouchableOpacity>
@@ -174,8 +172,8 @@ const Profile = () => {
                         visible={showModal}
                         autoCloseDuration={1000}
                         onAnimationComplete={() => {
+                            logout();
                             setShowModal(false);
-                            router.push("/Login");
                         }}
                         title={"Logged Out"}
                         subtitle={"Logged Out Successfully. Redirecting to Home..."}

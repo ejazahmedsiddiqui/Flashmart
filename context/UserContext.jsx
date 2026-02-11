@@ -66,6 +66,7 @@ export const UserProvider = ({ children }) => {
                 isAuthenticated: false,
                 isLoading: false,
             });
+            return { success: true}
         } catch (error) {
             console.error("Error clearing user data:", error);
             throw error;

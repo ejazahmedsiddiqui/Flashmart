@@ -13,6 +13,11 @@ export const useThemeStore = create(
         (set, get) => ({
             mode: systemScheme,
             theme: systemScheme === 'dark' ? darkTheme : lightTheme,
+            _hasHydrated: false,
+
+            setHasHydrated: (state) => {
+                set({ _hasHydrated: state });
+            },
 
             toggleMode: () => {
                 const next = get().mode === 'dark' ? 'light' : 'dark';
@@ -28,6 +33,13 @@ export const useThemeStore = create(
             partialize: (state) => ({
                 mode: state.mode,
             }),
+            onRehydrateStorage: () => (state) => {
+                if (state) {
+                    // Update theme to match the hydrated mode
+                    state.theme = state.mode === 'dark' ? darkTheme : lightTheme;
+                    state.setHasHydrated(true);
+                }
+            },
         }
     )
 );

@@ -16,7 +16,7 @@ import {useThemeStore} from "../../store/themeStore";
 import {useUser} from "../../context/UserContext";
 
 const SellerLogin = () => {
-    const {phone: userPhone, token, isAuthenticated, isLoading, login, logout} = useUser();
+    const {isAuthenticated, isLoading, login} = useUser();
 
     const theme = useThemeStore((s) => s.theme);
     const styles = useMemo(() => createStyles(theme), [theme]);
@@ -28,17 +28,13 @@ const SellerLogin = () => {
     const [errors, setErrors] = useState({phone: "", otp: ""});
     const [resendTimer, setResendTimer] = useState(0);
 
-    /* Animations */
-    const fadeAnim = useRef(new Animated.Value(0)).current;
-    const scaleAnim = useRef(new Animated.Value(0.3)).current;
-    const checkScaleAnim = useRef(new Animated.Value(0)).current;
-    const progressAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
-        if (isAuthenticated) {
+        console.log('Login isAuthenticated: ', isAuthenticated)
+        if (isAuthenticated && !isLoading) {
             router.replace('/Profile')
         }
-    }, [isAuthenticated]);
+    }, [isAuthenticated, isLoading]);
 
 
     useEffect(() => {
@@ -72,39 +68,6 @@ const SellerLogin = () => {
             setErrors({...errors, otp: "Invalid phone number"});
             Alert.alert('Error', error);
         }
-    };
-
-    const showSuccessAnimation = () => {
-        setShowSuccessModal(true);
-
-        Animated.parallel([
-            Animated.timing(fadeAnim, {
-                toValue: 1,
-                duration: 100,
-                useNativeDriver: true,
-            }),
-            Animated.spring(scaleAnim, {
-                toValue: 1,
-                tension: 50,
-                friction: 7,
-                useNativeDriver: true,
-            }),
-        ]).start(() => {
-            Animated.spring(checkScaleAnim, {
-                toValue: 1,
-                tension: 50,
-                friction: 7,
-                useNativeDriver: true,
-            }).start(() => {
-                Animated.timing(progressAnim, {
-                    toValue: 1,
-                    duration: 800,
-                    useNativeDriver: false,
-                }).start(() => {
-                    router.replace("/");
-                });
-            });
-        });
     };
 
     const handleResendOTP = () => {
@@ -167,7 +130,7 @@ const SellerLogin = () => {
                                 onChangeText={setPhone}
                                 placeholder="Enter 10-digit mobile number"
                                 icon={<Phone size={20} color={styles.iconMuted.color}/>}
-                                textColor={styles.inputText.color}
+                                textColor={'#000'}
                                 error={errors.phone}
                                 maxLength={10}
                             />
@@ -193,7 +156,7 @@ const SellerLogin = () => {
                                 placeholder="6-digit code"
                                 maxLength={6}
                                 icon={<Lock size={20} color={styles.iconMuted.color}/>}
-                                textColor={styles.inputText.color}
+                                textColor={'#000'}
                                 error={errors.otp}
                             />
 
@@ -241,7 +204,7 @@ const SellerLogin = () => {
                 visible={showSuccessModal}
                 onAnimationComplete={() => {
                     setShowSuccessModal(false);
-                    router.replace("/");
+                    router.replace("/Profile");
                 }}
                 title="Logged in"
                 subtitle="Welcome Back! Redirecting to Home page..."

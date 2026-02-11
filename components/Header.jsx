@@ -62,7 +62,6 @@ const Header = ({
                         style={{
                             flexDirection: 'row',
                             alignItems: 'center',
-                            marginTop: 5,
                         }}
                         onPress={() => setShowModal(prev => ({...prev, addressModalVisible: true}))}
                     >
@@ -241,7 +240,7 @@ const createStyles = (theme) => StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 6,
         borderWidth: 2,
-        borderColor: theme.colors.border,
+        borderColor: '#fff',
     },
     cartBadgeText: {
         color: theme.colors.accentText,

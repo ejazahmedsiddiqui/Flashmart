@@ -6,7 +6,7 @@ export const darkTheme = {
         background: '#191919',
         surface: '#222222',
         card: '#1f1f1f',
-        border: '#2a2a2a',
+        border: '#3a3a3a',
         inverted: '#fff',
         invertedMuted: '#333333',
         invertedExtraMuted: '#2e2e2e',

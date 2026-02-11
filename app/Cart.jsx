@@ -10,7 +10,7 @@ import {
     ScrollView,
 } from 'react-native';
 import {router} from "expo-router";
-import {ArrowLeft, Trash2, Plus, Minus, ShoppingBag, ShoppingCart} from "lucide-react-native";
+import {ArrowLeft, Trash2, Plus, Minus, ShoppingBag, ShoppingCart, TriangleAlert} from "lucide-react-native";
 import {useCartStore} from '../store/cartStore';
 import {useThemeStore} from "../store/themeStore";
 
@@ -46,9 +46,8 @@ export default function Cart() {
     );
 
 
-
     const removeItem = useCartStore(state => state.removeItem);
-
+    const clearCart = useCartStore(state => state.clearCart);
     const deliveryFee = subtotal > 500 ? 0 : 40;
     const total = subtotal + deliveryFee;
     const handleUpdateQuantity = (cartKey, change) => {
@@ -121,14 +120,14 @@ export default function Cart() {
                 <View style={styles.header}>
                     {router.canGoBack() &&
                         <TouchableOpacity
-                        onPress={() => {
-                            router.back()
-                        }}
-                        style={styles.backButton}
-                        activeOpacity={0.7}
-                    >
-                        <ArrowLeft size={24} color={theme.colors.textSecondary}/>
-                    </TouchableOpacity>}
+                            onPress={() => {
+                                router.back()
+                            }}
+                            style={styles.backButton}
+                            activeOpacity={0.7}
+                        >
+                            <ArrowLeft size={24} color={theme.colors.textSecondary}/>
+                        </TouchableOpacity>}
                     <Text style={styles.headerTitle}>My Cart</Text>
                     <View style={styles.placeholder}/>
                 </View>
@@ -246,7 +245,37 @@ export default function Cart() {
                         </View>
                     )}
                 </View>
+                <View
+                    style={{
+                        flex: 1,
 
+                    }}
+                >
+
+                    <TouchableOpacity
+                        style={{
+                            flex: 1,
+                            backgroundColor: theme.colors.danger,
+                            marginHorizontal: theme.spacing.lg,
+                            marginVertical: theme.spacing.sm,
+                            paddingHorizontal: theme.spacing.lg,
+                            paddingVertical: theme.spacing.md,
+                            borderRadius: theme.radius.md,
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            gap: theme.spacing.sm,
+                        }}
+                        onPress={() => {
+                            clearCart()
+                            console.log('Proceeding to checkout');
+                        }}
+                        activeOpacity={0.7}
+                    >
+
+                        <Text style={styles.checkoutButtonText}>Clear Cart</Text>
+                    </TouchableOpacity>
+                </View>
                 {/* Spacer for checkout button */}
                 <View style={{height: 100}}/>
             </ScrollView>
@@ -479,7 +508,6 @@ const createStyles = (theme) => StyleSheet.create({
     billSection: {
         backgroundColor: theme.colors.background,
         marginHorizontal: 20,
-        marginTop: 16,
         padding: 20,
         borderRadius: 12,
         borderWidth: 1,
