@@ -1,12 +1,13 @@
-import React, { useState, useMemo } from 'react';
+import React, {useState, useMemo} from 'react';
 import {View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, StatusBar} from 'react-native';
-import { ShoppingCart, Heart, ArrowLeft, Minus, Plus } from 'lucide-react-native';
-import { router, useLocalSearchParams } from "expo-router";
+import {ShoppingCart, Heart, ArrowLeft, Minus, Plus} from 'lucide-react-native';
+import {router, useLocalSearchParams} from "expo-router";
 import ProductCard from "../../components/ProductCard";
-import { products } from "../../utilities/products";
-import { useCartStore } from "../../store/cartStore";
+import {products} from "../../utilities/products";
+import {useCartStore} from "../../store/cartStore";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {useThemeStore} from "../../store/themeStore";
+import CartBadgeIcon from "../../components/CartBadgeIcon";
 
 const ProductDetailsPage = () => {
     const theme = useThemeStore((s) => s.theme);
@@ -69,7 +70,7 @@ const ProductDetailsPage = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <StatusBar backgroundColor={theme.colors.inverted} />
+            <StatusBar backgroundColor={theme.colors.inverted}/>
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()}>
@@ -78,15 +79,13 @@ const ProductDetailsPage = () => {
                 <Text style={styles.headerTitle}>
                     {product.name}
                 </Text>
-                <TouchableOpacity onPress={() => router.push('/Cart')}>
-                    <ShoppingCart size={24} color={theme.colors.textSecondary}/>
-                </TouchableOpacity>
+                <CartBadgeIcon/>
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false}>
                 {/* Image */}
                 <View style={styles.imageContainer}>
-                    <Image source={{ uri: product.image }} style={styles.productImage} />
+                    <Image source={{uri: product.image}} style={styles.productImage}/>
 
                     <TouchableOpacity
                         style={styles.favoriteButton}
@@ -158,19 +157,23 @@ const ProductDetailsPage = () => {
                 {similarProducts.length > 0 && (
                     <View style={styles.similarSection}>
                         <Text style={styles.similarTitle}>Similar Products</Text>
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false}
-                                    onLayout={(event) => {
-                                        const containerWidth = event.nativeEvent.layout.width;
-                                        setCardWidth(containerWidth);
-                                    }}>
+                        <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={styles.similarProductsContainer}
+                        >
                             {similarProducts.map(item => (
-                                <ProductCard key={item.id} product={item} width={cardWidth} />
+                                <ProductCard
+                                    key={item.id}
+                                    product={item}
+                                    isHorizontal={true}  // Add this prop
+                                />
                             ))}
                         </ScrollView>
                     </View>
                 )}
 
-                <View style={{ height: 120 }} />
+                <View style={{height: 120}}/>
             </ScrollView>
 
             {/* Bottom Bar */}
@@ -182,11 +185,11 @@ const ProductDetailsPage = () => {
                 ) : (
                     <View style={styles.quantityContainer}>
                         <TouchableOpacity onPress={handleDecrement}>
-                            <Minus size={20} color={theme.colors.accentText} />
+                            <Minus size={20} color={theme.colors.accentText}/>
                         </TouchableOpacity>
                         <Text style={styles.quantityText}>{quantity}</Text>
                         <TouchableOpacity onPress={handleIncrement}>
-                            <Plus size={20} color={theme.colors.accentText} />
+                            <Plus size={20} color={theme.colors.accentText}/>
                         </TouchableOpacity>
                     </View>
                 )}
@@ -240,7 +243,7 @@ const createStyles = (theme) => StyleSheet.create({
         borderRadius: 20,
         padding: theme.spacing.sm,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: {width: 0, height: 2},
         shadowOpacity: 0.05,
         shadowRadius: 4,
         elevation: 2,
@@ -382,7 +385,7 @@ const createStyles = (theme) => StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: theme.colors.border,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: -2 },
+        shadowOffset: {width: 0, height: -2},
         shadowOpacity: 0.05,
         shadowRadius: 4,
         elevation: 4,
@@ -411,6 +414,9 @@ const createStyles = (theme) => StyleSheet.create({
         fontSize: theme.fontSize.lg,
         fontWeight: theme.fontWeight.bold,
         marginHorizontal: 30,
+    },
+    similarProductsContainer: {
+        paddingHorizontal: 4,
     },
 });
 

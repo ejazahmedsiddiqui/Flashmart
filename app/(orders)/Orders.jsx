@@ -11,17 +11,18 @@ import {
     Package,
     Search,
     Eye,
-    ChevronDown
+    ChevronDown, ChevronsLeft, ShoppingCartIcon, ChevronLeft
 } from 'lucide-react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
-import { useRouter } from 'expo-router';
+import {useRouter} from 'expo-router';
 import {useThemeStore} from "../../store/themeStore";
+import {useCartCount} from "../../hooks/useCartCount";
+import CartBadgeIcon from "../../components/CartBadgeIcon";
 
 
 const Orders = () => {
     const theme = useThemeStore((s) => s.theme);
     const styles = useMemo(() => createStyles(theme), [theme]);
-
     const [searchQuery, setSearchQuery] = useState('');
     const router = useRouter();
 
@@ -110,11 +111,32 @@ const Orders = () => {
     console.log('@/app/seller/Orders accessed.');
 
     return (
-        <SafeAreaView  style={styles.container}>
+        <SafeAreaView style={styles.container}>
 
             <ScrollView>
-                <View style={styles.content}>
+                <View style={{
+                    flex: 1,
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    borderBottomWidth: 1,
+                    borderBottomColor: '#ccc',
+                    marginTop: 12,
+                    paddingHorizontal: 12,
+                    paddingBottom: 12,
+                }}>
+                    {/* only go back if there is something to go back to */}
+                    {router.canGoBack() &&
+                        <ChevronLeft
+                            size={24}
+                            color={theme.colors.textPrimary}
+                            onPress={() => router.back()}
+                        />
+                    }
                     <Text style={styles.pageTitle}>Orders Management</Text>
+                    <CartBadgeIcon/>
+                </View>
+                <View style={styles.content}>
                     <Text style={styles.pageSubtitle}>
                         Manage customer orders, payments, and delivery status
                     </Text>
@@ -228,7 +250,7 @@ const createStyles = (theme) => StyleSheet.create({
         padding: theme.spacing.lg,
     },
     pageTitle: {
-        fontSize: theme.fontSize.xxxxl,
+        fontSize: theme.fontSize.xxl,
         fontWeight: theme.fontWeight.bold,
         color: theme.colors.textPrimary,
         marginBottom: 4,
@@ -236,7 +258,7 @@ const createStyles = (theme) => StyleSheet.create({
     pageSubtitle: {
         fontSize: theme.fontSize.md,
         color: theme.colors.textSecondary,
-        marginBottom: theme.spacing.lg,
+        marginVertical: theme.spacing.lg,
     },
     searchSection: {
         marginBottom: theme.spacing.lg,

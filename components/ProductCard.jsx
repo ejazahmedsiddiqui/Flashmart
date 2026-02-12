@@ -3,19 +3,15 @@ import {
     TouchableOpacity,
     View,
     StyleSheet,
-    Dimensions,
     Image, ActivityIndicator,
 } from "react-native";
-import React, {useEffect, useMemo, useRef} from "react";
+import React, {useMemo} from "react";
 import {router} from "expo-router";
 import {useCartStore} from "../store/cartStore";
 import {useThemeStore} from "../store/themeStore";
 import {SafeAreaView} from "react-native-safe-area-context";
 
-const {width} = Dimensions.get("window");
-const CARD_WIDTH = (width - 48) / 2;
-
-const ProductCard = ({product, width = CARD_WIDTH}) => {
+const ProductCard = ({product, isHorizontal = false}) => {
     const selectedVariant = product.variants?.[0];
     const cartKey = useMemo(
         () =>
@@ -88,7 +84,7 @@ const ProductCard = ({product, width = CARD_WIDTH}) => {
         <TouchableOpacity
             style={[
                 styles.productCard,
-                {width: (width / 2) - 8} // Divide by 2 for numColumns, subtract margins
+                isHorizontal && styles.horizontalCard  // Add conditional style
             ]}
             onPress={handleCardPush}
         >
@@ -109,7 +105,7 @@ const ProductCard = ({product, width = CARD_WIDTH}) => {
                     <Text style={styles.brandText}>{product.brand}</Text>
                 )}
 
-                <Text style={styles.productName} numberOfLines={2}>
+                <Text style={styles.productName} numberOfLines={1}>
                     {product.name}
                 </Text>
 
@@ -170,16 +166,23 @@ export default React.memo(ProductCard);
 
 const createStyles = (theme) => StyleSheet.create({
     productCard: {
+        flex: 1,
         backgroundColor: theme.colors.card,
         borderRadius: theme.radius.md,
         margin: 4,
         overflow: 'hidden',
         borderWidth: 1,
         borderColor: theme.colors.border,
+        maxWidth: '50%',
+    },
+    horizontalCard: {
+        flex: 0,
+        width: 160,
+        maxWidth: 'none',
     },
     imageContainer: {
         width: '100%',
-        height: 140,
+        height: 100,
         backgroundColor: theme.colors.surface,
         alignItems: 'center',
         justifyContent: 'center',
@@ -262,12 +265,14 @@ const createStyles = (theme) => StyleSheet.create({
         paddingHorizontal: 2,
         borderWidth: 2,
         borderColor: theme.colors.accent,
+        justifyContent: 'space-between',  // Add this
     },
     quantityButton: {
         width: 28,
         height: 28,
         justifyContent: 'center',
         alignItems: 'center',
+        flexShrink: 0,
     },
     quantityButtonText: {
         color: theme.colors.accentText,
@@ -278,7 +283,6 @@ const createStyles = (theme) => StyleSheet.create({
         color: theme.colors.accentText,
         fontSize: theme.fontSize.md,
         fontWeight: theme.fontWeight.bold,
-        flex: 1,
         textAlign: 'center',
     },
 });
