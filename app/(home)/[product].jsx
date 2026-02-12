@@ -6,8 +6,12 @@ import ProductCard from "../../components/ProductCard";
 import { products } from "../../utilities/products";
 import { useCartStore } from "../../store/cartStore";
 import {SafeAreaView} from "react-native-safe-area-context";
+import {useThemeStore} from "../../store/themeStore";
 
 const ProductDetailsPage = () => {
+    const theme = useThemeStore((s) => s.theme);
+    const styles = useMemo(() => createStyles(theme), [theme]);
+
     const params = useLocalSearchParams();
     const [cardWidth, setCardWidth] = useState(0);
 
@@ -65,22 +69,17 @@ const ProductDetailsPage = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <StatusBar backgroundColor={'#fff'} />
+            <StatusBar backgroundColor={theme.colors.inverted} />
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()}>
-                    <ArrowLeft size={24} color={'#ccc'}/>
+                    <ArrowLeft size={24} color={theme.colors.textSecondary}/>
                 </TouchableOpacity>
-                <Text style={{
-                    fontSize: 24,
-                    fontWeight: '700',
-                    letterSpacing: -0.3,
-                    color: '#fff'
-                }}>
+                <Text style={styles.headerTitle}>
                     {product.name}
                 </Text>
                 <TouchableOpacity onPress={() => router.push('/Cart')}>
-                    <ShoppingCart size={24} color={'#ccc'}/>
+                    <ShoppingCart size={24} color={theme.colors.textSecondary}/>
                 </TouchableOpacity>
             </View>
 
@@ -95,12 +94,12 @@ const ProductDetailsPage = () => {
                     >
                         <Heart
                             size={20}
-                            color={isFavorite ? '#e74c3c' : '#b5b5b5'}
-                            fill={isFavorite ? '#e74c3c' : 'none'}
+                            color={isFavorite ? theme.colors.danger : theme.colors.textSecondary}
+                            fill={isFavorite ? theme.colors.danger : 'none'}
                         />
                     </TouchableOpacity>
 
-                    {discount && (
+                    {discount > 0 && (
                         <View style={styles.discountBadge}>
                             <Text style={styles.discountText}>{discount}% OFF</Text>
                         </View>
@@ -114,7 +113,7 @@ const ProductDetailsPage = () => {
                     <Text style={styles.weightText}>{selectedVariant.weight}</Text>
 
                     <View style={styles.ratingContainer}>
-                        <Text>⭐ {product.rating}</Text>
+                        <Text style={styles.ratingText}>⭐ {product.rating}</Text>
                         <Text style={styles.reviewsText}>({product.reviews} reviews)</Text>
                     </View>
 
@@ -183,11 +182,11 @@ const ProductDetailsPage = () => {
                 ) : (
                     <View style={styles.quantityContainer}>
                         <TouchableOpacity onPress={handleDecrement}>
-                            <Minus size={20} color="#fff" />
+                            <Minus size={20} color={theme.colors.accentText} />
                         </TouchableOpacity>
                         <Text style={styles.quantityText}>{quantity}</Text>
                         <TouchableOpacity onPress={handleIncrement}>
-                            <Plus size={20} color="#fff" />
+                            <Plus size={20} color={theme.colors.accentText} />
                         </TouchableOpacity>
                     </View>
                 )}
@@ -197,10 +196,10 @@ const ProductDetailsPage = () => {
 };
 
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#191919',
+        backgroundColor: theme.colors.background,
     },
 
     /* ---------------- Header ---------------- */
@@ -208,32 +207,38 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        backgroundColor: '#191919',
+        paddingHorizontal: theme.spacing.md,
+        paddingVertical: theme.spacing.md,
+        backgroundColor: theme.colors.background,
         borderBottomWidth: 1,
-        borderBottomColor: '#2a2a2a',
+        borderBottomColor: theme.colors.border,
+    },
+    headerTitle: {
+        fontSize: theme.fontSize.xxxl,
+        fontWeight: theme.fontWeight.bold,
+        letterSpacing: -0.3,
+        color: theme.colors.textPrimary,
     },
 
     /* ---------------- Image ---------------- */
     imageContainer: {
         alignItems: 'center',
-        backgroundColor: '#222',
+        backgroundColor: theme.colors.surface,
         paddingVertical: 30,
         position: 'relative',
     },
     productImage: {
         width: 250,
         height: 250,
-        borderRadius: 12,
+        borderRadius: theme.radius.md,
     },
     favoriteButton: {
         position: 'absolute',
         top: 20,
         right: 20,
-        backgroundColor: '#1f1f1f',
+        backgroundColor: theme.colors.card,
         borderRadius: 20,
-        padding: 8,
+        padding: theme.spacing.sm,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.05,
@@ -244,68 +249,68 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 20,
         left: 20,
-        backgroundColor: '#26702A',
-        paddingHorizontal: 12,
+        backgroundColor: theme.colors.accent,
+        paddingHorizontal: theme.spacing.md,
         paddingVertical: 6,
-        borderRadius: 6,
+        borderRadius: theme.radius.sm,
     },
     discountText: {
-        color: '#ffffff',
-        fontSize: 12,
-        fontWeight: '700',
+        color: theme.colors.accentText,
+        fontSize: theme.fontSize.sm,
+        fontWeight: theme.fontWeight.bold,
     },
 
     /* ---------------- Product Info ---------------- */
     productInfo: {
-        padding: 20,
+        padding: theme.spacing.lg,
     },
     brandText: {
-        fontSize: 14,
-        color: '#b3b3b3',
+        fontSize: theme.fontSize.md,
+        color: theme.colors.textSecondary,
         marginBottom: 4,
     },
     productName: {
-        fontSize: 22,
-        fontWeight: '700',
-        color: '#f5f5f5',
+        fontSize: theme.fontSize.xxl,
+        fontWeight: theme.fontWeight.bold,
+        color: theme.colors.textPrimary,
         marginBottom: 4,
     },
     weightText: {
-        fontSize: 14,
-        color: '#9a9a9a',
-        marginBottom: 12,
+        fontSize: theme.fontSize.md,
+        color: theme.colors.textMuted,
+        marginBottom: theme.spacing.md,
     },
 
     ratingContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 16,
+        marginBottom: theme.spacing.md,
     },
     ratingText: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#e0e0e0',
-        marginRight: 8,
+        fontSize: theme.fontSize.md,
+        fontWeight: theme.fontWeight.medium,
+        color: theme.colors.textPrimary,
+        marginRight: theme.spacing.sm,
     },
     reviewsText: {
-        fontSize: 14,
-        color: '#a0a0a0',
+        fontSize: theme.fontSize.md,
+        color: theme.colors.textSecondary,
     },
 
     priceContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 12,
+        marginBottom: theme.spacing.md,
     },
     price: {
-        fontSize: 26,
-        fontWeight: '700',
-        color: '#ffffff',
-        marginRight: 12,
+        fontSize: theme.fontSize.xxxl,
+        fontWeight: theme.fontWeight.bold,
+        color: theme.colors.textPrimary,
+        marginRight: theme.spacing.md,
     },
     originalPrice: {
-        fontSize: 18,
-        color: '#8a8a8a',
+        fontSize: theme.fontSize.xl,
+        color: theme.colors.textMuted,
         textDecorationLine: 'line-through',
     },
 
@@ -313,57 +318,57 @@ const styles = StyleSheet.create({
     variantRow: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        marginVertical: 16,
+        marginVertical: theme.spacing.md,
     },
     variantChip: {
         borderWidth: 1,
-        borderColor: '#3a3a3a',
+        borderColor: theme.colors.border,
         borderRadius: 20,
         paddingHorizontal: 14,
-        paddingVertical: 8,
-        marginRight: 8,
-        marginBottom: 8,
-        backgroundColor: '#1f1f1f',
+        paddingVertical: theme.spacing.sm,
+        marginRight: theme.spacing.sm,
+        marginBottom: theme.spacing.sm,
+        backgroundColor: theme.colors.card,
     },
     variantActive: {
-        backgroundColor: '#26702A',
-        borderColor: '#26702A',
+        backgroundColor: theme.colors.accent,
+        borderColor: theme.colors.accent,
     },
     variantText: {
-        fontSize: 14,
-        color: '#d0d0d0',
-        fontWeight: '600',
+        fontSize: theme.fontSize.md,
+        color: theme.colors.textSecondary,
+        fontWeight: theme.fontWeight.medium,
     },
     variantTextActive: {
-        color: '#ffffff',
+        color: theme.colors.accentText,
     },
 
     /* ---------------- Description ---------------- */
     sectionTitle: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: '#f5f5f5',
-        marginBottom: 12,
+        fontSize: theme.fontSize.xl,
+        fontWeight: theme.fontWeight.bold,
+        color: theme.colors.textPrimary,
+        marginBottom: theme.spacing.md,
     },
     descriptionText: {
         fontSize: 15,
         lineHeight: 24,
-        color: '#bdbdbd',
+        color: theme.colors.textSecondary,
     },
 
     /* ---------------- Similar Products ---------------- */
     similarSection: {
-        paddingTop: 24,
-        paddingHorizontal: 12,
+        paddingTop: theme.spacing.xl,
+        paddingHorizontal: theme.spacing.md,
         borderTopWidth: 8,
-        borderTopColor: '#222',
+        borderTopColor: theme.colors.surface,
     },
     similarTitle: {
-        fontSize: 20,
-        fontWeight: '700',
-        color: '#f5f5f5',
-        marginBottom: 16,
-        paddingHorizontal: 20,
+        fontSize: theme.fontSize.lg,
+        fontWeight: theme.fontWeight.bold,
+        color: theme.colors.textPrimary,
+        marginBottom: theme.spacing.md,
+        paddingHorizontal: theme.spacing.lg,
     },
 
     /* ---------------- Bottom Bar ---------------- */
@@ -372,10 +377,10 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: '#191919',
-        padding: 16,
+        backgroundColor: theme.colors.background,
+        padding: theme.spacing.md,
         borderTopWidth: 1,
-        borderTopColor: '#2a2a2a',
+        borderTopColor: theme.colors.border,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: -2 },
         shadowOpacity: 0.05,
@@ -383,28 +388,28 @@ const styles = StyleSheet.create({
         elevation: 4,
     },
     addButton: {
-        backgroundColor: '#26702A',
-        borderRadius: 12,
-        paddingVertical: 16,
+        backgroundColor: theme.colors.accent,
+        borderRadius: theme.radius.md,
+        paddingVertical: theme.spacing.md,
         alignItems: 'center',
     },
     addButtonText: {
-        color: '#ffffff',
-        fontSize: 16,
-        fontWeight: '700',
+        color: theme.colors.accentText,
+        fontSize: theme.fontSize.lg,
+        fontWeight: theme.fontWeight.bold,
     },
     quantityContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#26702A',
-        borderRadius: 12,
-        paddingVertical: 12,
+        backgroundColor: theme.colors.accent,
+        borderRadius: theme.radius.md,
+        paddingVertical: theme.spacing.md,
     },
     quantityText: {
-        color: '#ffffff',
-        fontSize: 20,
-        fontWeight: '700',
+        color: theme.colors.accentText,
+        fontSize: theme.fontSize.lg,
+        fontWeight: theme.fontWeight.bold,
         marginHorizontal: 30,
     },
 });

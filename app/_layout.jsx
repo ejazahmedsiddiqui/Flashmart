@@ -2,8 +2,9 @@ import {Stack, usePathname} from "expo-router";
 import Footer from "../components/Footer"; // Adjust the path based on where you place the Footer component
 import {View, StyleSheet, StatusBar, ActivityIndicator, Text} from "react-native";
 import {UserProvider} from "../context/UserContext";
-import { useThemeStore } from "../store/themeStore";
+import {useThemeStore} from "../store/themeStore";
 import {SafeAreaView} from "react-native-safe-area-context";
+import {AddressProvider} from "../context/AddressContext";
 
 export default function RootLayout() {
     const pathname = usePathname();
@@ -32,25 +33,28 @@ export default function RootLayout() {
 
     return (
         <UserProvider>
-            <StatusBar style={"auto"} />
-            <View style={styles.container}>
+            <AddressProvider>
+                <StatusBar style={"auto"}/>
+                <View style={styles.container}>
 
-                <Stack
-                    screenOptions={{
-                        headerShown: false,
-                        animation: 'fade',
-                        animationDuration: 150,
-                    }}>
-                    <Stack.Screen name='(home)'/>
-                    <Stack.Screen name='Cart'/>
-                    <Stack.Screen name='(categories)'/>
-                    <Stack.Screen name='(auth)'/>
-                    <Stack.Screen name='(profile)'/>
-                    <Stack.Screen name='Checkout'/>
-                    <Stack.Screen name='Search'/>
-                </Stack>
-                {shouldShowFooter && <Footer/>}
-            </View>
+                    <Stack
+                        screenOptions={{
+                            headerShown: false,
+                            animation: 'fade',
+                            animationDuration: 150,
+                        }}>
+                        <Stack.Screen name='(home)'/>
+                        <Stack.Screen name='Cart'/>
+                        <Stack.Screen name='(categories)'/>
+                        <Stack.Screen name='(auth)'/>
+                        <Stack.Screen name='(profile)'/>
+                        <Stack.Screen name='(orders)'/>
+                        <Stack.Screen name='Checkout'/>
+                        <Stack.Screen name='Search'/>
+                    </Stack>
+                    {shouldShowFooter && <Footer/>}
+                </View>
+            </AddressProvider>
         </UserProvider>
     );
 }

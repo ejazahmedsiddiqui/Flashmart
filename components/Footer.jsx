@@ -1,5 +1,5 @@
 import {StyleSheet, Text, TouchableOpacity, View} from "react-native";
-import {Home, LayoutDashboardIcon, LucideShoppingCart, User} from "lucide-react-native";
+import {BoxIcon, Home, LayoutDashboardIcon, LucideShoppingCart, User} from "lucide-react-native";
 import {router, usePathname} from "expo-router";
 import {useCartCount} from "../hooks/useCartCount"; // Adjust path as needed
 import { useThemeStore } from "../store/themeStore";
@@ -18,18 +18,27 @@ const Footer = () => {
             label: 'Home',
             icon: Home,
             route: '/(home)'
-        },{
+        },
+        {
             id: 'cart',
             label: 'Cart',
             icon: LucideShoppingCart,
             route: '/Cart',
             badge: itemCount
-        },{
+        },
+        {
             id: 'categories',
             label: 'Categories',
             icon: LayoutDashboardIcon,
             route: '/Categories'
-        },{
+        },
+        {
+            id: 'orders',
+            label: 'Orders',
+            icon: BoxIcon,
+            route: '/(orders)/Orders'
+        },
+        {
             id: 'profile',
             label: 'Profile',
             icon: User,
@@ -40,6 +49,9 @@ const Footer = () => {
     const isActive = (route) => {
         if (route === '/(home)') {
             return pathname === '/' || pathname.startsWith('/(home)');
+        }
+        if (route.startsWith('/(orders)')) {
+            return pathname.startsWith('/Orders');
         }
         if (route.startsWith('/(profile)')) {
             return pathname.startsWith('/Profile');
@@ -99,6 +111,7 @@ export default Footer;
 const createStyles = (theme) => StyleSheet.create({
     footerContainer: {
         height: 'auto',
+        maxHeight: '10%',
         paddingVertical: theme.spacing.sm,
         justifyContent: 'space-evenly',
         paddingHorizontal: theme.spacing.sm,
@@ -109,9 +122,10 @@ const createStyles = (theme) => StyleSheet.create({
         flexDirection: 'row',
         borderTopWidth: 1,
         borderTopColor: theme.colors.border,
+        flex: 1,
     },
     item: {
-        width: '25%',
+        flex: 1,
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingVertical: theme.spacing.sm,

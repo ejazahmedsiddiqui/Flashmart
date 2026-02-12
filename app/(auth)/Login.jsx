@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import React, {useState, useRef, useEffect, useMemo} from "react";
 import {Phone, Lock} from "lucide-react-native";
-import {router} from "expo-router";
+import {router, useLocalSearchParams} from "expo-router";
 
 import RenderFormField from "../../components/RenderFormField";
 import SuccessModal from "../../components/SuccessModal";
@@ -17,6 +17,8 @@ import {useUser} from "../../context/UserContext";
 
 const SellerLogin = () => {
     const {isAuthenticated, isLoading, login} = useUser();
+
+    const params = useLocalSearchParams();
 
     const theme = useThemeStore((s) => s.theme);
     const styles = useMemo(() => createStyles(theme), [theme]);
@@ -30,11 +32,17 @@ const SellerLogin = () => {
 
 
     useEffect(() => {
-        console.log('Login isAuthenticated: ', isAuthenticated)
-        if (isAuthenticated && !isLoading) {
-            router.replace('/Profile')
-        }
+        console.log('Login isAuthenticated: ', isAuthenticated);
+        if (!isAuthenticated || isLoading) return;
+        const timer = setTimeout(() => {
+            setShowSuccessModal(false);
+            if (!params.path) router.replace("/Profile");
+            if (params.path === 'cart' || params.path === 'Cart') router.replace("/Cart");
+        }, 3000);
+        return () => clearTimeout(timer);
+
     }, [isAuthenticated, isLoading]);
+
 
 
     useEffect(() => {
@@ -57,12 +65,14 @@ const SellerLogin = () => {
             setErrors({...errors, otp: "Please enter a valid 6-digit OTP"});
             return;
         }
-
         try {
             if (otp === '123456') {
-                const response = login(phone, 'ejwt72nma9787nnaouystb10357ss080e124n34n23423kj4bn23kj4234n23n42n42kj3n221nkjndasdjgfuxuiho1');
-                if (response.success)
+                console.log('Verify OTP accessed')
+                const response = await login(phone, 'ejwt72nma9787nnaouystb10357ss080e124n34n23423kj4bn23kj4234n23n42n42kj3n221nkjndasdjgfuxuiho1');
+                if (response.success){
+                    console.log(response)
                     setShowSuccessModal(true);
+                }
             }
         } catch (error) {
             setErrors({...errors, otp: "Invalid phone number"});
@@ -204,10 +214,12 @@ const SellerLogin = () => {
                 visible={showSuccessModal}
                 onAnimationComplete={() => {
                     setShowSuccessModal(false);
-                    router.replace("/Profile");
+                    if (!params.path) router.replace("/Profile");
+                    if (params.path === 'cart' || params.path === 'Cart') router.replace("/Cart");
                 }}
                 title="Logged in"
-                subtitle="Welcome Back! Redirecting to Home page..."
+                subtitle={`Welcome Back! Redirecting to ${params.path ? params.path : 'Profile'} page...`}
+                autoCloseDuration={800}
             />
         </SafeAreaView>
     );

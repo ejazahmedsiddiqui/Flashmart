@@ -2,17 +2,18 @@ import {SafeAreaView} from "react-native-safe-area-context";
 import {Text, StyleSheet, View, TouchableOpacity, ScrollView, Modal} from "react-native";
 import {router} from "expo-router";
 import {ArrowLeft, ShoppingCart, MapPin, Check, Store, Package} from "lucide-react-native";
-import React, {useMemo, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import {useCartStore} from "../store/cartStore";
 import {addresses} from "../utilities/address";
 import {shopAddresses} from "../utilities/shopAddress";
+import {useUser} from "../context/UserContext";
 
 const Checkout = () => {
     const [selectedAddress, setSelectedAddress] = useState(null);
     const [selectedShop, setSelectedShop] = useState(null);
     const [showAddressModal, setShowAddressModal] = useState(false);
     const [showShopModal, setShowShopModal] = useState(false);
-
+    const {isAuthenticated } = useUser();
     const itemsByKey = useCartStore(state => state.itemsByKey);
     const cartItems = useMemo(() => Object.values(itemsByKey), [itemsByKey]);
 
@@ -41,7 +42,14 @@ const Checkout = () => {
     const itemCount = cartItems.reduce((count, item) => count + item.quantity, 0);
 
     console.log('@/app/Checkout -> accessed');
-
+    useEffect(() => {
+        if (!isAuthenticated) router.replace({
+            pathname: '/Login',
+            params: {
+                path: 'cart'
+            }
+        })
+    }, [ isAuthenticated ]);
     const AddressCard = ({address, isSelected, onPress}) => (
         <TouchableOpacity
             style={[styles.addressCard, isSelected && styles.selectedCard]}

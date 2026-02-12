@@ -29,15 +29,15 @@ import SuccessModal from "../../components/SuccessModal";
 import * as Location from 'expo-location';
 import MapView from 'react-native-maps';
 import {router} from "expo-router";
-import HomeLayout from "../(home)/_layout";
+import {useAddress} from "../../context/AddressContext";
 
-const {width, height} = Dimensions.get('window');
+const {height} = Dimensions.get('window');
 
 const AddressSetter = () => {
     const [currentStep, setCurrentStep] = useState(1);
     const [homeAddress, setHomeAddress] = useState({
-        doorNumber: '',
-        houseName: '',
+        houseNumber: '',
+        aptNamePlot: '',
         street: '',
         city: '',
         district: '',
@@ -46,6 +46,7 @@ const AddressSetter = () => {
         latitude: null,
         longitude: null,
         formattedAddress: '', // Auto-fetched address
+        title: '',
     });
 
     const [mapRegion, setMapRegion] = useState({
@@ -68,7 +69,8 @@ const AddressSetter = () => {
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(50)).current;
     const updateTimerRef = useRef(null);
-    const [addressTitle, setAddressTitle] = useState("");
+
+    const {addAddress, length} = useAddress();
     useEffect(() => {
         Animated.parallel([
             Animated.timing(progressAnim, {
@@ -132,7 +134,7 @@ const AddressSetter = () => {
                 break;
             }
             case 2: {
-                if (!homeAddress.doorNumber || !homeAddress.houseName) {
+                if (!homeAddress.houseNumber || !homeAddress.aptNamePlot) {
                     showAlert('Incomplete Address', 'Please enter door number and house name');
                     return;
                 }
@@ -179,9 +181,6 @@ const AddressSetter = () => {
                 latitudeDelta: 0.005,
                 longitudeDelta: 0.005,
             };
-
-            // Only animate the map, don't set state directly
-            // The onRegionChangeComplete will handle the state update
             if (mapRef.current) {
                 mapRef.current.animateToRegion(newRegion, 1000);
             }
@@ -302,19 +301,36 @@ const AddressSetter = () => {
             router.back();
     };
 
-    const handleSubmit = () => {
-        if (!addressTitle || !homeAddress.formattedAddress || (!homeAddress.latitude && !homeAddress.longitude)) {
+    const addressData = {
+        title: homeAddress.title,
+        houseNumber: homeAddress.houseNumber,
+        aptNamePlot: homeAddress.aptNamePlot,
+        latitude: homeAddress.latitude,
+        longitude: homeAddress.longitude,
+        tempAddress: `${homeAddress.houseNumber}, ${homeAddress.aptNamePlot}, ${homeAddress.street}, ${homeAddress.city}, ${homeAddress.district}, ${homeAddress.city}, Postal Code: ${homeAddress.pinCode}`,
+        formattedAddress: homeAddress.formattedAddress ?? homeAddress.formattedAddress
+    }
+
+    const handleSubmit = async () => {
+        console.log('Address Data is: ', addressData)
+        // check for complete data
+        if (!homeAddress.title || !homeAddress.formattedAddress || (!homeAddress.latitude && !homeAddress.longitude)) {
             showAlert('Incomplete Form', 'Please enter a valid title/address');
             return;
         }
+        //call context with completed address data
+
+        const response = await addAddress(addressData);
+        if (response.success)
+            setShowSuccessModal(true);
+        else showAlert('Error', 'Unable to add address for now...', { onOk: () => router.replace('/Address')})
         console.log("Form submitted");
-        setShowSuccessModal(true);
     };
 
     const buildFullUserAddress = () => {
         return [
-            homeAddress.doorNumber,
-            homeAddress.houseName,
+            homeAddress.houseNumber,
+            homeAddress.aptNamePlot,
             homeAddress.street,
             homeAddress.city,
             homeAddress.district,
@@ -527,8 +543,8 @@ const AddressSetter = () => {
                 <RenderFormField
                     maxLength={20}
                     label="Door Number"
-                    value={homeAddress.doorNumber}
-                    onChangeText={(value) => setHomeAddress(prev => ({...prev, doorNumber: value}))}
+                    value={homeAddress.houseNumber}
+                    onChangeText={(value) => setHomeAddress(prev => ({...prev, houseNumber: value}))}
                     placeholder="e.g., 42, A-101"
                     icon={<Home size={20} color="#9CA3AF"/>}
                 />
@@ -536,8 +552,8 @@ const AddressSetter = () => {
                 <RenderFormField
                     maxLength={50}
                     label="House/Building Name"
-                    value={homeAddress.houseName}
-                    onChangeText={(value) => setHomeAddress(prev => ({...prev, houseName: value}))}
+                    value={homeAddress.aptNamePlot}
+                    onChangeText={(value) => setHomeAddress(prev => ({...prev, aptNamePlot: value}))}
                     placeholder="e.g., Green Valley Apartments"
                     autoCapitalize="words"
                     icon={<Home size={20} color="#9CA3AF"/>}
@@ -572,8 +588,8 @@ const AddressSetter = () => {
                     label={'Title'}
                     placeholder={'Enter Address title: (Home, Work, Office, etc.)'}
                     icon={<LucideHome size={24} color={'#9CA3AF'}/>}
-                    value={addressTitle}
-                    onChangeText={setAddressTitle}
+                    value={homeAddress.title}
+                    onChangeText={(value) => setHomeAddress(prev => ({...prev, title: value}))}
                 />
 
                 {/* Address Information */}
@@ -655,8 +671,9 @@ const AddressSetter = () => {
     );
 
     return (
+
         <SafeAreaView style={styles.container}>
-            <KeyboardAvoidingView
+            {length < 5 ? <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.container}
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
@@ -710,7 +727,35 @@ const AddressSetter = () => {
                         </TouchableOpacity>
                     </View>
                 </ScrollView>
-            </KeyboardAvoidingView>
+            </KeyboardAvoidingView> :
+            <View style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                padding: 30,
+            }}>
+                <Text style={styles.headerTitle}>Address diary full</Text>
+                <Text style={styles.headerSubtitle}>
+                    Sorry, the address diary is full. Please remove other addresses to add more.
+                </Text>
+                <TouchableOpacity
+                    style={{
+                        marginTop: 24,
+                        borderRadius: 12,
+                        backgroundColor: 'red',
+                        paddingHorizontal: 20,
+                        paddingVertical: 12,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}
+                    onPress={handleBack}
+                >
+                    <Text style={{
+                        color: '#fff',
+
+                    }}>Back</Text>
+                </TouchableOpacity>
+            </View>}
 
             {/* Edit Modal */}
             {renderEditModal()}
@@ -729,13 +774,13 @@ const AddressSetter = () => {
                 subtitle={'New location added Successfully, Redirecting to Addresses'}
                 onAnimationComplete={() => {
                     setShowSuccessModal(false);
-                    router.push('/')
+                    router.back()
                 }}
                 iconColor={'#93BD57'}
                 iconBackgroundColor={'#D4E7B8'}
                 progressBarColor={'#93BD57'}
                 visible={showSuccessModal}
-                autoCloseDuration={1200}
+                autoCloseDuration={800}
             />
         </SafeAreaView>
     );
