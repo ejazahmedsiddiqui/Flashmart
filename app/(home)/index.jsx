@@ -187,7 +187,7 @@ export default function Index() {
                             data={displayProducts}
                             renderItem={renderProduct}
                             keyExtractor={item => item.id.toString()}
-                            numColumns={3}
+                            numColumns={2}
                             columnWrapperStyle={styles.columnWrapper}  // Add this
                             contentContainerStyle={styles.productsList}
                             showsVerticalScrollIndicator={false}

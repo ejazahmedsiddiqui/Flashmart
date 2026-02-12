@@ -182,7 +182,7 @@ const createStyles = (theme) => StyleSheet.create({
     },
     imageContainer: {
         width: '100%',
-        height: 140,
+        height: 100,
         backgroundColor: theme.colors.surface,
         alignItems: 'center',
         justifyContent: 'center',
