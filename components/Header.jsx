@@ -18,6 +18,7 @@ import AnimatedSearchBar from "../components/AnimatedSearchBar";
 import {useCartCount} from "../hooks/useCartCount";
 import {useThemeStore} from "../store/themeStore";
 import {useAddress} from "../context/AddressContext";
+import CartBadgeIcon from "./CartBadgeIcon";
 
 const Header = ({
                     showAddress = true,
@@ -92,20 +93,7 @@ const Header = ({
                     }
                 </View>
                 {showCart &&
-                    <TouchableOpacity
-                        style={[styles.cartIconButton, {flexShrink: 0}]}
-                        onPress={() => router.push('/Cart')}
-                        activeOpacity={0.7}
-                    >
-                        <View style={styles.cartIcon}>
-                            <ShoppingCart size={20} color={'#fff'}/>
-                        </View>
-                        {itemCount > 0 && (
-                            <View style={styles.cartBadge}>
-                                <Text style={styles.cartBadgeText}>{itemCount}</Text>
-                            </View>
-                        )}
-                    </TouchableOpacity>
+                    <CartBadgeIcon/>
                 }
             </View>
 
@@ -213,7 +201,7 @@ const Header = ({
                             {/* Empty State */}
                             {allAddresses.length === 0 && (
                                 <View style={styles.emptyState}>
-                                    <MapPin size={48} color={theme.colors.textMuted} />
+                                    <MapPin size={48} color={theme.colors.textMuted}/>
                                     <Text style={styles.emptyStateText}>No saved addresses</Text>
                                     <Text style={styles.emptyStateSubtext}>
                                         Tap "Add New Address" to get started

@@ -47,7 +47,6 @@ export default function Index() {
     const [error, setError] = useState(false);
     const scrollViewRef = useRef(null);
     const [categoryLayouts, setCategoryLayouts] = useState({});
-    const [cardWidth, setCardWidth] = useState(0);
     const categoryHeaderList = [
         {id: '', label: 'Home', icon: HomeIcon},
         {id: 'vegetables', label: 'Vegetables', icon: Carrot, title: 'Grocery & Kitchen'},
@@ -118,8 +117,8 @@ export default function Index() {
     };
 
     const renderProduct = useCallback(
-        ({item}) => <ProductCard product={item} width={cardWidth}/>,
-        [cardWidth]
+        ({item}) => <ProductCard product={item}/>,
+        []
     );
 
 
@@ -185,14 +184,11 @@ export default function Index() {
                         </View>
                     ) : (
                         <FlatList
-                            onLayout={(event) => {
-                                const containerWidth = event.nativeEvent.layout.width;
-                                setCardWidth(containerWidth);
-                            }}
                             data={displayProducts}
                             renderItem={renderProduct}
                             keyExtractor={item => item.id.toString()}
-                            numColumns={2}
+                            numColumns={3}
+                            columnWrapperStyle={styles.columnWrapper}  // Add this
                             contentContainerStyle={styles.productsList}
                             showsVerticalScrollIndicator={false}
                             initialNumToRender={6}
@@ -255,15 +251,17 @@ const createStyles = (theme) =>  StyleSheet.create({
         color: theme.colors.textPrimary,
     },
 
-    // Products Section
     productsSection: {
         flex: 1,
         paddingTop: 16,
+
     },
     productsList: {
         paddingBottom: 20,
-        alignItems: 'center',
+    },
+    columnWrapper: {
         justifyContent: 'space-between',
+        paddingHorizontal: 4,
     },
     // Loading & Error States
     loadingContainer: {
@@ -322,7 +320,5 @@ const createStyles = (theme) =>  StyleSheet.create({
         textAlign: "center",
         lineHeight: 20,
     },
-
-    // Modal Styles
 
 })

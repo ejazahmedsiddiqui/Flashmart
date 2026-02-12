@@ -7,13 +7,18 @@ import {useCartStore} from "../store/cartStore";
 import {addresses} from "../utilities/address";
 import {shopAddresses} from "../utilities/shopAddress";
 import {useUser} from "../context/UserContext";
+import {useAddress} from "../context/AddressContext";
 
 const Checkout = () => {
+
+    const { allAddresses } = useAddress();
+
+    console.log(allAddresses);
     const [selectedAddress, setSelectedAddress] = useState(null);
     const [selectedShop, setSelectedShop] = useState(null);
     const [showAddressModal, setShowAddressModal] = useState(false);
     const [showShopModal, setShowShopModal] = useState(false);
-    const {isAuthenticated } = useUser();
+    const {isAuthenticated} = useUser();
     const itemsByKey = useCartStore(state => state.itemsByKey);
     const cartItems = useMemo(() => Object.values(itemsByKey), [itemsByKey]);
 
@@ -49,7 +54,7 @@ const Checkout = () => {
                 path: 'cart'
             }
         })
-    }, [ isAuthenticated ]);
+    }, [isAuthenticated]);
     const AddressCard = ({address, isSelected, onPress}) => (
         <TouchableOpacity
             style={[styles.addressCard, isSelected && styles.selectedCard]}
@@ -59,7 +64,7 @@ const Checkout = () => {
             <View style={styles.addressHeader}>
                 <View style={styles.addressTypeContainer}>
                     <MapPin size={16} color="#0c831f"/>
-                    <Text style={styles.addressType}>{address.type}</Text>
+                    <Text style={styles.addressType}>{address.title}</Text>
                 </View>
                 {isSelected && (
                     <View style={styles.checkIcon}>
@@ -68,14 +73,12 @@ const Checkout = () => {
                 )}
             </View>
             <Text style={styles.addressText}>
-                {address.houseNumber}, {address.buildingAddress}
+                {address.houseNumber}, {address.aptNamePlot}
             </Text>
-            <Text style={styles.addressText}>
-                {address.streetAddress}, {address.city}
+            <Text style={styles.addressText} numberOfLines={2}>
+                {address.formattedAddress}
             </Text>
-            <Text style={styles.addressText}>
-                {address.state} - {address.pinCode}
-            </Text>
+
         </TouchableOpacity>
     );
 
@@ -260,7 +263,7 @@ const Checkout = () => {
                             </TouchableOpacity>
                         </View>
                         <ScrollView style={styles.modalScroll}>
-                            {addresses.map((address) => (
+                            {allAddresses?.map((address) => (
                                 <AddressCard
                                     key={address.id}
                                     address={address}
