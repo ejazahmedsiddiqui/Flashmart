@@ -201,7 +201,7 @@ const createStyles = (theme) => StyleSheet.create({
 
     /* Sidebar */
     sidebar: {
-        width: 90,
+        width: 70,
         backgroundColor: theme.colors.surface,
         borderRightWidth: 1,
         borderColor: theme.colors.border,
@@ -215,7 +215,7 @@ const createStyles = (theme) => StyleSheet.create({
     },
     brandItemActive: {
         backgroundColor: theme.colors.background,
-        borderLeftWidth: 4,
+        borderLeftWidth: 8,
         borderLeftColor: theme.colors.accent,
     },
     brandImage: {

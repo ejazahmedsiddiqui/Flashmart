@@ -23,11 +23,14 @@ import SuccessModal from "../../components/SuccessModal";
 import AnimatedContainer from "../../components/AnimatedContainer";
 import {useThemeStore} from "../../store/themeStore";
 import {useUser} from "../../context/UserContext";
+import CustomAlert from "../../components/CustomAlert";
+import {useAlert} from "../../utilities/alertConfig";
 
 const {height} = Dimensions.get("window");
 
 const Profile = () => {
     const { isAuthenticated, isLoading, logout } = useUser();
+    const { showAlert, hideAlert, alertConfig } = useAlert();
     const [showModal, setShowModal] = React.useState(false);
 
     const theme = useThemeStore((s) => s.theme);
@@ -161,7 +164,16 @@ const Profile = () => {
                         <View style={styles.buttonContainer}>
                             <TouchableOpacity
                                 style={styles.logoutButton}
-                                onPress={() => setShowModal(true)}
+                                onPress={() => {
+                                    showAlert(
+                                        'Logout?',
+                                        'Are you sure you want to logout?',
+                                        {
+                                            onOk: () => setShowModal(true),
+                                            showCancel: true,
+                                        }
+                                    )
+                                }}
                             >
                                 <Text style={styles.logoutText}>Logout</Text>
                             </TouchableOpacity>
@@ -169,7 +181,7 @@ const Profile = () => {
                     </ScrollView>
 
                     <SuccessModal
-                        visible={showModal}
+                        visible={showModal || !isAuthenticated}
                         autoCloseDuration={1000}
                         onAnimationComplete={() => {
                             logout();
@@ -183,6 +195,17 @@ const Profile = () => {
                     />
                 </KeyboardAvoidingView>
             </SafeAreaView>
+            <CustomAlert
+                visible={alertConfig.visible}
+                title={alertConfig.title}
+                message={alertConfig.message}
+                onOk={alertConfig.onOk}
+                onCancel={alertConfig.onCancel}
+                showCancel={alertConfig.showCancel}
+                okText={alertConfig.okText}
+                cancelText={alertConfig.cancelText}
+                onClose={hideAlert}
+            />
         </AnimatedContainer>
     );
 };

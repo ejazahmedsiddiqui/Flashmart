@@ -7,15 +7,20 @@ import {
     TouchableOpacity,
     StyleSheet,
     Image,
-    ScrollView,
+    ScrollView, Dimensions,
 } from 'react-native';
 import {router} from "expo-router";
 import {ArrowLeft, Trash2, Plus, Minus, ShoppingBag, ShoppingCart, TriangleAlert} from "lucide-react-native";
 import {useCartStore} from '../store/cartStore';
 import {useThemeStore} from "../store/themeStore";
+import {useUser} from "../context/UserContext";
+import {useAlert} from "../utilities/alertConfig";
+import CustomAlert from "../components/CustomAlert";
 
-
+const {height} = Dimensions.get("window");
 export default function Cart() {
+    const {isAuthenticated} = useUser();
+
     const theme = useThemeStore((s) => s.theme);
     const styles = useMemo(() => createStyles(theme), [theme]);
 
@@ -23,6 +28,7 @@ export default function Cart() {
     const decrementQuantity = useCartStore(state => state.decrementQuantity);
 
     const itemsByKey = useCartStore(state => state.itemsByKey);
+    const {showAlert, alertConfig, hideAlert} = useAlert()
     const cartItems = useMemo(() => Object.values(itemsByKey), [itemsByKey]);
 
     const subtotal = useMemo(
@@ -257,7 +263,6 @@ export default function Cart() {
                             flex: 1,
                             backgroundColor: theme.colors.danger,
                             marginHorizontal: theme.spacing.lg,
-                            marginVertical: theme.spacing.sm,
                             paddingHorizontal: theme.spacing.lg,
                             paddingVertical: theme.spacing.md,
                             borderRadius: theme.radius.md,
@@ -265,10 +270,18 @@ export default function Cart() {
                             justifyContent: 'center',
                             alignItems: 'center',
                             gap: theme.spacing.sm,
+                            marginBottom: height * 0.075,
                         }}
                         onPress={() => {
-                            clearCart()
-                            console.log('Proceeding to checkout');
+                            showAlert(
+                                'Clear Cart?',
+                                'Are you sure you want to clear out the cart?',
+                                {
+                                    onOk: () => clearCart(),
+                                    showCancel: true,
+                                    okText: 'Clear Cart'
+                                }
+                            )
                         }}
                         activeOpacity={0.7}
                     >
@@ -289,23 +302,45 @@ export default function Cart() {
                 <TouchableOpacity
                     style={styles.checkoutButton}
                     onPress={() => {
-                        router.push({
-                            pathname: '/Checkout',
-                            params: {
-                                deliveryFee: deliveryFee,
-                                subTotal: subtotal,
-                                totalAmount: total,
-                                cartItems: cartItems,
-                                savings: savings,
-                            }
-                        })
-                        console.log('Proceeding to checkout');
+                        if (!isAuthenticated) {
+                            router.push({
+                                pathname: '/Login',
+                                params: {
+                                    path: 'cart'
+                                }
+                            })
+                        }
+                        if (isAuthenticated)
+                            router.push({
+                                pathname: '/Checkout',
+                                params: {
+                                    deliveryFee: deliveryFee,
+                                    subTotal: subtotal,
+                                    totalAmount: total,
+                                    cartItems: cartItems,
+                                    savings: savings,
+                                }
+                            })
                     }}
                     activeOpacity={0.7}
                 >
-                    <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>
+                    {isAuthenticated ?
+                        <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text> :
+                        <Text style={styles.checkoutButtonText}>Login to continue</Text>
+                    }
                 </TouchableOpacity>
             </View>
+            <CustomAlert
+                visible={alertConfig.visible}
+                title={alertConfig.title}
+                message={alertConfig.message}
+                onOk={alertConfig.onOk}
+                onCancel={alertConfig.onCancel}
+                showCancel={alertConfig.showCancel}
+                okText={alertConfig.okText}
+                cancelText={alertConfig.cancelText}
+                onClose={hideAlert}
+            />
         </SafeAreaView>
     );
 }
@@ -508,11 +543,11 @@ const createStyles = (theme) => StyleSheet.create({
     billSection: {
         backgroundColor: theme.colors.background,
         marginHorizontal: 20,
+        marginVertical: 12,
         padding: 20,
         borderRadius: 12,
         borderWidth: 1,
         borderColor: theme.colors.border,
-        marginBottom: 12,
     },
     billTitle: {
         fontSize: 16,
@@ -629,6 +664,7 @@ const createStyles = (theme) => StyleSheet.create({
         paddingVertical: 16,
         borderTopWidth: 1,
         borderTopColor: theme.colors.border,
+        height: height * 0.175
     },
     checkoutInfo: {
         flexDirection: 'row',

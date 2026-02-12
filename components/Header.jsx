@@ -1,21 +1,23 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import {
     View,
     Text,
-
     TouchableOpacity,
-    StyleSheet, Modal, ScrollView,
-
+    StyleSheet,
+    Modal,
+    ScrollView,
 } from 'react-native';
 import {router} from "expo-router";
 import {
     ShoppingCart,
-    ChevronDown, Navigation, MapPin,
+    ChevronDown,
+    Navigation,
+    MapPin,
 } from "lucide-react-native";
 import AnimatedSearchBar from "../components/AnimatedSearchBar";
 import {useCartCount} from "../hooks/useCartCount";
-import {addresses} from "../utilities/address";
 import {useThemeStore} from "../store/themeStore";
+import {useAddress} from "../context/AddressContext";
 
 const Header = ({
                     showAddress = true,
@@ -23,32 +25,32 @@ const Header = ({
                     showCart = true,
                     showSearchBar = true,
                 }) => {
-    const [address, setAddress] = useState({
-        type: 'Home',
-        pinCode: '',
-        houseNumber: '',
-        buildingAddress: '',
-        streetAddress: '',
-        city: '',
-        state: '',
-    });
     const [showModal, setShowModal] = useState({
         addressModalVisible: false,
     });
-    const [fullAddress, setFullAddress] = useState('')
+
+    const {allAddresses, currentAddress, currentAddressIndex, setCurrentAddress, isLoading} = useAddress();
     const theme = useThemeStore((s) => s.theme);
     const styles = useMemo(() => createStyles(theme), [theme]);
-
-    const savedAddresses = addresses;
-    useEffect(() => {
-        if (savedAddresses.length > 0) {
-            setAddress(savedAddresses[0]);
-        }
-    }, []);
-    useEffect(() => {
-        setFullAddress(address.houseNumber + ', ' + address.buildingAddress + ', ' + address.streetAddress + ', ' + address.city);
-    }, [address])
     const itemCount = useCartCount();
+
+    const handleAddressSelect = (index) => {
+        setCurrentAddress(index);
+        setShowModal(prev => ({...prev, addressModalVisible: false}));
+    };
+
+    const getShortAddress = () => {
+        if (!currentAddress) return 'Add an address';
+
+        const parts = [];
+        if (currentAddress.houseNumber) parts.push(currentAddress.houseNumber);
+        if (currentAddress.apartmentNameAndPlot) parts.push(currentAddress.apartmentNameAndPlot);
+
+        const addressText = currentAddress.tempAddress || currentAddress.formattedAddress || '';
+        const addressParts = addressText.split(',').slice(0, 2);
+
+        return [...parts, ...addressParts].join(', ');
+    };
 
     return (
         <>
@@ -59,55 +61,63 @@ const Header = ({
                     }
                     {showAddress &&
                         <TouchableOpacity
-                        style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                        }}
-                        onPress={() => setShowModal(prev => ({...prev, addressModalVisible: true}))}
-                    >
-                        <Text
                             style={{
-                                color: theme.colors.textPrimary,
-                                fontSize: theme.fontSize.sm,
-                                fontWeight: theme.fontWeight.bold,
+                                flexDirection: 'row',
+                                alignItems: 'center',
                             }}
-                        >{address?.type?.toUpperCase()} - </Text>
-                        <Text
-                            numberOfLines={1}
-                            style={{
-                                color: theme.colors.textSecondary,
-                                fontSize: theme.fontSize.sm,
-                                fontWeight: theme.fontWeight.regular,
-                                flexShrink: 1,
-                            }}
-                        >{fullAddress.split(',').slice(0, 3).join(',')}</Text>
-                        <ChevronDown size={24} color={theme.colors.textSecondary}/>
-                    </TouchableOpacity>}
+                            onPress={() => setShowModal(prev => ({...prev, addressModalVisible: true}))}
+                        >
+                            <Text
+                                style={{
+                                    color: theme.colors.textPrimary,
+                                    fontSize: theme.fontSize.sm,
+                                    fontWeight: theme.fontWeight.bold,
+                                }}
+                            >
+                                {currentAddress?.title?.toUpperCase() || 'ADDRESS'} -
+                            </Text>
+                            <Text
+                                numberOfLines={1}
+                                style={{
+                                    color: theme.colors.textSecondary,
+                                    fontSize: theme.fontSize.sm,
+                                    fontWeight: theme.fontWeight.regular,
+                                    flexShrink: 1,
+                                }}
+                            >
+                                {getShortAddress()}
+                            </Text>
+                            <ChevronDown size={24} color={theme.colors.textSecondary}/>
+                        </TouchableOpacity>
+                    }
                 </View>
                 {showCart &&
                     <TouchableOpacity
-                    style={[styles.cartIconButton, {flexShrink: 0}]}
-                    onPress={() => router.push('/Cart')}
-                    activeOpacity={0.7}
-                >
-                    <View style={styles.cartIcon}>
-                        <ShoppingCart size={20} color={'#fff'}/>
-                    </View>
-                    {itemCount > 0 && (
-                        <View style={styles.cartBadge}>
-                            <Text style={styles.cartBadgeText}>{itemCount}</Text>
+                        style={[styles.cartIconButton, {flexShrink: 0}]}
+                        onPress={() => router.push('/Cart')}
+                        activeOpacity={0.7}
+                    >
+                        <View style={styles.cartIcon}>
+                            <ShoppingCart size={20} color={'#fff'}/>
                         </View>
-                    )}
-                </TouchableOpacity>}
+                        {itemCount > 0 && (
+                            <View style={styles.cartBadge}>
+                                <Text style={styles.cartBadgeText}>{itemCount}</Text>
+                            </View>
+                        )}
+                    </TouchableOpacity>
+                }
             </View>
 
             {/* Search Bar */}
             {showSearchBar &&
                 <View style={styles.searchSection}>
-                <View style={styles.searchContainer}>
-                    <AnimatedSearchBar/>
+                    <View style={styles.searchContainer}>
+                        <AnimatedSearchBar/>
+                    </View>
                 </View>
-            </View>}
+            }
+
             {/* Address Selection Modal */}
             <Modal
                 animationType="slide"
@@ -129,67 +139,87 @@ const Header = ({
 
                         <ScrollView style={styles.addressList}>
                             {/* Current Location Option */}
-                            <TouchableOpacity style={styles.currentLocationButton}>
+                            <TouchableOpacity
+                                style={styles.currentLocationButton}
+                                onPress={() => router.push('/AddressSetter')}
+                            >
                                 <View style={styles.currentLocationIcon}>
                                     <Navigation size={24} color="#339a38"/>
                                 </View>
                                 <View style={styles.currentLocationTextContainer}>
-                                    <Text style={styles.currentLocationTitle}>Use Current Location</Text>
+                                    <Text style={styles.currentLocationTitle}>Add New Address</Text>
                                     <Text style={styles.currentLocationSubtitle}>
-                                        Enable location to find stores near you
+                                        Use current location or enter manually
                                     </Text>
                                 </View>
                             </TouchableOpacity>
 
-                            {/* Divider */}
-                            <View style={styles.divider}>
-                                <View style={styles.dividerLine}/>
-                                <Text style={styles.dividerText}>SAVED ADDRESSES</Text>
-                                <View style={styles.dividerLine}/>
-                            </View>
+                            {/* Show Saved Addresses only if available */}
+                            {allAddresses.length > 0 && (
+                                <>
+                                    {/* Divider */}
+                                    <View style={styles.divider}>
+                                        <View style={styles.dividerLine}/>
+                                        <Text style={styles.dividerText}>SAVED ADDRESSES</Text>
+                                        <View style={styles.dividerLine}/>
+                                    </View>
 
-                            {/* Saved Addresses */}
-                            {savedAddresses.map((addr) => (
-                                <TouchableOpacity
-                                    key={addr.id}
-                                    style={[
-                                        styles.addressCard,
-                                        address.id === addr.id && styles.addressCardSelected
-                                    ]}
-                                    onPress={() => {
-                                        setAddress(addr);
-                                        setShowModal(prev => ({...prev, addressModalVisible: false}));
-                                    }}
-                                >
-                                    <View style={styles.addressIconContainer}>
-                                        <MapPin size={20} color="#339a38"/>
-                                    </View>
-                                    <View style={styles.addressInfo}>
-                                        <View style={styles.addressTypeRow}>
-                                            <Text
-                                                style={[
-                                                    styles.addressType,
-                                                    address.id === addr.id && styles.addressTypeSelected
-                                                ]}
-                                            >
-                                                {addr.type}
-                                            </Text>
-                                            {address.id === addr.id && (
-                                                <View style={styles.selectedBadge}>
-                                                    <Text style={styles.selectedBadgeText}>SELECTED</Text>
+                                    {/* Saved Addresses */}
+                                    {allAddresses.map((addr, index) => (
+                                        <TouchableOpacity
+                                            key={addr.id}
+                                            style={[
+                                                styles.addressCard,
+                                                index === currentAddressIndex && styles.addressCardSelected
+                                            ]}
+                                            onPress={() => handleAddressSelect(index)}
+                                        >
+                                            <View style={styles.addressIconContainer}>
+                                                <MapPin size={20} color="#339a38"/>
+                                            </View>
+                                            <View style={styles.addressInfo}>
+                                                <View style={styles.addressTypeRow}>
+                                                    <Text
+                                                        style={[
+                                                            styles.addressType,
+                                                            index === currentAddressIndex && styles.addressTypeSelected
+                                                        ]}
+                                                    >
+                                                        {addr.title}
+                                                    </Text>
+                                                    {index === currentAddressIndex && (
+                                                        <View style={styles.selectedBadge}>
+                                                            <Text style={styles.selectedBadgeText}>SELECTED</Text>
+                                                        </View>
+                                                    )}
                                                 </View>
-                                            )}
-                                        </View>
-                                        <Text style={styles.addressText}>
-                                            {addr.houseNumber}, {addr.buildingAddress}
-                                        </Text>
-                                        <Text style={styles.addressText}>
-                                            {addr.streetAddress}, {addr.city}
-                                        </Text>
-                                        <Text style={styles.addressPinCode}>PIN: {addr.pinCode}</Text>
-                                    </View>
-                                </TouchableOpacity>
-                            ))}
+
+                                                {addr.houseNumber && (
+                                                    <Text style={styles.addressText}>
+                                                        {addr.houseNumber}
+                                                        {addr.apartmentNameAndPlot ? `, ${addr.apartmentNameAndPlot}` : ''}
+                                                    </Text>
+                                                )}
+
+                                                <Text style={styles.addressText} numberOfLines={2}>
+                                                    {addr.tempAddress || addr.formattedAddress}
+                                                </Text>
+                                            </View>
+                                        </TouchableOpacity>
+                                    ))}
+                                </>
+                            )}
+
+                            {/* Empty State */}
+                            {allAddresses.length === 0 && (
+                                <View style={styles.emptyState}>
+                                    <MapPin size={48} color={theme.colors.textMuted} />
+                                    <Text style={styles.emptyStateText}>No saved addresses</Text>
+                                    <Text style={styles.emptyStateSubtext}>
+                                        Tap "Add New Address" to get started
+                                    </Text>
+                                </View>
+                            )}
                         </ScrollView>
                     </View>
                 </View>
@@ -199,6 +229,7 @@ const Header = ({
 }
 
 export default Header;
+
 const createStyles = (theme) => StyleSheet.create({
     header: {
         flexDirection: 'row',
@@ -273,7 +304,7 @@ const createStyles = (theme) => StyleSheet.create({
         justifyContent: 'flex-end',
     },
     modalContent: {
-        backgroundColor:  theme.colors.background,
+        backgroundColor: theme.colors.background,
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
         maxHeight: '85%',
@@ -297,7 +328,7 @@ const createStyles = (theme) => StyleSheet.create({
         width: 32,
         height: 32,
         borderRadius: 16,
-        backgroundColor:  theme.colors.background,
+        backgroundColor: theme.colors.surface,
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -312,7 +343,7 @@ const createStyles = (theme) => StyleSheet.create({
     currentLocationButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: theme.colors.background,
+        backgroundColor: theme.colors.card,
         borderRadius: 16,
         padding: 16,
         marginTop: 20,
@@ -323,7 +354,7 @@ const createStyles = (theme) => StyleSheet.create({
         width: 48,
         height: 48,
         borderRadius: 24,
-        backgroundColor: theme.colors.background,
+        backgroundColor: theme.colors.surface,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 12,
@@ -349,7 +380,7 @@ const createStyles = (theme) => StyleSheet.create({
     dividerLine: {
         flex: 1,
         height: 1,
-        backgroundColor: theme.colors.background,
+        backgroundColor: theme.colors.border,
     },
     dividerText: {
         fontSize: theme.fontSize.sm,
@@ -360,22 +391,22 @@ const createStyles = (theme) => StyleSheet.create({
     },
     addressCard: {
         flexDirection: 'row',
-        backgroundColor: theme.colors.background,
+        backgroundColor: theme.colors.card,
         borderRadius: theme.radius.lg,
         padding: 16,
         marginBottom: 12,
         borderWidth: 2,
-        borderColor: 'rgba(81,81,81,0.2)',
+        borderColor: theme.colors.border,
     },
     addressCardSelected: {
-        backgroundColor: theme.colors.background,
+        backgroundColor: theme.colors.surface,
         borderColor: '#339a38',
     },
     addressIconContainer: {
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: theme.colors.background,
+        backgroundColor: theme.colors.surface,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 12,
@@ -416,7 +447,23 @@ const createStyles = (theme) => StyleSheet.create({
     },
     addressPinCode: {
         fontSize: theme.fontSize.md,
-        color: theme.colors.muted,
+        color: theme.colors.textMuted,
         fontWeight: '500',
     },
-})
+    emptyState: {
+        alignItems: 'center',
+        paddingVertical: 40,
+    },
+    emptyStateText: {
+        fontSize: theme.fontSize.lg,
+        fontWeight: '700',
+        color: theme.colors.textPrimary,
+        marginTop: theme.spacing.md,
+    },
+    emptyStateSubtext: {
+        fontSize: theme.fontSize.md,
+        color: theme.colors.textMuted,
+        marginTop: theme.spacing.xs,
+        textAlign: 'center',
+    },
+});
