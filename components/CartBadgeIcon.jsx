@@ -37,6 +37,7 @@ const createStyles = (theme) => StyleSheet.create({
         borderRadius: theme.radius.xl,
         justifyContent: 'center',
         alignItems: 'center',
+        boxShadow: '1px 3px 5px rgba(0, 0, 0, 0.4)',
     },
     cartIcon: {
         fontSize: theme.fontSize.xxl,

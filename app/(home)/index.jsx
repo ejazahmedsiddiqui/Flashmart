@@ -35,12 +35,12 @@ import {products} from "../../utilities/products";
 import Header from "../../components/Header";
 import {useThemeStore} from "../../store/themeStore";
 import AnimatedContainer from "../../components/AnimatedContainer";
+import {Banners} from "../../utilities/banners";
+import Banner from "../../components/Banner";
 
 export default function Index() {
     const theme = useThemeStore((s) => s.theme);
     const styles = useMemo(() => createStyles(theme), [theme]);
-
-
     const [category, setCategory] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [displayProducts, setDisplayProducts] = useState([]);
@@ -126,7 +126,6 @@ export default function Index() {
         <AnimatedContainer>
             <SafeAreaView style={styles.container}>
                 <Header/>
-                {/* Categories */}
                 <View style={styles.categoriesSection}>
                     <ScrollView
                         ref={scrollViewRef}
@@ -168,6 +167,12 @@ export default function Index() {
                         })}
                     </ScrollView>
                 </View>
+
+                <View style={styles.bannerWrapper}>
+                    <Banner/>
+                </View>
+                {/* Categories */}
+
 
                 {/* Products List */}
                 <View style={styles.productsSection}>
@@ -214,10 +219,14 @@ export default function Index() {
     );
 }
 
-const createStyles = (theme) =>  StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
     container: {
         flex: 1,
         paddingHorizontal: 20,
+    },
+
+    bannerWrapper: {
+        marginHorizontal: -10, // Negates parent's paddingHorizontal
     },
 
     // Categories Styles
