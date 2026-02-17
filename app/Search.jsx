@@ -95,7 +95,7 @@ const Search = () => {
         handleSearch(query);
     }, [handleSearch]);
 
-    // Render product card
+    // Render (product) card
     const renderProduct = useCallback(
         ({item}) => <ProductCard product={item}/>,
         []

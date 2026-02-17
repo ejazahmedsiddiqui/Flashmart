@@ -17,7 +17,9 @@ import {
     User,
     Sun,
     Moon,
-    PackageOpen, MapPinHouse
+    PackageOpen,
+    MapPinHouse,
+    MessageCircleQuestionMark
 } from "lucide-react-native";
 import SuccessModal from "../../components/SuccessModal";
 import AnimatedContainer from "../../components/AnimatedContainer";
@@ -140,7 +142,8 @@ const Profile = () => {
                                         <Text style={styles.actionText}>Add New Address</Text>
                                     </View>
                                     <ChevronRight size={18} color={styles.iconMuted.color}/>
-                                </TouchableOpacity><View style={styles.divider}/>
+                                </TouchableOpacity>
+                                <View style={styles.divider}/>
 
                                 <TouchableOpacity
                                     style={styles.actionRow}
@@ -157,6 +160,21 @@ const Profile = () => {
                                     </View>
                                     <ChevronRight size={18} color={styles.iconMuted.color}/>
                                 </TouchableOpacity>
+
+                                <View style={styles.divider}/>
+
+                                <TouchableOpacity
+                                    style={styles.actionRow}
+                                    onPress={() => router.push("/NeedHelp")}
+                                    activeOpacity={0.8}
+                                >
+                                    <View style={styles.actionLeft}>
+                                        <MessageCircleQuestionMark size={18} color={styles.iconPrimary.color}/>
+                                        <Text style={styles.actionText}>Need Help?</Text>
+                                    </View>
+                                    <ChevronRight size={18} color={styles.iconMuted.color}/>
+                                </TouchableOpacity>
+
                             </View>
                         </View>
 

@@ -203,8 +203,6 @@ const createStyles = (theme) => StyleSheet.create({
         flex: 1,
         backgroundColor: theme.colors.background,
     },
-
-    /* ---------------- Header ---------------- */
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',

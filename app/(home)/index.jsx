@@ -29,7 +29,7 @@ import {
     Baby,
     HeartPulse,
     Shirt,
-    PawPrint, Pickaxe, ChevronUpCircleIcon, TriangleAlert, ChevronUp
+    PawPrint, Pickaxe, TriangleAlert, ChevronUp
 } from "lucide-react-native";
 import {products} from "../../utilities/products";
 import Header from "../../components/Header";
@@ -275,9 +275,30 @@ const createStyles = (theme) => StyleSheet.create({
     categoryTextActive: {
         color: theme.colors.textPrimary,
     },
+    scrollTopButton: {
+        position: 'absolute',
+        flexDirection: 'row',
+        justifyContent: 'space-evenly',
+        gap: 4,
+        alignItems: 'center',
+        top: 20,
+        backgroundColor: theme.colors.surface,
+        borderWidth: 2,
+        borderColor: theme.colors.border,
+        paddingVertical: 8,
+        paddingHorizontal: 8,
+        borderRadius: 30,
+        zIndex: 1000,
+        alignSelf: 'center',
 
+    },
+    buttonText: {
+        color: theme.colors.textPrimary,
+        fontSize: 12,
+    },
     productsSection: {
         flex: 1,
+        paddingHorizontal: 12,
     },
     productsList: {},
     columnWrapper: {
@@ -337,26 +358,4 @@ const createStyles = (theme) => StyleSheet.create({
         textAlign: "center",
         lineHeight: 20,
     },
-    scrollTopButton: {
-        position: 'absolute',
-        flexDirection: 'row',
-        justifyContent: 'space-evenly',
-        gap: 4,
-        alignItems: 'center',
-        top: 20,
-        backgroundColor: theme.colors.surface,
-        borderWidth: 2,
-        borderColor: theme.colors.border,
-        paddingVertical: 8,
-        paddingHorizontal: 8,
-        borderRadius: 30,
-        zIndex: 1000,
-        alignSelf: 'center',
-
-    },
-    buttonText: {
-        color: theme.colors.textPrimary,
-        fontSize: 12,
-    },
-
 })

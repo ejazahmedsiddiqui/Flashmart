@@ -12,13 +12,6 @@ export default function HomeLayout() {
                     title: 'Home',
                 }}
             />
-            <Stack.Screen
-                name="[product]"
-                options={{
-                    title: 'Product Details',
-                    presentation: 'card', // Makes it feel like a proper stack navigation
-                }}
-            />
         </Stack>
     );
 }
