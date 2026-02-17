@@ -1,6 +1,6 @@
 import React, {useState, useMemo} from 'react';
 import {View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, StatusBar} from 'react-native';
-import {ShoppingCart, Heart, ArrowLeft, Minus, Plus} from 'lucide-react-native';
+import { Heart, ArrowLeft, Minus, Plus} from 'lucide-react-native';
 import {router, useLocalSearchParams} from "expo-router";
 import ProductCard from "../../components/ProductCard";
 import {products} from "../../utilities/products";
@@ -14,7 +14,6 @@ const ProductDetailsPage = () => {
     const styles = useMemo(() => createStyles(theme), [theme]);
 
     const params = useLocalSearchParams();
-    const [cardWidth, setCardWidth] = useState(0);
 
     const product = products.find(
         p => p.id === Number(params.product)

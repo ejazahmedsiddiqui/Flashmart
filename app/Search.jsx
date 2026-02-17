@@ -25,9 +25,7 @@ const Search = () => {
     const [isSearching, setIsSearching] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
     const [recentSearches, setRecentSearches] = useState([]);
-    const [cardWidth, setCardWidth] = useState(0);
 
-    // Trending/Popular searches
     const trendingSearches = useMemo(() => [
         "Organic Vegetables",
         "Fresh",
@@ -37,7 +35,6 @@ const Search = () => {
         "Snacks",
     ], []);
 
-    // Search function
     const performSearch = useCallback(async (query) => {
         if (!query.trim()) {
             setSearchResults([]);
@@ -46,7 +43,7 @@ const Search = () => {
 
         setIsSearching(true);
 
-        // Simulate network delay
+        // network delay
         await new Promise(resolve => setTimeout(resolve, 300));
 
         const lowercaseQuery = query.toLowerCase();
@@ -72,7 +69,6 @@ const Search = () => {
     // Handle search submission
     const handleSearch = useCallback((query) => {
         if (query.trim()) {
-            // Add to recent searches (avoiding duplicates)
             setRecentSearches(prev => {
                 const filtered = prev.filter(s => s !== query);
                 return [query, ...filtered].slice(0, 5);
@@ -101,8 +97,8 @@ const Search = () => {
 
     // Render product card
     const renderProduct = useCallback(
-        ({item}) => <ProductCard product={item} width={cardWidth}/>,
-        [cardWidth]
+        ({item}) => <ProductCard product={item}/>,
+        []
     );
 
     // Render recent search item
@@ -205,16 +201,13 @@ const Search = () => {
                                     {searchResults.length} {searchResults.length === 1 ? 'result' : 'results'} found
                                 </Text>
                                 <FlatList
-                                    onLayout={(event) => {
-                                        const containerWidth = event.nativeEvent.layout.width;
-                                        setCardWidth(containerWidth);
-                                    }}
                                     data={searchResults}
                                     renderItem={renderProduct}
                                     keyExtractor={item => item.id.toString()}
                                     numColumns={2}
                                     contentContainerStyle={styles.productsList}
                                     showsVerticalScrollIndicator={false}
+                                    initialScrollIndex={0}
                                 />
                             </>
                         ) : (
@@ -312,7 +305,6 @@ const createStyles = (theme) => StyleSheet.create({
     },
     productsList: {
         paddingBottom: 20,
-        alignItems: 'center',
         justifyContent: 'space-between',
     },
     loadingContainer: {

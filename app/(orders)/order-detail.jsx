@@ -1,11 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
     View,
     Text,
     ScrollView,
     TouchableOpacity,
     StyleSheet,
-    Modal
+
 } from 'react-native';
 import {
     ArrowLeft,
@@ -16,7 +16,7 @@ import {
     Truck,
     CheckCircle,
     Phone,
-    Edit
+
 } from 'lucide-react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -32,18 +32,7 @@ const OrderDetail = () => {
     // Parse the order data from params
     const order = params.order ? JSON.parse(params.order) : null;
 
-    const [showStatusModal, setShowStatusModal] = useState(false);
-    const [currentStatus, setCurrentStatus] = useState(order?.orderStatus || 'pending');
-
-    const statusOptions = [
-        { value: 'pending', label: 'Pending', color: '#DC2626' },
-        { value: 'confirmed', label: 'Confirmed', color: '#2563EB' },
-        { value: 'preparing', label: 'Preparing', color: '#D97706' },
-        { value: 'out_for_delivery', label: 'Out for Delivery', color: '#7C3AED' },
-        { value: 'delivered', label: 'Delivered', color: '#059669' },
-        { value: 'cancelled', label: 'Cancelled', color: '#DC2626' }
-    ];
-
+    const currentStatus = order?.orderStatus
     const getStatusColor = (status) => {
         switch (status) {
             case 'pending':
@@ -82,11 +71,6 @@ const OrderDetail = () => {
         }
     };
 
-    const handleStatusChange = (newStatus) => {
-        setCurrentStatus(newStatus);
-        setShowStatusModal(false);
-        // Here you would typically update the status in your backend/state management
-    };
 
     if (!order) {
         return (
@@ -102,7 +86,7 @@ const OrderDetail = () => {
                 </View>
             </SafeAreaView>
         );
-    };
+    }
     console.log('@/app/seller/order-details accessed.');
 
     return (
@@ -129,12 +113,6 @@ const OrderDetail = () => {
                                 <Package size={20} color={theme.colors.info} />
                                 <Text style={styles.cardTitle}>Order Status</Text>
                             </View>
-                            <TouchableOpacity
-                                style={styles.editButton}
-                                onPress={() => setShowStatusModal(true)}
-                            >
-                                <Edit size={16} color={theme.colors.textSecondary} />
-                            </TouchableOpacity>
                         </View>
 
                         <View style={[
@@ -246,12 +224,6 @@ const OrderDetail = () => {
 
                     {/* Action Buttons */}
                     <View style={styles.actionButtons}>
-                        <TouchableOpacity
-                            style={styles.primaryButton}
-                            onPress={() => setShowStatusModal(true)}
-                        >
-                            <Text style={styles.primaryButtonText}>Update Order Status</Text>
-                        </TouchableOpacity>
 
                         <TouchableOpacity
                             style={styles.secondaryButton}
@@ -264,45 +236,6 @@ const OrderDetail = () => {
                 </View>
             </ScrollView>
 
-            {/* Status Update Modal */}
-            <Modal
-                visible={showStatusModal}
-                transparent
-                animationType="slide"
-                onRequestClose={() => setShowStatusModal(false)}
-            >
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Update Order Status</Text>
-
-                        {statusOptions.map((option) => (
-                            <TouchableOpacity
-                                key={option.value}
-                                style={[
-                                    styles.statusOption,
-                                    currentStatus === option.value && styles.statusOptionActive
-                                ]}
-                                onPress={() => handleStatusChange(option.value)}
-                            >
-                                <View
-                                    style={[
-                                        styles.statusDot,
-                                        { backgroundColor: option.color }
-                                    ]}
-                                />
-                                <Text style={styles.statusOptionText}>{option.label}</Text>
-                            </TouchableOpacity>
-                        ))}
-
-                        <TouchableOpacity
-                            style={styles.modalCloseButton}
-                            onPress={() => setShowStatusModal(false)}
-                        >
-                            <Text style={styles.modalCloseText}>Cancel</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
         </SafeAreaView>
     );
 };

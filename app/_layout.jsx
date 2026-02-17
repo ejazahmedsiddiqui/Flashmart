@@ -50,6 +50,8 @@ export default function RootLayout() {
                         <Stack.Screen name='(profile)'/>
                         <Stack.Screen name='(orders)'/>
                         <Stack.Screen name='Checkout'/>
+                        <Stack.Screen name='product'/>
+                        <Stack.Screen name='Banner'/>
                         <Stack.Screen name='Search'/>
                     </Stack>
                     {shouldShowFooter && <Footer/>}
