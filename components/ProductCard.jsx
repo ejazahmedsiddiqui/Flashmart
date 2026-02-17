@@ -32,7 +32,7 @@ const ProductCard = ({product, isHorizontal = false}) => {
     const hasHydrated = useThemeStore((s) => s._hasHydrated);
 
     const handleCardPush = () => {
-        router.push(`/product/${product.id}`);
+        router.push(`/(product)/${product.id}`);
     };
 
     const discountPercent = useMemo(() => {

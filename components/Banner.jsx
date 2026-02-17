@@ -122,7 +122,7 @@ const Banner = () => {
                 autoPlay
                 autoPlayInterval={3000}
                 scrollAnimationDuration={700}
-                style={{ alignSelf: "center" }}
+                style={{ alignSelf: "center"}}
                 horizontal
                 vertical={false}
                 mode={'parallax'}
