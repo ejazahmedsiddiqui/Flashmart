@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback } from "react";
+import React, { useMemo, useCallback } from "react";
 import {
     View,
     Text,
@@ -14,13 +14,11 @@ import { Banners } from "../utilities/banners";
 const { width } = Dimensions.get("window");
 
 const BANNER_HEIGHT = 220;
-const BANNER_MARGIN = 8;
+const BANNER_MARGIN = 4;
 const ITEM_WIDTH = width - BANNER_MARGIN * 2;
 
 const Banner = () => {
-    const [currentIndex, setCurrentIndex] = useState(0);
 
-    /** ---------- ACTIVE BANNERS ---------- */
     const activeBanners = useMemo(() => {
         const now = new Date();
 
@@ -37,12 +35,9 @@ const Banner = () => {
         }).sort((a, b) => a.priority - b.priority);
     }, []);
 
-    /** ---------- PRESS HANDLER ---------- */
     const handleBannerPress = useCallback((banner) => {
-        if (!banner.route) return;
-
         router.push({
-            pathname: banner.route,
+            pathname: `/Banner/${banner.id}`,
             params: {
                 campaign: banner.campaign,
                 bannerId: banner.id,
@@ -50,10 +45,8 @@ const Banner = () => {
         });
     }, []);
 
-    /** ---------- EMPTY ---------- */
     if (activeBanners.length === 0) return null;
 
-    /** ---------- RENDER ITEM ---------- */
     const renderItem = ({ item: banner }) => {
         return (
             <TouchableOpacity
@@ -128,27 +121,12 @@ const Banner = () => {
                 loop
                 autoPlay
                 autoPlayInterval={3000}
-                scrollAnimationDuration={200}
-                onSnapToItem={setCurrentIndex}
+                scrollAnimationDuration={700}
                 style={{ alignSelf: "center" }}
+                horizontal
                 vertical={false}
                 mode={'parallax'}
             />
-
-            {/* Pagination */}
-            {activeBanners.length > 1 && (
-                <View style={styles.paginationContainer}>
-                    {activeBanners.map((_, i) => (
-                        <View
-                            key={i}
-                            style={[
-                                styles.paginationDot,
-                                i === currentIndex && styles.paginationDotActive,
-                            ]}
-                        />
-                    ))}
-                </View>
-            )}
         </View>
     );
 };
@@ -157,7 +135,7 @@ export default Banner;
 
 const styles = StyleSheet.create({
     container: {
-        marginVertical: 16,
+        marginBottom: 12,
     },
 
     bannerContainer: {
@@ -165,7 +143,7 @@ const styles = StyleSheet.create({
         height: BANNER_HEIGHT,
         borderRadius: 16,
         overflow: "hidden",
-        elevation: 4,
+        boxShadow: '1px 4px 8px rgba(0, 0, 0, 0.5)',
     },
 
     bannerImage: {
@@ -222,7 +200,7 @@ const styles = StyleSheet.create({
     paginationContainer: {
         flexDirection: "row",
         justifyContent: "center",
-        marginTop: 12,
+        marginTop: 4,
         gap: 8,
     },
 

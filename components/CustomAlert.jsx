@@ -1,5 +1,6 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import {useThemeStore} from "../store/themeStore";
 
 // Custom Alert Component with Cancel functionality
 const CustomAlert = ({
@@ -13,6 +14,9 @@ const CustomAlert = ({
                          cancelText = 'Cancel',
                          onClose
                      }) => {
+    const theme = useThemeStore((s) => s.theme);
+    const styles = useMemo(() => createStyles(theme), [theme]);
+
     const handleOk = () => {
         if (onOk) {
             onOk();
@@ -72,7 +76,7 @@ const CustomAlert = ({
 
 export default CustomAlert;
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
     overlay: {
         flex: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -80,31 +84,23 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     alertBox: {
-        backgroundColor: 'white',
+        backgroundColor: theme.colors.background,
         borderRadius: 12,
         padding: 20,
         width: '80%',
         maxWidth: 400,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
     },
     title: {
         fontSize: 20,
         fontWeight: 'bold',
         marginBottom: 10,
-        color: '#333',
+        color: theme.colors.textPrimary,
         textAlign: 'center',
     },
     message: {
         fontSize: 16,
         marginBottom: 20,
-        color: '#666',
+        color: theme.colors.textSecondary,
         textAlign: 'center',
         lineHeight: 22,
     },

@@ -29,14 +29,15 @@ import {
     Baby,
     HeartPulse,
     Shirt,
-    PawPrint, Pickaxe
+    PawPrint, Pickaxe, ChevronUpCircleIcon, TriangleAlert, ChevronUp
 } from "lucide-react-native";
 import {products} from "../../utilities/products";
 import Header from "../../components/Header";
 import {useThemeStore} from "../../store/themeStore";
 import AnimatedContainer from "../../components/AnimatedContainer";
-import {Banners} from "../../utilities/banners";
 import Banner from "../../components/Banner";
+
+const CONTENT_OFFSET_THRESHOLD = 300
 
 export default function Index() {
     const theme = useThemeStore((s) => s.theme);
@@ -47,6 +48,9 @@ export default function Index() {
     const [error, setError] = useState(false);
     const scrollViewRef = useRef(null);
     const [categoryLayouts, setCategoryLayouts] = useState({});
+    const [contentVerticalOffset, setContentVerticalOffset] = useState(0);
+    const flatListRef = useRef(null);
+
     const categoryHeaderList = [
         {id: '', label: 'Home', icon: HomeIcon},
         {id: 'vegetables', label: 'Vegetables', icon: Carrot, title: 'Grocery & Kitchen'},
@@ -120,12 +124,26 @@ export default function Index() {
         ({item}) => <ProductCard product={item}/>,
         []
     );
-
+    const handleScroll = (event) => {
+        setContentVerticalOffset(event.nativeEvent.contentOffset.y)
+    }
+    const scrollToTop = useCallback(() => {
+        if (flatListRef.current) {
+            flatListRef.current.scrollToOffset({
+                offset: 0,
+                animated: true,
+                viewPosition: 0,
+            })
+        }
+    }, []);
 
     return (
         <AnimatedContainer>
             <SafeAreaView style={styles.container}>
-                <Header/>
+                <View style={{paddingHorizontal: 12,}}>
+                    <Header/>
+                </View>
+                {/* Categories */}
                 <View style={styles.categoriesSection}>
                     <ScrollView
                         ref={scrollViewRef}
@@ -168,76 +186,74 @@ export default function Index() {
                     </ScrollView>
                 </View>
 
-                <View style={styles.bannerWrapper}>
-                    <Banner/>
-                </View>
-                {/* Categories */}
-
-
                 {/* Products List */}
                 <View style={styles.productsSection}>
-                    {isLoading ? (
-                        <View style={styles.loadingContainer}>
-                            <ActivityIndicator size="large" color={"#339a38"}/>
-                            <Text style={styles.loadingText}>Loading fresh products...</Text>
-                        </View>
-                    ) : displayProducts.length !== 0 ? (error ? (
-                        <View style={styles.errorContainer}>
-                            <Text style={styles.errorEmoji}>🥺</Text>
-                            <Text style={styles.errorText}>Oops! Something went wrong</Text>
-                            <Text style={styles.errorSubtext}>Please try again later</Text>
-                        </View>
-                    ) : (
-                        <FlatList
-                            data={displayProducts}
-                            renderItem={renderProduct}
-                            keyExtractor={item => item.id.toString()}
-                            numColumns={2}
-                            columnWrapperStyle={styles.columnWrapper}  // Add this
-                            contentContainerStyle={styles.productsList}
-                            showsVerticalScrollIndicator={false}
-                            initialNumToRender={6}
-                            maxToRenderPerBatch={6}
-                            windowSize={5}
-                            removeClippedSubviews
-                        />
-                    )) : (
-                        <View style={styles.errorContainer}>
-                            <View style={styles.iconWrapper}>
-                                <PackageX size={42} color={"#196500"}/>
-                            </View>
-
-                            <Text style={styles.title}>{'No products available'}</Text>
-                            <Text style={styles.subtitle}>{'Please come back later'}</Text>
-                        </View>
+                    {contentVerticalOffset > CONTENT_OFFSET_THRESHOLD && (
+                        <TouchableOpacity style={styles.scrollTopButton} onPress={scrollToTop}>
+                            <ChevronUp size={16} color={theme.colors.textPrimary}/>
+                            <Text style={styles.buttonText}>Go back to top</Text>
+                        </TouchableOpacity>
                     )}
+                    {isLoading ?
+                        (
+                            <View style={styles.loadingContainer}>
+                                <ActivityIndicator size="large" color={"#339a38"}/>
+                                <Text style={styles.loadingText}>Loading fresh products...</Text>
+                            </View>
+                        ) :
+                        error ?
+                            (
+                                <View style={styles.errorContainer}>
+                                    <TriangleAlert size={48} color={'yellow'} style={{marginBottom: 12}}/>
+                                    <Text style={styles.errorText}>Oops! Something went wrong</Text>
+                                    <Text style={styles.errorSubtext}>Please try again later</Text>
+                                </View>
+                            ) :
+                            displayProducts.length !== 0 ? (
+                                <FlatList
+                                    ListHeaderComponent={Banner}
+                                    ref={flatListRef}
+                                    keyExtractor={item => item.id.toString()}
+                                    data={displayProducts}
+                                    renderItem={renderProduct}
+                                    numColumns={2}
+                                    initialNumToRender={6}
+                                    maxToRenderPerBatch={6}
+                                    windowSize={5}
+                                    onScroll={handleScroll}
+                                    scrollEventThrottle={16}
+                                    showsVerticalScrollIndicator={false}
+                                    removeClippedSubviews
+                                    columnWrapperStyle={styles.columnWrapper}  // Add this
+                                    contentContainerStyle={styles.productsList}
+                                />
+                            ) : (
+                                <View style={styles.errorContainer}>
+                                    <View style={styles.iconWrapper}>
+                                        <PackageX size={42} color={"#196500"}/>
+                                    </View>
+
+                                    <Text style={styles.title}>{'No products available'}</Text>
+                                    <Text style={styles.subtitle}>{'Please come back later'}</Text>
+                                </View>
+                            )
+                    }
                 </View>
 
-                {/* Address Selection Modal */}
             </SafeAreaView>
         </AnimatedContainer>
-    );
+    )
+        ;
 }
 
 const createStyles = (theme) => StyleSheet.create({
     container: {
         flex: 1,
-        paddingHorizontal: 20,
     },
-
-    bannerWrapper: {
-        marginHorizontal: -10, // Negates parent's paddingHorizontal
-    },
-
     // Categories Styles
     categoriesSection: {
         paddingVertical: 2,
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: theme.colors.textPrimary,
-        marginBottom: 12,
+        paddingHorizontal: 12,
     },
     categoryChip: {
         justifyContent: 'center',
@@ -262,12 +278,8 @@ const createStyles = (theme) => StyleSheet.create({
 
     productsSection: {
         flex: 1,
-        paddingTop: 16,
-
     },
-    productsList: {
-        paddingBottom: 20,
-    },
+    productsList: {},
     columnWrapper: {
         justifyContent: 'space-between',
         paddingHorizontal: 4,
@@ -290,10 +302,6 @@ const createStyles = (theme) => StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         paddingTop: 60,
-    },
-    errorEmoji: {
-        fontSize: 48,
-        marginBottom: 12,
     },
     errorText: {
         fontSize: 18,
@@ -328,6 +336,27 @@ const createStyles = (theme) => StyleSheet.create({
         color: "#666",
         textAlign: "center",
         lineHeight: 20,
+    },
+    scrollTopButton: {
+        position: 'absolute',
+        flexDirection: 'row',
+        justifyContent: 'space-evenly',
+        gap: 4,
+        alignItems: 'center',
+        top: 20,
+        backgroundColor: theme.colors.surface,
+        borderWidth: 2,
+        borderColor: theme.colors.border,
+        paddingVertical: 8,
+        paddingHorizontal: 8,
+        borderRadius: 30,
+        zIndex: 1000,
+        alignSelf: 'center',
+
+    },
+    buttonText: {
+        color: theme.colors.textPrimary,
+        fontSize: 12,
     },
 
 })

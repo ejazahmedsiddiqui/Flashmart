@@ -9,7 +9,6 @@ import React, {useMemo} from "react";
 import {router} from "expo-router";
 import {useCartStore} from "../store/cartStore";
 import {useThemeStore} from "../store/themeStore";
-import {SafeAreaView} from "react-native-safe-area-context";
 
 const ProductCard = ({product, isHorizontal = false}) => {
     const selectedVariant = product.variants?.[0];
@@ -33,7 +32,7 @@ const ProductCard = ({product, isHorizontal = false}) => {
     const hasHydrated = useThemeStore((s) => s._hasHydrated);
 
     const handleCardPush = () => {
-        router.push(`/(home)/${product.id}`);
+        router.push(`/product/${product.id}`);
     };
 
     const discountPercent = useMemo(() => {
@@ -64,7 +63,7 @@ const ProductCard = ({product, isHorizontal = false}) => {
     console.log("Render ProductCard", product.id);
     if (!hasHydrated) {
         return (
-            <SafeAreaView style={{
+            <View style={{
                 flex: 1,
                 justifyContent: "center",
                 alignItems: "center",
@@ -76,7 +75,7 @@ const ProductCard = ({product, isHorizontal = false}) => {
                 }}>
                     Loading...
                 </Text>
-            </SafeAreaView>
+            </View>
         )
     }
 
@@ -174,6 +173,7 @@ const createStyles = (theme) => StyleSheet.create({
         borderWidth: 1,
         borderColor: theme.colors.border,
         maxWidth: '50%',
+        heigh: 200,
     },
     horizontalCard: {
         flex: 0,
