@@ -4,8 +4,8 @@ import {router} from "expo-router";
 import {useAddress} from "../../context/AddressContext";
 import AnimatedContainer from "../../components/AnimatedContainer";
 import {useThemeStore} from "../../store/themeStore";
-import {useMemo} from "react";
-import {Trash2, MapPin, Plus} from "lucide-react-native";
+import React, {useMemo} from "react";
+import {Trash2, MapPin, Plus, ChevronLeft} from "lucide-react-native";
 import {useAlert} from "../../utilities/alertConfig";
 import CustomAlert from "../../components/CustomAlert";
 
@@ -94,6 +94,18 @@ const Address = () => {
         <AnimatedContainer>
             <SafeAreaView style={styles.container}>
                 <View style={styles.header}>
+                    {router.canGoBack() && <TouchableOpacity
+                        style={{
+                            justifyContent: 'flex-start',
+                            alignItems: 'center',
+                            flexDirection: 'row',
+                            gap: 8,
+                        }}
+                        onPress={() => {
+                            router.back();
+                        }}>
+                        <ChevronLeft size={24} color={theme.colors.textPrimary}/>
+                    </TouchableOpacity>}
                     <Text style={styles.headerTitle}>My Addresses</Text>
                     <TouchableOpacity
                         style={styles.addButton}

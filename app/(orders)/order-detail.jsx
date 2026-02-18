@@ -5,7 +5,7 @@ import {
     ScrollView,
     TouchableOpacity,
     StyleSheet,
-
+    Image
 } from 'react-native';
 import {
     ArrowLeft,
@@ -146,19 +146,33 @@ const OrderDetail = () => {
                             </View>
                         </View>
 
-                        <View style={styles.detailRow}>
-                            <Text style={styles.detailLabel}>Phone</Text>
-                            <View style={styles.phoneContainer}>
-                                <Text style={styles.detailValue}>{order.customer}</Text>
-                                <TouchableOpacity style={styles.phoneButton}>
-                                    <Phone size={16} color={theme.colors.success} />
-                                </TouchableOpacity>
+                        {order.address ? (
+                            <>
+                                <View style={styles.detailRow}>
+                                    <Text style={styles.detailLabel}>Address</Text>
+                                    <Text style={styles.detailValue}>
+                                        {order.address.houseNumber}, {order.address.aptNamePlot}
+                                    </Text>
+                                    <Text style={[styles.detailValue, { fontWeight: '400', fontSize: 13 }]}>
+                                        {order.address.formattedAddress}
+                                    </Text>
+                                </View>
+                            </>
+                        ) : (
+                            <View style={styles.detailRow}>
+                                <Text style={styles.detailLabel}>Phone</Text>
+                                <View style={styles.phoneContainer}>
+                                    <Text style={styles.detailValue}>{order.customer}</Text>
+                                    <TouchableOpacity style={styles.phoneButton}>
+                                        <Phone size={16} color={theme.colors.success} />
+                                    </TouchableOpacity>
+                                </View>
                             </View>
-                        </View>
+                        )}
                     </View>
 
                     {/* Delivery Partner */}
-                    {order.delivery !== 'pending' && (
+                    {(order.deliveryPartner ?? order.delivery) !== 'pending' && (
                         <View style={styles.card}>
                             <View style={styles.cardHeader}>
                                 <View style={styles.cardHeaderLeft}>
@@ -169,7 +183,7 @@ const OrderDetail = () => {
 
                             <View style={styles.detailRow}>
                                 <Text style={styles.detailLabel}>Name</Text>
-                                <Text style={styles.detailValue}>{order.delivery}</Text>
+                                <Text style={styles.detailValue}>{order.deliveryPartner ?? order.delivery}</Text>
                             </View>
                         </View>
                     )}
@@ -183,18 +197,55 @@ const OrderDetail = () => {
                             </View>
                         </View>
 
-                        <View style={styles.itemRow}>
-                            <View style={styles.itemInfo}>
-                                <Text style={styles.itemName}>Order Items</Text>
-                                <Text style={styles.itemQuantity}>Qty: {order.items}</Text>
+                        {Array.isArray(order.items) ? order.items.map((item, index) => (
+                            <View key={item.cartKey ?? index}>
+                                <View style={styles.itemRow}>
+                                    {item.image ? (
+                                        <Image
+                                            source={{ uri: item.image }}
+                                            style={styles.itemImage}
+                                        />
+                                    ) : null}
+                                    <View style={styles.itemInfo}>
+                                        <Text style={styles.itemName}>{item.name}</Text>
+                                        {item.brand ? (
+                                            <Text style={styles.itemBrand}>{item.brand}</Text>
+                                        ) : null}
+                                        {item.variantSku ? (
+                                            <Text style={styles.itemVariant}>SKU: {item.variantSku}</Text>
+                                        ) : null}
+                                        <Text style={styles.itemQuantity}>Qty: {item.quantity}</Text>
+                                    </View>
+                                    <Text style={styles.itemPrice}>₹{(item.price * item.quantity).toFixed(2)}</Text>
+                                </View>
+                                {index < order.items.length - 1 && <View style={styles.divider} />}
                             </View>
-                        </View>
+                        )) : (
+                            <View style={styles.itemRow}>
+                                <View style={styles.itemInfo}>
+                                    <Text style={styles.itemName}>Order Items</Text>
+                                    <Text style={styles.itemQuantity}>Qty: {order.items}</Text>
+                                </View>
+                            </View>
+                        )}
 
                         <View style={styles.divider} />
 
+                        {order.savings > 0 && (
+                            <View style={styles.totalRow}>
+                                <Text style={styles.savingsLabel}>You saved</Text>
+                                <Text style={styles.savingsValue}>-₹{order.savings.toFixed(2)}</Text>
+                            </View>
+                        )}
                         <View style={styles.totalRow}>
+                            <Text style={styles.summaryLabel}>Delivery Fee</Text>
+                            <Text style={styles.summaryValue}>₹{(order.deliveryFee ?? 40).toFixed(2)}</Text>
+                        </View>
+                        <View style={[styles.totalRow, { marginTop: 8 }]}>
                             <Text style={styles.totalLabel}>Total Amount</Text>
-                            <Text style={styles.totalAmount}>{order.amount}</Text>
+                            <Text style={styles.totalAmount}>
+                                {order.total != null ? `₹${order.total.toFixed(2)}` : order.amount}
+                            </Text>
                         </View>
                     </View>
 
@@ -209,7 +260,7 @@ const OrderDetail = () => {
 
                         <View style={styles.detailRow}>
                             <Text style={styles.detailLabel}>Method</Text>
-                            <Text style={styles.detailValue}>{order.payment}</Text>
+                            <Text style={styles.detailValue}>{order.paymentMethod ?? order.payment}</Text>
                         </View>
 
                         <View style={styles.detailRow}>
@@ -225,13 +276,13 @@ const OrderDetail = () => {
                     {/* Action Buttons */}
                     <View style={styles.actionButtons}>
 
-                        <TouchableOpacity
+                        {router.canGoBack() && <TouchableOpacity
                             style={styles.secondaryButton}
                             onPress={() => router.back()}
                         >
-                            <ArrowLeft size={16} color={theme.colors.info} />
-                            <Text style={styles.secondaryButtonText}>Back to Orders</Text>
-                        </TouchableOpacity>
+                            <ArrowLeft size={16} color={theme.colors.info}/>
+                            <Text style={styles.secondaryButtonText}>Back</Text>
+                        </TouchableOpacity>}
                     </View>
                 </View>
             </ScrollView>
@@ -501,6 +552,49 @@ const createStyles = (theme) => StyleSheet.create({
         fontSize: theme.fontSize.xl,
         color: theme.colors.textSecondary,
         marginBottom: theme.spacing.lg,
+    },
+    itemImage: {
+        width: 56,
+        height: 56,
+        borderRadius: theme.radius.sm,
+        marginRight: theme.spacing.md,
+        backgroundColor: theme.colors.surface,
+    },
+    itemPrice: {
+        fontSize: 15,
+        fontWeight: theme.fontWeight.bold,
+        color: theme.colors.textPrimary,
+        minWidth: 70,
+        textAlign: 'right',
+    },
+    itemBrand: {
+        fontSize: 12,
+        color: theme.colors.textSecondary,
+        marginBottom: 2,
+    },
+    itemVariant: {
+        fontSize: 12,
+        color: theme.colors.textSecondary,
+        marginBottom: 2,
+    },
+    savingsLabel: {
+        fontSize: theme.fontSize.md,
+        color: '#0c831f',
+        fontWeight: '600',
+    },
+    savingsValue: {
+        fontSize: theme.fontSize.md,
+        fontWeight: '700',
+        color: '#0c831f',
+    },
+    summaryLabel: {
+        fontSize: theme.fontSize.md,
+        color: theme.colors.textSecondary,
+    },
+    summaryValue: {
+        fontSize: theme.fontSize.md,
+        fontWeight: '600',
+        color: theme.colors.textPrimary,
     },
 });
 

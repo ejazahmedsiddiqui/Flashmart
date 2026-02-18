@@ -30,12 +30,10 @@ const UserHelp = () => {
         <SafeAreaView style={styles.container}>
             {/* Header */}
             <View style={styles.backHeader}>
-                <TouchableOpacity
+                {router.canGoBack() && <TouchableOpacity
                     style={styles.backButton}
                     onPress={() => {
-                        if (router.canGoBack()) {
-                            router.back();
-                        }
+                        router.back();
                     }}>
                     <ChevronLeft size={24} color={theme.colors.textPrimary}/>
                     <Text style={{
@@ -44,7 +42,7 @@ const UserHelp = () => {
                         marginHorizontal: 5,
                         color: theme.colors.textPrimary,
                     }}>Back</Text>
-                </TouchableOpacity>
+                </TouchableOpacity>}
             </View>
             <View style={styles.content}>
                 <View style={styles.header}>
@@ -57,10 +55,10 @@ const UserHelp = () => {
                     </View>
                 </View>
                 <View
-                style={{
-                    justifyContent: 'space-between',
-                    gap: 12,
-                }}>
+                    style={{
+                        justifyContent: 'space-between',
+                        gap: 12,
+                    }}>
 
 
                     <TouchableOpacity style={styles.infoCard}
@@ -100,7 +98,7 @@ const UserHelp = () => {
                         <View style={styles.infoRow}>
                             <View style={styles.infoLeft}>
                                 <View style={styles.infoIcon}>
-                                    <FontAwesome name="whatsapp" size={24} color={theme.colors.accent} />
+                                    <FontAwesome name="whatsapp" size={24} color={theme.colors.accent}/>
                                 </View>
                                 <View>
                                     <Text style={styles.infoLabel}>Message us on WhatsApp</Text>

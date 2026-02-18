@@ -40,15 +40,22 @@ import Banner from "../../components/Banner";
 const CONTENT_OFFSET_THRESHOLD = 300
 
 export default function Index() {
+    //theme:
     const theme = useThemeStore((s) => s.theme);
     const styles = useMemo(() => createStyles(theme), [theme]);
+
+    //states:
     const [category, setCategory] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [displayProducts, setDisplayProducts] = useState([]);
     const [error, setError] = useState(false);
-    const scrollViewRef = useRef(null);
     const [categoryLayouts, setCategoryLayouts] = useState({});
-    const [contentVerticalOffset, setContentVerticalOffset] = useState(0);
+    const [showScrollTop, setShowScrollTop] = useState(false);
+
+    //references for scrolls
+    const offsetRef = useRef(0);
+    const isScrollingToTop = useRef(false);
+    const scrollViewRef = useRef(null);
     const flatListRef = useRef(null);
 
     const categoryHeaderList = [
@@ -97,7 +104,11 @@ export default function Index() {
     }
 
     const handleCategoryPress = (catId, index) => {
+
         setCategory(catId);
+        //hide go to top button on category reset
+        offsetRef.current = 0;
+        setShowScrollTop(false);
 
         // Calculate scroll position to center the selected category
         if (scrollViewRef.current && categoryLayouts[catId]) {
@@ -125,17 +136,35 @@ export default function Index() {
         []
     );
     const handleScroll = (event) => {
-        setContentVerticalOffset(event.nativeEvent.contentOffset.y)
-    }
+        if (isScrollingToTop.current) return; // ignore scroll events during programmatic scroll
+
+        const y = event.nativeEvent.contentOffset.y;
+        offsetRef.current = y;
+
+        if (y > CONTENT_OFFSET_THRESHOLD && !showScrollTop) {
+            setShowScrollTop(true);
+        }
+
+        if (y <= CONTENT_OFFSET_THRESHOLD && showScrollTop) {
+            setShowScrollTop(false);
+        }
+    };
+
     const scrollToTop = useCallback(() => {
         if (flatListRef.current) {
+            isScrollingToTop.current = true;
+            setShowScrollTop(false);
             flatListRef.current.scrollToOffset({
                 offset: 0,
                 animated: true,
-                viewPosition: 0,
-            })
+            });
+            // Clear the flag after animation finishes (~500ms is safe for most cases)
+            setTimeout(() => {
+                isScrollingToTop.current = false;
+            }, 600);
         }
     }, []);
+
 
     return (
         <AnimatedContainer>
@@ -188,7 +217,7 @@ export default function Index() {
 
                 {/* Products List */}
                 <View style={styles.productsSection}>
-                    {contentVerticalOffset > CONTENT_OFFSET_THRESHOLD && (
+                    {showScrollTop && (
                         <TouchableOpacity style={styles.scrollTopButton} onPress={scrollToTop}>
                             <ChevronUp size={16} color={theme.colors.textPrimary}/>
                             <Text style={styles.buttonText}>Go back to top</Text>
@@ -221,7 +250,7 @@ export default function Index() {
                                     maxToRenderPerBatch={6}
                                     windowSize={5}
                                     onScroll={handleScroll}
-                                    scrollEventThrottle={16}
+                                    scrollEventThrottle={32}
                                     showsVerticalScrollIndicator={false}
                                     removeClippedSubviews
                                     columnWrapperStyle={styles.columnWrapper}  // Add this
