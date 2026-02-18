@@ -1,25 +1,30 @@
 import {SafeAreaView} from "react-native-safe-area-context";
 import {Text, StyleSheet, View, TouchableOpacity, ScrollView, Modal} from "react-native";
 import {router} from "expo-router";
-import {ArrowLeft, ShoppingCart, MapPin, Check, Store, Package} from "lucide-react-native";
+import {ArrowLeft, MapPin, Check, Store, Package, Plus} from "lucide-react-native";
 import React, {useEffect, useMemo, useState} from "react";
 import {useCartStore} from "../store/cartStore";
-import {addresses} from "../utilities/address";
+import {useOrderStore} from "../store/orderStore";
 import {shopAddresses} from "../utilities/shopAddress";
 import {useUser} from "../context/UserContext";
 import {useAddress} from "../context/AddressContext";
+import {useThemeStore} from "../store/themeStore";
+import CartBadgeIcon from "../components/CartBadgeIcon";
 
 const Checkout = () => {
 
     const { allAddresses } = useAddress();
+    const theme = useThemeStore((s) => s.theme);
+    const styles = useMemo(() => createStyles(theme), [theme]);
 
-    console.log(allAddresses);
     const [selectedAddress, setSelectedAddress] = useState(null);
     const [selectedShop, setSelectedShop] = useState(null);
     const [showAddressModal, setShowAddressModal] = useState(false);
     const [showShopModal, setShowShopModal] = useState(false);
     const {isAuthenticated} = useUser();
     const itemsByKey = useCartStore(state => state.itemsByKey);
+    const clearCart = useCartStore(state => state.clearCart);
+    const placeOrder = useOrderStore(state => state.placeOrder);
     const cartItems = useMemo(() => Object.values(itemsByKey), [itemsByKey]);
 
     const subtotal = useMemo(
@@ -119,23 +124,10 @@ const Checkout = () => {
                     style={styles.backButton}
                     activeOpacity={0.7}
                 >
-                    <ArrowLeft size={24} color="#0f172a"/>
+                    <ArrowLeft size={24} color={theme.colors.textSecondary}/>
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Checkout</Text>
-                <TouchableOpacity
-                    style={[styles.cartIconButton, {flexShrink: 0}]}
-                    activeOpacity={0.7}
-                    onPress={() => router.push('/Cart')}
-                >
-                    <View style={styles.cartIcon}>
-                        <ShoppingCart size={20} color={'#fff'}/>
-                    </View>
-                    {cartItems.length > 0 && (
-                        <View style={styles.cartBadge}>
-                            <Text style={styles.cartBadgeText}>{cartItems.length}</Text>
-                        </View>
-                    )}
-                </TouchableOpacity>
+                <CartBadgeIcon />
             </View>
 
             <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -234,11 +226,24 @@ const Checkout = () => {
                     activeOpacity={0.8}
                     disabled={!selectedAddress || !selectedShop}
                     onPress={() => {
-                        // Handle checkout logic here
-                        console.log('Proceeding to payment...');
+                        const newOrder = placeOrder({
+                            cartItems,
+                            address: selectedAddress,
+                            shop: selectedShop,
+                            subtotal,
+                            savings,
+                            deliveryFee,
+                            total,
+                            paymentMethod: 'COD',
+                        });
+                        clearCart();
+                        router.replace({
+                            pathname: '/order-detail',
+                            params: { order: JSON.stringify(newOrder) },
+                        });
                     }}
                 >
-                    <Text style={styles.checkoutButtonText}>
+                    <Text style={[styles.checkoutButtonText, (!selectedAddress || !selectedShop) && {color: theme.colors.textMuted}]}>
                         Proceed to Payment • ₹{total.toFixed(2)}
                     </Text>
                 </TouchableOpacity>
@@ -262,6 +267,17 @@ const Checkout = () => {
                                 <Text style={styles.closeButtonText}>✕</Text>
                             </TouchableOpacity>
                         </View>
+                        {allAddresses.length === 0 && (
+                            <ScrollView style={styles.modalScroll}>
+                                <TouchableOpacity
+                                    style={styles.addButton}
+                                    onPress={() => router.push('/Address')}
+                                >
+                                    <Plus size={20} color={'#fff'}/>
+                                    <Text style={styles.addButtonText}>Add New</Text>
+                                </TouchableOpacity>
+                            </ScrollView>
+                        )}
                         <ScrollView style={styles.modalScroll}>
                             {allAddresses?.map((address) => (
                                 <AddressCard
@@ -319,10 +335,10 @@ const Checkout = () => {
 
 export default Checkout;
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f8fafc',
+        backgroundColor: theme.colors.background,
     },
     header: {
         flexDirection: 'row',
@@ -330,9 +346,9 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: 12,
         paddingVertical: 16,
-        backgroundColor: '#ffffff',
+        backgroundColor: theme.colors.background,
         borderBottomWidth: 1,
-        borderBottomColor: '#e2e8f0',
+        borderBottomColor: theme.colors.border,
     },
     backButton: {
         padding: 4,
@@ -340,45 +356,11 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: 20,
         fontWeight: '700',
-        color: '#0f172a',
+        color: theme.colors.textPrimary,
         flex: 1,
         textAlign: 'center',
     },
-    cartIconButton: {
-        width: 40,
-        height: 40,
-        backgroundColor: '#0c831f',
-        borderRadius: 20,
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowColor: '#0c831f',
-        shadowOffset: {width: 0, height: 4},
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 4,
-    },
-    cartIcon: {
-        fontSize: 24,
-    },
-    cartBadge: {
-        position: 'absolute',
-        top: -4,
-        right: -4,
-        backgroundColor: '#ef4444',
-        borderRadius: 12,
-        minWidth: 24,
-        height: 24,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: 6,
-        borderWidth: 2,
-        borderColor: '#ffffff',
-    },
-    cartBadgeText: {
-        color: '#ffffff',
-        fontSize: 12,
-        fontWeight: '700',
-    },
+
     content: {
         flex: 1,
     },
@@ -389,38 +371,38 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 18,
         fontWeight: '700',
-        color: '#0f172a',
+        color: theme.colors.textPrimary,
         marginBottom: 12,
     },
     selectButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#ffffff',
+        backgroundColor: theme.colors.background,
         padding: 16,
         borderRadius: 12,
         borderWidth: 2,
-        borderColor: '#0c831f',
+        borderColor: theme.colors.border,
         borderStyle: 'dashed',
         gap: 8,
     },
     selectButtonText: {
         fontSize: 16,
         fontWeight: '600',
-        color: '#0c831f',
+        color: theme.colors.accent,
     },
     addressCard: {
-        backgroundColor: '#ffffff',
+        backgroundColor: theme.colors.background,
         padding: 16,
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: '#e2e8f0',
+        borderColor: theme.colors.border,
         marginBottom: 12,
     },
     selectedCard: {
-        borderColor: '#0c831f',
+        borderColor: theme.colors.border,
         borderWidth: 2,
-        backgroundColor: '#f0fdf4',
+        backgroundColor: theme.colors.background,
     },
     addressHeader: {
         flexDirection: 'row',
@@ -436,41 +418,41 @@ const styles = StyleSheet.create({
     addressType: {
         fontSize: 16,
         fontWeight: '700',
-        color: '#0f172a',
+        color: theme.colors.textPrimary,
     },
     shopName: {
         fontSize: 16,
         fontWeight: '700',
-        color: '#0f172a',
+        color: theme.colors.textPrimary,
     },
     checkIcon: {
         width: 24,
         height: 24,
         borderRadius: 12,
-        backgroundColor: '#0c831f',
+        backgroundColor: theme.colors.accent,
         justifyContent: 'center',
         alignItems: 'center',
     },
     addressText: {
         fontSize: 14,
-        color: '#64748b',
+        color: theme.colors.textSecondary,
         marginBottom: 2,
     },
     deliveryPartnerCard: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#ffffff',
+        backgroundColor: theme.colors.background,
         padding: 16,
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: '#e2e8f0',
+        borderColor: theme.colors.border,
         gap: 12,
     },
     deliveryPartnerIcon: {
         width: 48,
         height: 48,
         borderRadius: 24,
-        backgroundColor: '#f0fdf4',
+        backgroundColor: theme.colors.background,
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -480,19 +462,19 @@ const styles = StyleSheet.create({
     deliveryPartnerName: {
         fontSize: 16,
         fontWeight: '700',
-        color: '#0f172a',
+        color: theme.colors.textPrimary,
         marginBottom: 4,
     },
     deliveryPartnerTime: {
         fontSize: 14,
-        color: '#64748b',
+        color: theme.colors.textSecondary,
     },
     summaryCard: {
-        backgroundColor: '#ffffff',
+        backgroundColor: theme.colors.background,
         padding: 16,
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: '#e2e8f0',
+        borderColor: theme.colors.border,
     },
     summaryRow: {
         flexDirection: 'row',
@@ -502,65 +484,65 @@ const styles = StyleSheet.create({
     },
     summaryLabel: {
         fontSize: 14,
-        color: '#64748b',
+        color: theme.colors.textSecondary,
     },
     summaryValue: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#0f172a',
+        color: theme.colors.textPrimary,
     },
     savingsLabel: {
         fontSize: 14,
-        color: '#0c831f',
+        color: theme.colors.accent,
         fontWeight: '600',
     },
     savingsValue: {
         fontSize: 14,
         fontWeight: '700',
-        color: '#0c831f',
+        color: theme.colors.accent,
     },
     divider: {
         height: 1,
-        backgroundColor: '#e2e8f0',
+        backgroundColor: theme.colors.border,
         marginVertical: 8,
     },
     totalLabel: {
         fontSize: 16,
         fontWeight: '700',
-        color: '#0f172a',
+        color: theme.colors.textPrimary,
     },
     totalValue: {
         fontSize: 18,
         fontWeight: '700',
-        color: '#0c831f',
+        color: theme.colors.accent,
     },
     footer: {
-        backgroundColor: '#ffffff',
+        backgroundColor: theme.colors.background,
         paddingHorizontal: 16,
         paddingVertical: 12,
         borderTopWidth: 1,
-        borderTopColor: '#e2e8f0',
+        borderTopColor: theme.colors.border,
     },
     checkoutButton: {
-        backgroundColor: '#0c831f',
+        backgroundColor: theme.colors.accent,
         paddingVertical: 16,
         borderRadius: 12,
         alignItems: 'center',
-        shadowColor: '#0c831f',
+        shadowColor: theme.colors.accent,
         shadowOffset: {width: 0, height: 4},
         shadowOpacity: 0.3,
         shadowRadius: 8,
         elevation: 4,
     },
     checkoutButtonDisabled: {
-        backgroundColor: '#94a3b8',
+        backgroundColor: theme.colors.invertedMuted,
         shadowOpacity: 0,
         elevation: 0,
     },
     checkoutButtonText: {
         fontSize: 16,
         fontWeight: '700',
-        color: '#ffffff',
+        color: theme.colors.accentText,
     },
     modalOverlay: {
         flex: 1,
@@ -568,7 +550,7 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
     },
     modalContent: {
-        backgroundColor: '#ffffff',
+        backgroundColor: theme.colors.background,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         maxHeight: '80%',
@@ -580,12 +562,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 20,
         borderBottomWidth: 1,
-        borderBottomColor: '#e2e8f0',
+        borderBottomColor: theme.colors.border,
     },
     modalTitle: {
         fontSize: 18,
         fontWeight: '700',
-        color: '#0f172a',
+        color: theme.colors.textPrimary,
     },
     closeButton: {
         width: 32,
@@ -595,7 +577,22 @@ const styles = StyleSheet.create({
     },
     closeButtonText: {
         fontSize: 24,
-        color: '#64748b',
+        color: theme.colors.textSecondary,
+    },
+    addButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: theme.colors.accent,
+        paddingHorizontal: theme.spacing.md,
+        paddingVertical: theme.spacing.xl,
+        borderRadius: theme.radius.md,
+        gap: theme.spacing.xs,
+    },
+    addButtonText: {
+        color: theme.colors.accentText,
+        fontSize: theme.fontSize.md,
+        fontWeight: theme.fontWeight.medium,
     },
     modalScroll: {
         paddingHorizontal: 16,

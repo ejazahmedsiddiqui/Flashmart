@@ -9,13 +9,11 @@ import {
 } from 'react-native';
 import {router} from "expo-router";
 import {
-    ShoppingCart,
     ChevronDown,
     Navigation,
     MapPin,
 } from "lucide-react-native";
 import AnimatedSearchBar from "../components/AnimatedSearchBar";
-import {useCartCount} from "../hooks/useCartCount";
 import {useThemeStore} from "../store/themeStore";
 import {useAddress} from "../context/AddressContext";
 import CartBadgeIcon from "./CartBadgeIcon";
@@ -33,7 +31,6 @@ const Header = ({
     const {allAddresses, currentAddress, currentAddressIndex, setCurrentAddress, isLoading} = useAddress();
     const theme = useThemeStore((s) => s.theme);
     const styles = useMemo(() => createStyles(theme), [theme]);
-    const itemCount = useCartCount();
 
     const handleAddressSelect = (index) => {
         setCurrentAddress(index);
@@ -58,7 +55,11 @@ const Header = ({
             <View style={styles.header}>
                 <View style={{flex: 1, marginRight: 12}}>
                     {showHeaderTitle &&
-                        <Text style={styles.headerTitle}>FreshCart</Text>
+                        (
+                            <View>
+                                {allAddresses.length > 0 && <Text style={{fontSize: 12, color: theme.colors.textPrimary}}>Delivery in: 12 minutes</Text>}
+                                <Text style={styles.headerTitle}>FreshCart</Text>
+                            </View>)
                     }
                     {showAddress &&
                         <TouchableOpacity

@@ -7,7 +7,7 @@ import {
     KeyboardAvoidingView,
     Platform,
     ScrollView,
-    Dimensions, ActivityIndicator,
+    ActivityIndicator,
 } from "react-native";
 import {router} from "expo-router";
 import React, {useEffect, useMemo} from "react";
@@ -19,7 +19,7 @@ import {
     Moon,
     PackageOpen,
     MapPinHouse,
-    MessageCircleQuestionMark
+    MessageCircleQuestionMark, StoreIcon, Handshake
 } from "lucide-react-native";
 import SuccessModal from "../../components/SuccessModal";
 import AnimatedContainer from "../../components/AnimatedContainer";
@@ -28,11 +28,9 @@ import {useUser} from "../../context/UserContext";
 import CustomAlert from "../../components/CustomAlert";
 import {useAlert} from "../../utilities/alertConfig";
 
-const {height} = Dimensions.get("window");
-
 const Profile = () => {
-    const { isAuthenticated, isLoading, logout } = useUser();
-    const { showAlert, hideAlert, alertConfig } = useAlert();
+    const {isAuthenticated, isLoading, logout} = useUser();
+    const {showAlert, hideAlert, alertConfig} = useAlert();
     const [showModal, setShowModal] = React.useState(false);
 
     const theme = useThemeStore((s) => s.theme);
@@ -42,15 +40,41 @@ const Profile = () => {
     const styles = useMemo(() => createStyles(theme), [theme]);
 
     useEffect(() => {
-        console.log ('Profile isAuthenticated', isAuthenticated);
-        if(!isAuthenticated) router.replace('/Login')
+        console.log('Profile isAuthenticated', isAuthenticated);
+        if (!isAuthenticated) router.replace('/Login')
     }, [isAuthenticated]);
 
-    if(isLoading) {
+    const renderOptionCard = (text, Icon, route) => (
+        <View>
+            <TouchableOpacity
+                style={styles.actionRow}
+                onPress={() => router.push(route)}
+                activeOpacity={0.8}
+            >
+                <View style={styles.actionLeft}>
+                    <PackageOpen size={18} color={styles.iconPrimary.color}/>
+                    <Text style={styles.actionText}>{text}</Text>
+                </View>
+                <Icon size={18} color={styles.iconMuted.color}/>
+            </TouchableOpacity>
+
+            <View style={styles.divider}/>
+        </View>
+    );
+    const options = [
+        { label: 'My Orders', icon: PackageOpen, route: '/Orders'},
+        { label: 'Saved Addresses', icon: Home, route: '/Address'},
+        { label: 'Add New Address', icon: MapPinHouse, route: '/AddressSetter'},
+        { label: 'Need Help?', icon: MessageCircleQuestionMark, route: '/NeedHelp'},
+        { label: 'Become A seller', icon: StoreIcon, route: '/'},
+        { label: 'Become a delivery Partner', icon: Handshake, route: '/'}
+
+    ]
+    if (isLoading) {
         return (
             <AnimatedContainer>
                 <SafeAreaView style={[styles.container]}>
-                    <ActivityIndicator size={'large'} color={theme.colors.inverted} />
+                    <ActivityIndicator size={'large'} color={theme.colors.inverted}/>
                     <Text style={{
                         color: theme.colors.text,
                         fontSize: theme.fontSize.lg,
@@ -104,47 +128,23 @@ const Profile = () => {
 
                             {/* Actions */}
                             <View style={styles.actionCard}>
-                                <TouchableOpacity
-                                    style={styles.actionRow}
-                                    onPress={() => router.push("/Orders")}
-                                    activeOpacity={0.8}
-                                >
-                                    <View style={styles.actionLeft}>
-                                        <PackageOpen size={18} color={styles.iconPrimary.color}/>
-                                        <Text style={styles.actionText}>My Orders</Text>
+                                {options?.map((option) => (
+                                    <View key={option.label}>
+                                        <TouchableOpacity
+                                            style={styles.actionRow}
+                                            onPress={() => router.push(option.route)}
+                                            activeOpacity={0.8}
+                                        >
+                                            <View style={styles.actionLeft}>
+                                                <option.icon size={18} color={styles.iconPrimary.color}/>
+                                                <Text style={styles.actionText}>{option.label}</Text>
+                                            </View>
+                                            <ChevronRight size={18} color={styles.iconMuted.color}/>
+                                        </TouchableOpacity>
+
+                                        <View style={styles.divider}/>
                                     </View>
-                                    <ChevronRight size={18} color={styles.iconMuted.color}/>
-                                </TouchableOpacity>
-
-                                <View style={styles.divider}/>
-
-                                <TouchableOpacity
-                                    style={styles.actionRow}
-                                    onPress={() => router.push("/Address")}
-                                    activeOpacity={0.8}
-                                >
-                                    <View style={styles.actionLeft}>
-                                        <Home size={18} color={styles.iconPrimary.color}/>
-                                        <Text style={styles.actionText}>Saved Addresses</Text>
-                                    </View>
-                                    <ChevronRight size={18} color={styles.iconMuted.color}/>
-                                </TouchableOpacity>
-
-                                <View style={styles.divider}/>
-
-                                <TouchableOpacity
-                                    style={styles.actionRow}
-                                    onPress={() => router.push("/AddressSetter")}
-                                    activeOpacity={0.8}
-                                >
-                                    <View style={styles.actionLeft}>
-                                        <MapPinHouse size={18} color={styles.iconPrimary.color}/>
-                                        <Text style={styles.actionText}>Add New Address</Text>
-                                    </View>
-                                    <ChevronRight size={18} color={styles.iconMuted.color}/>
-                                </TouchableOpacity>
-                                <View style={styles.divider}/>
-
+                                ))}
                                 <TouchableOpacity
                                     style={styles.actionRow}
                                     onPress={toggleMode}
@@ -161,21 +161,8 @@ const Profile = () => {
                                     <ChevronRight size={18} color={styles.iconMuted.color}/>
                                 </TouchableOpacity>
 
-                                <View style={styles.divider}/>
-
-                                <TouchableOpacity
-                                    style={styles.actionRow}
-                                    onPress={() => router.push("/NeedHelp")}
-                                    activeOpacity={0.8}
-                                >
-                                    <View style={styles.actionLeft}>
-                                        <MessageCircleQuestionMark size={18} color={styles.iconPrimary.color}/>
-                                        <Text style={styles.actionText}>Need Help?</Text>
-                                    </View>
-                                    <ChevronRight size={18} color={styles.iconMuted.color}/>
-                                </TouchableOpacity>
-
                             </View>
+
                         </View>
 
                         {/* Logout */}
