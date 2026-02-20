@@ -10,7 +10,7 @@ import {
     ActivityIndicator,
 } from "react-native";
 import {router} from "expo-router";
-import React, {useEffect, useMemo} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import {
     ChevronRight,
     Home,
@@ -38,29 +38,11 @@ const Profile = () => {
     const toggleMode = useThemeStore((s) => s.toggleMode);
 
     const styles = useMemo(() => createStyles(theme), [theme]);
-
     useEffect(() => {
         console.log('Profile isAuthenticated', isAuthenticated);
         if (!isAuthenticated) router.replace('/Login')
     }, [isAuthenticated]);
 
-    const renderOptionCard = (text, Icon, route) => (
-        <View>
-            <TouchableOpacity
-                style={styles.actionRow}
-                onPress={() => router.push(route)}
-                activeOpacity={0.8}
-            >
-                <View style={styles.actionLeft}>
-                    <PackageOpen size={18} color={styles.iconPrimary.color}/>
-                    <Text style={styles.actionText}>{text}</Text>
-                </View>
-                <Icon size={18} color={styles.iconMuted.color}/>
-            </TouchableOpacity>
-
-            <View style={styles.divider}/>
-        </View>
-    );
     const options = [
         { label: 'My Orders', icon: PackageOpen, route: '/Orders'},
         { label: 'Saved Addresses', icon: Home, route: '/Address'},
@@ -73,7 +55,7 @@ const Profile = () => {
     if (isLoading) {
         return (
             <AnimatedContainer>
-                <SafeAreaView style={[styles.container]}>
+                <SafeAreaView style={[styles.container, {flex: 1, justifyContent: 'center', alignItems: 'center'}]}>
                     <ActivityIndicator size={'large'} color={theme.colors.inverted}/>
                     <Text style={{
                         color: theme.colors.text,

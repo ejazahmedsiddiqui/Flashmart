@@ -10,6 +10,7 @@ export const darkTheme = {
         inverted: '#fff',
         invertedMuted: '#333333',
         invertedExtraMuted: '#2e2e2e',
+        boxShadow: 'rgba(255,255,255,0.13)',
 
         textPrimary: '#f5f5f5',
         textSecondary: '#b3b3b3',
