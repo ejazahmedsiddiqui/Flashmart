@@ -22,6 +22,18 @@ import {SafeAreaView} from "react-native-safe-area-context";
 import {useLocalSearchParams, useRouter} from 'expo-router';
 import {useThemeStore} from "../../store/themeStore";
 import {useOrderStore} from "../../store/orderStore";
+import {LayoutChangeEvent } from "react-native";
+import Animated, {
+    useSharedValue,
+    useAnimatedStyle,
+    withSpring,
+    runOnJS,
+} from "react-native-reanimated";
+import { PanGestureHandler } from "react-native-gesture-handler";
+import { Star } from "lucide-react-native";
+
+const STAR_SIZE = 40;
+const TOTAL_STARS = 5;
 
 const OrderDetail = () => {
     const theme = useThemeStore((s) => s.theme);
@@ -84,7 +96,7 @@ const OrderDetail = () => {
     const status = [
         'pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'
     ]
-
+    console.log(order)
     if (!order) {
         return (
             <SafeAreaView style={styles.container}>
@@ -101,7 +113,23 @@ const OrderDetail = () => {
         );
     }
 
-
+    const shopAddress = () => {
+        if (!order.shop) {
+            console.log('Order shop not found');
+            return null
+        }
+        return order.shop.houseNumber
+            + ', '
+            + order.shop.name
+            + ', '
+            + order.shop.buildingAddress
+            + ', '
+            + order.shop.city
+            + ', '
+            + order.shop.state
+            + ', '
+            + order.shop.pinCode
+    }
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
@@ -159,7 +187,7 @@ const OrderDetail = () => {
                             marginBottom: 12,
                             borderWidth: 1,
                             borderColor: theme.colors.border,
-                            boxShadow:`2px 4px 8px ${theme.colors.boxShadow}`
+                            boxShadow: `2px 4px 8px ${theme.colors.boxShadow}`
                         }]} onPress={() => router.push({
                             pathname: '/OrderTracking',
                             params: {
@@ -202,6 +230,17 @@ const OrderDetail = () => {
                                 </View>
                             </View>
                         )}
+                        {order.shop &&
+                            <View style={styles.detailRow}>
+                                <Text style={styles.detailLabel}>Shop Address</Text>
+                                <Text style={styles.detailValue}>
+                                    {order.shop.name}
+                                </Text>
+                                <Text style={[styles.detailValue, {fontWeight: '400', fontSize: 13}]}>
+                                    {shopAddress()}
+                                </Text>
+                            </View>
+                        }
                     </View>
 
                     {/* Delivery Partner */}
@@ -220,7 +259,17 @@ const OrderDetail = () => {
                             </View>
                         </View>
                     )}
+                    {/*Rating*/}
+                    {order.orderStatus === 'delivered' && (
+                        <View style={styles.card}>
+                            <View style={styles.cardHeader}>
+                                <View style={styles.cardHeaderLeft}>
+                                    <Text style={styles.cardTitle}>Give your order a rating</Text>
 
+                                </View>
+                            </View>
+                        </View>
+                    )}
                     {/* Order Items */}
                     <View style={styles.card}>
                         <View style={styles.cardHeader}>
