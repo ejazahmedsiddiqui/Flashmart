@@ -8,7 +8,7 @@ import {
     StyleSheet,
     ScrollView,
     ActivityIndicator,
-    Dimensions
+    Dimensions, StatusBar
 } from 'react-native';
 import ProductCard from "../../components/ProductCard";
 import {
@@ -168,6 +168,7 @@ export default function Index() {
 
     return (
         <AnimatedContainer>
+            <StatusBar backgroundColor={theme.colors.background}  />
             <SafeAreaView style={styles.container}>
                 <View style={{paddingHorizontal: 12,}}>
                     <Header/>

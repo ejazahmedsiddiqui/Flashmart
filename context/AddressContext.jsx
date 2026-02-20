@@ -13,12 +13,13 @@ const createAddress = ({title, houseNumber, aptNamePlot, tempAddress, formattedA
 });
 
 export const AddressProvider = ({children}) => {
-    const [addresses, setAddresses] = useState({
+    const initialState = {
         addressArray: [],
         length: 0,
         currentAddressIndex: 0,
         isLoading: true,
-    });
+    };
+    const [addresses, setAddresses] = useState(initialState);
 
     useEffect(() => {
         loadAddress();
@@ -125,6 +126,20 @@ export const AddressProvider = ({children}) => {
         }
     }, [addresses.addressArray, addresses.currentAddressIndex]);
 
+    const clearAllAddresses = useCallback(async () => {
+        try {
+            setAddresses({ ...initialState, isLoading: false });
+
+            await AsyncStorage.removeItem('addressArray');
+            await AsyncStorage.removeItem('currentAddressIndex');
+
+            return { success: true };
+        } catch (error) {
+            console.error('Error clearing addresses: ', error);
+            return { success: false };
+        }
+    }, []);
+
     const value = useMemo(() => ({
         allAddresses: addresses.addressArray,
         currentAddress: addresses.addressArray[addresses.currentAddressIndex] || null,
@@ -134,7 +149,8 @@ export const AddressProvider = ({children}) => {
         addAddress,
         removeAddress,
         setCurrentAddress,
-    }), [addresses, addAddress, removeAddress, setCurrentAddress]);
+        clearAllAddresses,
+    }), [addresses, addAddress, removeAddress, setCurrentAddress, clearAllAddresses]);
 
     return (
         <AddressContext.Provider value={value}>

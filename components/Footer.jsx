@@ -1,9 +1,10 @@
-import {StyleSheet, Text, TouchableOpacity, View} from "react-native";
-import {BoxIcon, Home, LayoutDashboardIcon, LucideShoppingCart, User} from "lucide-react-native";
+import {ActivityIndicator, StyleSheet, Text, TouchableOpacity, View} from "react-native";
+import {BoxIcon, Home, LayoutDashboardIcon, LucideShoppingCart, User, UserPlusIcon} from "lucide-react-native";
 import {router, usePathname} from "expo-router";
 import {useCartCount} from "../hooks/useCartCount"; // Adjust path as needed
 import { useThemeStore } from "../store/themeStore";
 import {useMemo} from "react";
+import {useUser} from "../context/UserContext";
 
 const Footer = () => {
     const theme = useThemeStore((s) => s.theme);
@@ -11,6 +12,7 @@ const Footer = () => {
 
     const pathname = usePathname();
     const itemCount = useCartCount();
+    const {isAuthenticated, isLoading} = useUser();
 
     const linking = [
         {
@@ -44,6 +46,12 @@ const Footer = () => {
             icon: User,
             route: '/(profile)/Profile'
         },
+        {
+            id: 'login',
+            label: 'Login',
+            icon: UserPlusIcon,
+            route: '/(auth)/Login'
+        },
     ];
 
     const isActive = (route) => {
@@ -59,16 +67,28 @@ const Footer = () => {
         if (route.startsWith('/Categories')) {
             return pathname.startsWith('/Categories');
         }
+        if(route.startsWith('/(auth)')) {
+            return pathname.startsWith('/Login');
+        }
         return pathname.includes(route);
     };
 
     const handleNavigation = (route) => {
         router.replace(route);
     };
-
+    const visibleLinks = linking.filter((item) => {
+        if (item.id === 'login') return !isAuthenticated;
+        if (item.id === 'profile') return isAuthenticated;
+        return true;
+    });
+    if(isLoading) {
+        return <View style={styles.footerContainer}>
+            <ActivityIndicator size="large" />
+        </View>
+    }
     return (
         <View style={styles.footerContainer}>
-            {linking.map((item) => {
+            {visibleLinks.map((item) => {
                 const active = isActive(item.route);
                 return (
                     <TouchableOpacity

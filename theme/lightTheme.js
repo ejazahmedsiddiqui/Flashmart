@@ -10,6 +10,7 @@ export const lightTheme = {
         inverted: '#000',
         invertedMuted: '#333333',
         invertedExtraMuted: '#ededed',
+        boxShadow: 'rgba(0, 0, 0, 0.25)',
 
         textPrimary: '#000000',
         textSecondary: '#666666',

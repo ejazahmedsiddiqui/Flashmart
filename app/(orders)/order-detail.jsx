@@ -1,11 +1,11 @@
-import React, { useMemo } from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {
     View,
     Text,
     ScrollView,
     TouchableOpacity,
     StyleSheet,
-    Image
+    Image, Modal
 } from 'react-native';
 import {
     ArrowLeft,
@@ -15,12 +15,13 @@ import {
     Calendar,
     Truck,
     CheckCircle,
-    Phone,
+    Phone, Map,
 
 } from 'lucide-react-native';
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import {SafeAreaView} from "react-native-safe-area-context";
+import {useLocalSearchParams, useRouter} from 'expo-router';
 import {useThemeStore} from "../../store/themeStore";
+import {useOrderStore} from "../../store/orderStore";
 
 const OrderDetail = () => {
     const theme = useThemeStore((s) => s.theme);
@@ -28,11 +29,20 @@ const OrderDetail = () => {
 
     const params = useLocalSearchParams();
     const router = useRouter();
+    //Scroll ref to put the page on top on status change
+    const scrollRef = useRef(null);
 
     // Parse the order data from params
-    const order = params.order ? JSON.parse(params.order) : null;
-
-    const currentStatus = order?.orderStatus
+    const orderId = params.orderId || null;
+    const updateOrderStatus = useOrderStore(state => state.updateOrderStatus);
+    const order = useOrderStore(state => state.orders.find(o => o.id === orderId) ?? null);
+    const [statusModalVisible, setStatusModalVisible] = useState(false);
+    useEffect(() => {
+        if (!statusModalVisible) {
+            scrollRef.current?.scrollTo({y: 0, animated: true})
+        }
+    }, [statusModalVisible]);
+    const currentStatus = order?.orderStatus;
     const getStatusColor = (status) => {
         switch (status) {
             case 'pending':
@@ -71,6 +81,9 @@ const OrderDetail = () => {
         }
     };
 
+    const status = [
+        'pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'
+    ]
 
     if (!order) {
         return (
@@ -87,7 +100,7 @@ const OrderDetail = () => {
             </SafeAreaView>
         );
     }
-    console.log('@/app/seller/order-details accessed.');
+
 
     return (
         <SafeAreaView style={styles.container}>
@@ -96,7 +109,7 @@ const OrderDetail = () => {
                     style={styles.backButton}
                     onPress={() => router.back()}
                 >
-                    <ArrowLeft size={24} color={theme.colors.textPrimary} />
+                    <ArrowLeft size={24} color={theme.colors.textPrimary}/>
                 </TouchableOpacity>
                 <View style={styles.headerTitle}>
                     <Text style={styles.headerText}>Order Details</Text>
@@ -104,20 +117,20 @@ const OrderDetail = () => {
                 </View>
             </View>
 
-            <ScrollView style={styles.scrollView}>
+            <ScrollView style={styles.scrollView} ref={scrollRef}>
                 <View style={styles.content}>
                     {/* Order Status Card */}
                     <View style={styles.card}>
                         <View style={styles.cardHeader}>
                             <View style={styles.cardHeaderLeft}>
-                                <Package size={20} color={theme.colors.info} />
+                                <Package size={20} color={theme.colors.info}/>
                                 <Text style={styles.cardTitle}>Order Status</Text>
                             </View>
                         </View>
 
                         <View style={[
                             styles.statusBadgeLarge,
-                            { backgroundColor: getStatusColor(currentStatus) }
+                            {backgroundColor: getStatusColor(currentStatus)}
                         ]}>
                             <CheckCircle
                                 size={20}
@@ -125,23 +138,43 @@ const OrderDetail = () => {
                             />
                             <Text style={[
                                 styles.statusTextLarge,
-                                { color: getStatusTextColor(currentStatus) }
+                                {color: getStatusTextColor(currentStatus)}
                             ]}>
                                 {currentStatus.replace(/_/g, ' ')}
                             </Text>
                         </View>
 
                         <View style={styles.infoRow}>
-                            <Calendar size={16} color={theme.colors.textSecondary} />
+                            <Calendar size={16} color={theme.colors.textSecondary}/>
                             <Text style={styles.infoText}>{order.date}</Text>
                         </View>
                     </View>
-
+                    {(order.orderStatus === 'out_for_delivery' || order.orderStatus === 'preparing') && (
+                        <TouchableOpacity style={[styles.primaryButton, {
+                            backgroundColor: theme.colors.accent,
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            gap: 12,
+                            marginBottom: 12,
+                            borderWidth: 1,
+                            borderColor: theme.colors.border,
+                            boxShadow:`2px 4px 8px ${theme.colors.boxShadow}`
+                        }]} onPress={() => router.push({
+                            pathname: '/OrderTracking',
+                            params: {
+                                shopName: order.shop.name
+                            }
+                        })}>
+                            <Map size={theme.fontSize.xl} color={theme.colors.accentText}/>
+                            <Text style={styles.primaryButtonText}>Track Order</Text>
+                        </TouchableOpacity>
+                    )}
                     {/* Customer Information */}
                     <View style={styles.card}>
                         <View style={styles.cardHeader}>
                             <View style={styles.cardHeaderLeft}>
-                                <User size={20} color={theme.colors.info} />
+                                <User size={20} color={theme.colors.info}/>
                                 <Text style={styles.cardTitle}>Customer Information</Text>
                             </View>
                         </View>
@@ -153,7 +186,7 @@ const OrderDetail = () => {
                                     <Text style={styles.detailValue}>
                                         {order.address.houseNumber}, {order.address.aptNamePlot}
                                     </Text>
-                                    <Text style={[styles.detailValue, { fontWeight: '400', fontSize: 13 }]}>
+                                    <Text style={[styles.detailValue, {fontWeight: '400', fontSize: 13}]}>
                                         {order.address.formattedAddress}
                                     </Text>
                                 </View>
@@ -164,7 +197,7 @@ const OrderDetail = () => {
                                 <View style={styles.phoneContainer}>
                                     <Text style={styles.detailValue}>{order.customer}</Text>
                                     <TouchableOpacity style={styles.phoneButton}>
-                                        <Phone size={16} color={theme.colors.success} />
+                                        <Phone size={16} color={theme.colors.success}/>
                                     </TouchableOpacity>
                                 </View>
                             </View>
@@ -176,7 +209,7 @@ const OrderDetail = () => {
                         <View style={styles.card}>
                             <View style={styles.cardHeader}>
                                 <View style={styles.cardHeaderLeft}>
-                                    <Truck size={20} color={theme.colors.info} />
+                                    <Truck size={20} color={theme.colors.info}/>
                                     <Text style={styles.cardTitle}>Delivery Partner</Text>
                                 </View>
                             </View>
@@ -192,7 +225,7 @@ const OrderDetail = () => {
                     <View style={styles.card}>
                         <View style={styles.cardHeader}>
                             <View style={styles.cardHeaderLeft}>
-                                <Package size={20} color={theme.colors.info} />
+                                <Package size={20} color={theme.colors.info}/>
                                 <Text style={styles.cardTitle}>Order Items</Text>
                             </View>
                         </View>
@@ -202,7 +235,7 @@ const OrderDetail = () => {
                                 <View style={styles.itemRow}>
                                     {item.image ? (
                                         <Image
-                                            source={{ uri: item.image }}
+                                            source={{uri: item.image}}
                                             style={styles.itemImage}
                                         />
                                     ) : null}
@@ -218,7 +251,7 @@ const OrderDetail = () => {
                                     </View>
                                     <Text style={styles.itemPrice}>₹{(item.price * item.quantity).toFixed(2)}</Text>
                                 </View>
-                                {index < order.items.length - 1 && <View style={styles.divider} />}
+                                {index < order.items.length - 1 && <View style={styles.divider}/>}
                             </View>
                         )) : (
                             <View style={styles.itemRow}>
@@ -229,7 +262,7 @@ const OrderDetail = () => {
                             </View>
                         )}
 
-                        <View style={styles.divider} />
+                        <View style={styles.divider}/>
 
                         {order.savings > 0 && (
                             <View style={styles.totalRow}>
@@ -241,7 +274,7 @@ const OrderDetail = () => {
                             <Text style={styles.summaryLabel}>Delivery Fee</Text>
                             <Text style={styles.summaryValue}>₹{(order.deliveryFee ?? 40).toFixed(2)}</Text>
                         </View>
-                        <View style={[styles.totalRow, { marginTop: 8 }]}>
+                        <View style={[styles.totalRow, {marginTop: 8}]}>
                             <Text style={styles.totalLabel}>Total Amount</Text>
                             <Text style={styles.totalAmount}>
                                 {order.total != null ? `₹${order.total.toFixed(2)}` : order.amount}
@@ -253,7 +286,7 @@ const OrderDetail = () => {
                     <View style={styles.card}>
                         <View style={styles.cardHeader}>
                             <View style={styles.cardHeaderLeft}>
-                                <CreditCard size={20} color={theme.colors.info} />
+                                <CreditCard size={20} color={theme.colors.info}/>
                                 <Text style={styles.cardTitle}>Payment Information</Text>
                             </View>
                         </View>
@@ -275,18 +308,80 @@ const OrderDetail = () => {
 
                     {/* Action Buttons */}
                     <View style={styles.actionButtons}>
-
-                        {router.canGoBack() && <TouchableOpacity
-                            style={styles.secondaryButton}
-                            onPress={() => router.back()}
+                        <TouchableOpacity
+                            style={styles.primaryButton}
+                            onPress={() => setStatusModalVisible(true)}
                         >
-                            <ArrowLeft size={16} color={theme.colors.info}/>
-                            <Text style={styles.secondaryButtonText}>Back</Text>
-                        </TouchableOpacity>}
+                            <Text style={styles.primaryButtonText}>Change Status</Text>
+                        </TouchableOpacity>
+
+                        {router.canGoBack() && (
+                            <TouchableOpacity
+                                style={styles.secondaryButton}
+                                onPress={() => router.back()}
+                            >
+                                <ArrowLeft size={16} color={theme.colors.info}/>
+                                <Text style={styles.secondaryButtonText}>Back</Text>
+                            </TouchableOpacity>
+                        )}
+
                     </View>
                 </View>
             </ScrollView>
 
+            <Modal
+                visible={statusModalVisible}
+                transparent
+                animationType="slide"
+                onRequestClose={() => setStatusModalVisible(false)}
+            >
+                <TouchableOpacity
+                    style={styles.modalOverlay}
+                    activeOpacity={1}
+                    onPress={() => setStatusModalVisible(false)}
+                >
+                    <TouchableOpacity activeOpacity={1} style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Update Order Status</Text>
+                        {status.map((statusOption) => {
+                            const isActive = currentStatus === statusOption;
+                            return (
+                                <TouchableOpacity
+                                    key={statusOption}
+                                    style={[styles.statusOption, isActive && styles.statusOptionActive]}
+                                    onPress={() => {
+                                        updateOrderStatus(order.id, statusOption);
+                                        setStatusModalVisible(false);
+                                    }}
+                                >
+                                    <View style={[
+                                        styles.statusDot,
+                                        {backgroundColor: getStatusTextColor(statusOption)}
+                                    ]}/>
+                                    <Text style={[
+                                        styles.statusOptionText,
+                                        isActive && {color: theme.colors.info}
+                                    ]}>
+                                        {statusOption.replace(/_/g, ' ')}
+                                    </Text>
+                                    {isActive && (
+                                        <CheckCircle
+                                            size={16}
+                                            color={theme.colors.info}
+                                            style={{marginLeft: 'auto'}}
+                                        />
+                                    )}
+                                </TouchableOpacity>
+                            );
+                        })}
+                        <TouchableOpacity
+                            style={styles.modalCloseButton}
+                            onPress={() => setStatusModalVisible(false)}
+                        >
+                            <Text style={styles.modalCloseText}>Cancel</Text>
+                        </TouchableOpacity>
+                    </TouchableOpacity>
+                </TouchableOpacity>
+            </Modal>
         </SafeAreaView>
     );
 };
@@ -333,7 +428,7 @@ const createStyles = (theme) => StyleSheet.create({
         padding: theme.spacing.md,
         marginBottom: theme.spacing.md,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
+        shadowOffset: {width: 0, height: 1},
         shadowOpacity: 0.05,
         shadowRadius: 3,
         elevation: 2,

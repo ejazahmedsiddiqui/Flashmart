@@ -7,13 +7,14 @@ import {
     FlatList,
     Image,
 } from 'react-native';
-import {Package, Eye, ChevronLeft, RefreshCw} from 'lucide-react-native';
+import {Package, Eye, ChevronLeft, RefreshCw, UserPlusIcon} from 'lucide-react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useRouter} from 'expo-router';
 import {useThemeStore} from '../../store/themeStore';
 import {useOrderStore} from '../../store/orderStore';
 import {useCartStore} from '../../store/cartStore';
 import CartBadgeIcon from '../../components/CartBadgeIcon';
+import {useUser} from "../../context/UserContext";
 
 const Orders = () => {
     const theme = useThemeStore((s) => s.theme);
@@ -21,23 +22,30 @@ const Orders = () => {
     const orders = useOrderStore((s) => s.orders);
     const addItem = useCartStore((s) => s.addItem);
     const router = useRouter();
-
+    const {isAuthenticated} = useUser();
     const getStatusColor = (status) => {
         switch (status) {
-            case 'pending':          return '#c15a00';
-            case 'confirmed':        return '#0073d3';
-            case 'preparing':        return '#7C3AED';
-            case 'out_for_delivery': return '#0073d3';
-            case 'delivered':        return theme.colors.accent;
-            case 'cancelled':        return '#DC2626';
-            default:                 return '#6B7280';
+            case 'pending':
+                return '#c15a00';
+            case 'confirmed':
+                return '#0073d3';
+            case 'preparing':
+                return '#7C3AED';
+            case 'out_for_delivery':
+                return '#0073d3';
+            case 'delivered':
+                return theme.colors.accent;
+            case 'cancelled':
+                return '#DC2626';
+            default:
+                return '#6B7280';
         }
     };
 
     const handleViewDetails = (order) => {
         router.push({
             pathname: '/order-detail',
-            params: {order: JSON.stringify(order)},
+            params: {order: JSON.stringify(order), orderId: order.id },
         });
     };
 
@@ -47,14 +55,14 @@ const Orders = () => {
             // addItem increments if already in cart, so call once per unit
             for (let i = 0; i < item.quantity; i++) {
                 addItem({
-                    id:            item.id,
-                    variantSku:    item.variantSku,
-                    price:         item.price,
+                    id: item.id,
+                    variantSku: item.variantSku,
+                    price: item.price,
                     originalPrice: item.originalPrice,
-                    name:          item.name,
-                    image:         item.image,
-                    brand:         item.brand,
-                    weight:        item.weight,
+                    name: item.name,
+                    image: item.image,
+                    brand: item.brand,
+                    weight: item.weight,
                 });
             }
         });
@@ -178,31 +186,46 @@ const Orders = () => {
                 <Text style={styles.pageTitle}>My Orders</Text>
                 <CartBadgeIcon/>
             </View>
-
-            {orders.length > 0 ? (
-                <FlatList
-                    data={orders}
-                    renderItem={renderOrder}
-                    keyExtractor={(item) => item.id.toString()}
-                    contentContainerStyle={styles.listContent}
-                    showsVerticalScrollIndicator={false}
-                />
-            ) : (
+            {!isAuthenticated ? (
                 <View style={styles.emptyContainer}>
                     <View style={styles.emptyIconWrap}>
-                        <Package size={48} color={theme.colors.textMuted}/>
+                        <UserPlusIcon size={48} color={theme.colors.textMuted}/>
                     </View>
-                    <Text style={styles.emptyTitle}>No orders yet</Text>
-                    <Text style={styles.emptySubtitle}>Your placed orders will appear here</Text>
+                    <Text style={styles.emptyTitle}>Not Logged-in</Text>
+                    <Text style={styles.emptySubtitle}>Please Login to see your orders</Text>
                     <TouchableOpacity
                         style={styles.shopNowBtn}
-                        onPress={() => router.replace('/')}
+                        onPress={() => router.replace('/Login')}
                         activeOpacity={0.8}
                     >
-                        <Text style={styles.shopNowText}>Start Shopping</Text>
+                        <Text style={styles.shopNowText}>Log in Now</Text>
                     </TouchableOpacity>
                 </View>
-            )}
+            ) : orders.length > 0 ? (
+                    <FlatList
+                        data={orders}
+                        renderItem={renderOrder}
+                        keyExtractor={(item) => item.id.toString()}
+                        contentContainerStyle={styles.listContent}
+                        showsVerticalScrollIndicator={false}
+                    />
+                ) :
+                (
+                    <View style={styles.emptyContainer}>
+                        <View style={styles.emptyIconWrap}>
+                            <Package size={48} color={theme.colors.textMuted}/>
+                        </View>
+                        <Text style={styles.emptyTitle}>No orders yet</Text>
+                        <Text style={styles.emptySubtitle}>Your placed orders will appear here</Text>
+                        <TouchableOpacity
+                            style={styles.shopNowBtn}
+                            onPress={() => router.replace('/')}
+                            activeOpacity={0.8}
+                        >
+                            <Text style={styles.shopNowText}>Start Shopping</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
         </SafeAreaView>
     );
 };

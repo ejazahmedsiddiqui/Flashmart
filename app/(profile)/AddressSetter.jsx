@@ -12,7 +12,7 @@ import {
     Dimensions
 } from "react-native";
 import RenderFormField from "../../components/RenderFormField";
-import React, {useState, useRef, useEffect} from "react";
+import React, {useState, useRef, useEffect, useMemo} from "react";
 import {
     Home,
     LocateFixed,
@@ -30,10 +30,14 @@ import * as Location from 'expo-location';
 import MapView from 'react-native-maps';
 import {router} from "expo-router";
 import {useAddress} from "../../context/AddressContext";
+import {useThemeStore} from "../../store/themeStore";
 
 const {height} = Dimensions.get('window');
 
 const AddressSetter = () => {
+    const theme = useThemeStore((s) => s.theme);
+    const styles = useMemo(() => createStyles(theme), [theme]);
+
     const [currentStep, setCurrentStep] = useState(1);
     const [homeAddress, setHomeAddress] = useState({
         houseNumber: '',
@@ -478,7 +482,7 @@ const AddressSetter = () => {
                                     (
                                         <View>
                                             <AlertCircleIcon size={20} color={'red'}/>
-                                            <Text style={{color: '#a31616', marginBottom: 12,}}>Street Name not Found.
+                                            <Text style={{color: theme.colors.danger, marginBottom: 12,}}>Street Name not Found.
                                                 Kindly Edit and
                                                 Add</Text>
                                         </View>
@@ -587,7 +591,7 @@ const AddressSetter = () => {
                 <RenderFormField
                     label={'Title'}
                     placeholder={'Enter Address title: (Home, Work, Office, etc.)'}
-                    icon={<LucideHome size={24} color={'#9CA3AF'}/>}
+                    icon={<LucideHome size={24} color={theme.colors.textMuted}/>}
                     value={homeAddress.title}
                     onChangeText={(value) => setHomeAddress(prev => ({...prev, title: value}))}
                 />
@@ -751,7 +755,7 @@ const AddressSetter = () => {
                     onPress={handleBack}
                 >
                     <Text style={{
-                        color: '#fff',
+                        color: theme.colors.accentText,
 
                     }}>Back</Text>
                 </TouchableOpacity>
@@ -776,9 +780,9 @@ const AddressSetter = () => {
                     setShowSuccessModal(false);
                     router.back()
                 }}
-                iconColor={'#93BD57'}
-                iconBackgroundColor={'#D4E7B8'}
-                progressBarColor={'#93BD57'}
+                iconColor={theme.colors.accent}
+                iconBackgroundColor={theme.colors.background}
+                progressBarColor={theme.colors.accent}
                 visible={showSuccessModal}
                 autoCloseDuration={800}
             />
@@ -788,10 +792,10 @@ const AddressSetter = () => {
 
 export default AddressSetter;
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F8FAFC',
+        backgroundColor: theme.colors.background,
     },
     scrollContent: {
         padding: 16,
@@ -805,22 +809,17 @@ const styles = StyleSheet.create({
     iconWrapper: {
         width: 72,
         height: 72,
-        backgroundColor: '#93BD57',
+        backgroundColor: theme.colors.accent,
         borderRadius: 36,
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 16,
-        shadowColor: '#93BD57',
-        shadowOffset: {width: 0, height: 4},
-        shadowOpacity: 0.25,
-        shadowRadius: 8,
-        elevation: 8,
     },
     headerTitle: {
         fontFamily: 'Montserrat',
         fontSize: 26,
         fontWeight: '700',
-        color: '#0F172A',
+        color: theme.colors.textSecondary,
         marginBottom: 8,
         letterSpacing: -0.5,
     },
@@ -828,7 +827,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Montserrat',
         fontSize: 14,
         fontWeight: '400',
-        color: '#64748B',
+        color: theme.colors.textMuted,
         textAlign: 'center',
         paddingHorizontal: 20,
     },
@@ -837,14 +836,14 @@ const styles = StyleSheet.create({
     },
     progressBarBackground: {
         height: 4,
-        backgroundColor: '#E2E8F0',
+        backgroundColor: theme.colors.border,
         borderRadius: 2,
         marginBottom: 20,
         overflow: 'hidden',
     },
     progressBarFill: {
         height: '100%',
-        backgroundColor: '#93BD57',
+        backgroundColor: theme.colors.accent,
         borderRadius: 2,
     },
     stepsContainer: {
@@ -859,14 +858,14 @@ const styles = StyleSheet.create({
         width: 36,
         height: 36,
         borderRadius: 18,
-        backgroundColor: '#E2E8F0',
+        backgroundColor: theme.colors.surface,
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 8,
     },
     stepCircleActive: {
-        backgroundColor: '#93BD57',
-        shadowColor: '#93BD57',
+        backgroundColor: theme.colors.accent,
+        shadowColor: theme.colors.accent,
         shadowOffset: {width: 0, height: 2},
         shadowOpacity: 0.3,
         shadowRadius: 4,
@@ -879,23 +878,21 @@ const styles = StyleSheet.create({
         fontFamily: 'Montserrat',
         fontSize: 11,
         fontWeight: '500',
-        color: '#94A3B8',
+        color: theme.colors.textSecondary,
         textAlign: 'center',
     },
     stepLabelActive: {
-        color: '#93BD57',
+        color: theme.colors.accent,
         fontWeight: '600',
     },
     formCard: {
-        backgroundColor: '#fff',
+        backgroundColor: theme.colors.background,
+        borderWidth: 2,
+        borderColor: theme.colors.border,
         borderRadius: 20,
         padding: 24,
         marginBottom: 20,
-        shadowColor: '#000',
-        shadowOffset: {width: 0, height: 2},
-        shadowOpacity: 0.06,
-        shadowRadius: 16,
-        elevation: 4,
+        boxShadow: `0px 2px 8px ${theme.colors.invertedExtraMuted}`
     },
     formSection: {
         width: '100%',
@@ -904,7 +901,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Montserrat',
         fontSize: 22,
         fontWeight: '700',
-        color: '#0F172A',
+        color: theme.colors.textPrimary,
         marginBottom: 8,
         letterSpacing: -0.3,
     },
@@ -912,7 +909,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Montserrat',
         fontSize: 14,
         fontWeight: '400',
-        color: '#64748B',
+        color: theme.colors.textMuted,
         marginBottom: 24,
         lineHeight: 20,
     },
@@ -928,17 +925,13 @@ const styles = StyleSheet.create({
         paddingVertical: 16,
         borderRadius: 14,
         marginBottom: 20,
-        shadowColor: '#059669',
-        shadowOffset: {width: 0, height: 3},
-        shadowOpacity: 0.25,
-        shadowRadius: 6,
-        elevation: 5,
+        boxShadow: '0px 2px 8px rgba(0,0,0,0.4)'
     },
     autoFetchButtonText: {
         fontFamily: 'Montserrat',
         fontSize: 15,
         fontWeight: '700',
-        color: '#fff',
+        color: theme.colors.accentText,
         letterSpacing: 0.3,
     },
     permissionInfo: {
@@ -958,7 +951,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Montserrat',
         fontSize: 12,
         fontWeight: '500',
-        color: '#92400E',
+        color: theme.colors.danger,
         lineHeight: 16,
     },
     mapWrapper: {
@@ -967,8 +960,8 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         marginBottom: 20,
         borderWidth: 1,
-        borderColor: '#E2E8F0',
-        backgroundColor: '#E2E8F0', // Prevent flash during load
+        borderColor: theme.colors.border,
+        backgroundColor: theme.colors.border, // Prevent flash during load
     },
     map: {
         width: '100%',
@@ -991,11 +984,11 @@ const styles = StyleSheet.create({
         marginTop: 2,
     },
     locationCard: {
-        backgroundColor: '#F8FAFC',
+        backgroundColor: theme.colors.background,
         borderRadius: 14,
         padding: 16,
         borderWidth: 1,
-        borderColor: '#E2E8F0',
+        borderColor: theme.colors.border,
     },
     locationHeader: {
         flexDirection: 'row',
@@ -1007,7 +1000,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Montserrat',
         fontSize: 14,
         fontWeight: '600',
-        color: '#475569',
+        color: theme.colors.textSecondary,
     },
     locationDetails: {
         marginBottom: 12,
@@ -1016,63 +1009,63 @@ const styles = StyleSheet.create({
         fontFamily: 'Montserrat',
         fontSize: 15,
         fontWeight: '600',
-        color: '#0F172A',
+        color: theme.colors.textSecondary,
         marginBottom: 4,
     },
     locationSubtext: {
         fontFamily: 'Montserrat',
         fontSize: 13,
         fontWeight: '400',
-        color: '#64748B',
+        color: theme.colors.textMuted,
     },
     editButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         gap: 6,
-        backgroundColor: '#fff',
+        backgroundColor: theme.colors.background,
         paddingVertical: 10,
         borderRadius: 10,
         borderWidth: 1,
-        borderColor: '#93BD57',
+        borderColor: theme.colors.accent,
     },
     editButtonText: {
         fontFamily: 'Montserrat',
         fontSize: 13,
         fontWeight: '600',
-        color: '#93BD57',
+        color: theme.colors.accent,
     },
     emptyLocationCard: {
-        backgroundColor: '#F8FAFC',
+        backgroundColor: theme.colors.background,
         borderRadius: 14,
         padding: 32,
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#E2E8F0',
+        borderColor: theme.colors.border,
         borderStyle: 'dashed',
     },
     emptyLocationText: {
         fontFamily: 'Montserrat',
         fontSize: 13,
         fontWeight: '500',
-        color: '#94A3B8',
+        color: theme.colors.textMuted,
         textAlign: 'center',
         marginTop: 12,
         maxWidth: 240,
     },
     previewCard: {
-        backgroundColor: '#F0F9FF',
+        backgroundColor: theme.colors.background,
         borderRadius: 12,
         padding: 16,
         marginTop: 20,
         borderWidth: 1,
-        borderColor: '#BFDBFE',
+        borderColor: theme.colors.border,
     },
     previewLabel: {
         fontFamily: 'Montserrat',
         fontSize: 12,
         fontWeight: '600',
-        color: '#1E40AF',
+        color: theme.colors.info,
         marginBottom: 6,
         textTransform: 'uppercase',
         letterSpacing: 0.5,
@@ -1081,43 +1074,43 @@ const styles = StyleSheet.create({
         fontFamily: 'Montserrat',
         fontSize: 14,
         fontWeight: '500',
-        color: '#1E3A8A',
+        color: theme.colors.info,
         lineHeight: 20,
     },
     reviewContainer: {
         gap: 16,
     },
     reviewSection: {
-        backgroundColor: '#F8FAFC',
+        backgroundColor: theme.colors.background,
         borderRadius: 14,
         padding: 16,
         borderWidth: 1,
-        borderColor: '#E2E8F0',
+        borderColor: theme.colors.border,
     },
     reviewSectionTitle: {
         fontFamily: 'Montserrat',
         fontSize: 15,
         fontWeight: '700',
-        color: '#334155',
+        color: theme.colors.textSecondary,
         marginBottom: 12,
     },
     reviewItem: {
         paddingVertical: 10,
         borderBottomWidth: 1,
-        borderBottomColor: '#E2E8F0',
+        borderBottomColor: theme.colors.border,
     },
     reviewLabel: {
         fontFamily: 'Montserrat',
         fontSize: 12,
         fontWeight: '600',
-        color: '#64748B',
+        color: theme.colors.textMuted,
         marginBottom: 4,
     },
     reviewValue: {
         fontFamily: 'Montserrat',
         fontSize: 14,
         fontWeight: '500',
-        color: '#0F172A',
+        color: theme.colors.textSecondary,
     },
     buttonContainer: {
         flexDirection: 'row',
@@ -1126,32 +1119,27 @@ const styles = StyleSheet.create({
     },
     backButton: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: theme.colors.background,
         borderRadius: 14,
         paddingVertical: 16,
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 2,
-        borderColor: '#E2E8F0',
+        borderColor: theme.colors.border,
     },
     backButtonText: {
         fontFamily: 'Montserrat',
         fontSize: 15,
         fontWeight: '600',
-        color: '#64748B',
+        color: theme.colors.textPrimary,
     },
     nextButton: {
         flex: 1,
-        backgroundColor: '#93BD57',
+        backgroundColor: theme.colors.accent,
         borderRadius: 14,
         paddingVertical: 16,
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: '#93BD57',
-        shadowOffset: {width: 0, height: 4},
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 6,
     },
     nextButtonFull: {
         flex: 1,
@@ -1160,7 +1148,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Montserrat',
         fontSize: 15,
         fontWeight: '700',
-        color: '#fff',
+        color: theme.colors.accentText,
         letterSpacing: 0.3,
     },
     modalOverlay: {
@@ -1169,7 +1157,7 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
     },
     modalContent: {
-        backgroundColor: '#fff',
+        backgroundColor: theme.colors.background,
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
         paddingTop: 24,
@@ -1187,7 +1175,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Montserrat',
         fontSize: 20,
         fontWeight: '700',
-        color: '#0F172A',
+        color: theme.colors.textSecondary,
     },
     modalBody: {
         gap: 16,
@@ -1199,7 +1187,7 @@ const styles = StyleSheet.create({
     },
     modalCancelButton: {
         flex: 1,
-        backgroundColor: '#F1F5F9',
+        backgroundColor: theme.colors.background,
         borderRadius: 12,
         paddingVertical: 14,
         alignItems: 'center',
@@ -1208,11 +1196,11 @@ const styles = StyleSheet.create({
         fontFamily: 'Montserrat',
         fontSize: 15,
         fontWeight: '600',
-        color: '#64748B',
+        color: theme.colors.textMuted,
     },
     modalSaveButton: {
         flex: 1,
-        backgroundColor: '#93BD57',
+        backgroundColor: theme.colors.accent,
         borderRadius: 12,
         paddingVertical: 14,
         alignItems: 'center',
@@ -1221,6 +1209,6 @@ const styles = StyleSheet.create({
         fontFamily: 'Montserrat',
         fontSize: 15,
         fontWeight: '700',
-        color: '#fff',
+        color: theme.colors.accentText,
     },
 });
