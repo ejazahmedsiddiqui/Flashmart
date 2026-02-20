@@ -15,25 +15,15 @@ import {
     Calendar,
     Truck,
     CheckCircle,
-    Phone, Map,
+    Phone, Map,Star
 
 } from 'lucide-react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
 import {useLocalSearchParams, useRouter} from 'expo-router';
 import {useThemeStore} from "../../store/themeStore";
 import {useOrderStore} from "../../store/orderStore";
-import {LayoutChangeEvent } from "react-native";
-import Animated, {
-    useSharedValue,
-    useAnimatedStyle,
-    withSpring,
-    runOnJS,
-} from "react-native-reanimated";
-import { PanGestureHandler } from "react-native-gesture-handler";
-import { Star } from "lucide-react-native";
+import StarRating from "../../components/ReanimatedStarRating";
 
-const STAR_SIZE = 40;
-const TOTAL_STARS = 5;
 
 const OrderDetail = () => {
     const theme = useThemeStore((s) => s.theme);
@@ -43,17 +33,24 @@ const OrderDetail = () => {
     const router = useRouter();
     //Scroll ref to put the page on top on status change
     const scrollRef = useRef(null);
+    //timer to only update rating after 5s
+    const debounceTimer = useRef(null);
 
     // Parse the order data from params
     const orderId = params.orderId || null;
     const updateOrderStatus = useOrderStore(state => state.updateOrderStatus);
     const order = useOrderStore(state => state.orders.find(o => o.id === orderId) ?? null);
     const [statusModalVisible, setStatusModalVisible] = useState(false);
+
+
     useEffect(() => {
         if (!statusModalVisible) {
             scrollRef.current?.scrollTo({y: 0, animated: true})
         }
     }, [statusModalVisible]);
+
+    //stop debouncer to update state on an unmounted object
+
     const currentStatus = order?.orderStatus;
     const getStatusColor = (status) => {
         switch (status) {
@@ -95,8 +92,17 @@ const OrderDetail = () => {
 
     const status = [
         'pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'
-    ]
-    console.log(order)
+    ];
+
+    const handleRatingChange = (newRating) => {
+        if (debounceTimer.current) {
+            clearTimeout(debounceTimer.current);
+        }
+        debounceTimer.current = setTimeout(() => {
+            console.log('Final rating:', newRating);
+            // call your store / API here
+        }, 5000);
+    };
     if (!order) {
         return (
             <SafeAreaView style={styles.container}>
@@ -129,7 +135,8 @@ const OrderDetail = () => {
             + order.shop.state
             + ', '
             + order.shop.pinCode
-    }
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
@@ -264,10 +271,11 @@ const OrderDetail = () => {
                         <View style={styles.card}>
                             <View style={styles.cardHeader}>
                                 <View style={styles.cardHeaderLeft}>
-                                    <Text style={styles.cardTitle}>Give your order a rating</Text>
-
+                                    <Star size={20} color={theme.colors.info} />
+                                    <Text style={styles.cardTitle}>Rate your order</Text>
                                 </View>
                             </View>
+                            <StarRating onRatingChange={handleRatingChange} />
                         </View>
                     )}
                     {/* Order Items */}
