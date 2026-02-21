@@ -24,7 +24,7 @@ const StarRating = ({ onRatingChange }) => {
     };
 
     const panGesture = Gesture.Pan()
-        .runOnJS(true) // ✅ runs callbacks on JS thread directly
+        .runOnJS(true)
         .onUpdate((event) => {
             const newRating = calculateRating(event.x);
             scale.value = withSpring(1.1);
@@ -35,7 +35,7 @@ const StarRating = ({ onRatingChange }) => {
         });
 
     const tapGesture = Gesture.Tap()
-        .runOnJS(true) // ✅ same here
+        .runOnJS(true)
         .onEnd((event) => {
             const newRating = calculateRating(event.x);
             scale.value = withSpring(1.1);

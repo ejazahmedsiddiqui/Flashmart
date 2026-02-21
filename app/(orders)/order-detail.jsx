@@ -100,7 +100,6 @@ const OrderDetail = () => {
         }
         debounceTimer.current = setTimeout(() => {
             console.log('Final rating:', newRating);
-            // call your store / API here
         }, 5000);
     };
     if (!order) {
@@ -620,6 +619,7 @@ const createStyles = (theme) => StyleSheet.create({
     primaryButton: {
         backgroundColor: theme.colors.info,
         paddingVertical: theme.spacing.md,
+        paddingHorizontal: 12,
         borderRadius: theme.radius.md,
         alignItems: 'center',
     },
